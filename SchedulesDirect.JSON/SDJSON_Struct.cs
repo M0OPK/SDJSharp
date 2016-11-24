@@ -161,4 +161,38 @@ namespace SchedulesDirect
             public bool onePostalCode;
         }
     }
+
+    // ===============================
+    // Transmitters command structures
+    // ===============================
+    public class SDTransmitter
+    {
+        public string transmitterArea;
+        public string transmitterID;
+    }
+
+    // Headends command structures
+    [DataContract]
+    public class SDHeadendsResponse
+    {
+        [DataMember]
+        public string headend;
+        [DataMember]
+        public string transport;
+        [DataMember]
+        public string location;
+        [DataMember]
+        public SDLineup[] lineups;
+
+        [DataContract]
+        public class SDLineup
+        {
+            [DataMember]
+            public string name;
+            [DataMember]
+            public string lineup;
+            [DataMember]
+            public string uri;
+        }
+    }
 }

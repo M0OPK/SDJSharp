@@ -38,6 +38,8 @@
             this.btnCountries = new System.Windows.Forms.Button();
             this.lbContinents = new System.Windows.Forms.ListBox();
             this.lbCountries = new System.Windows.Forms.ListBox();
+            this.btnTransmitters = new System.Windows.Forms.Button();
+            this.btnHeadends = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lblLogin
@@ -69,6 +71,7 @@
             // 
             this.txtPassword.Location = new System.Drawing.Point(84, 56);
             this.txtPassword.Name = "txtPassword";
+            this.txtPassword.PasswordChar = '*';
             this.txtPassword.Size = new System.Drawing.Size(188, 20);
             this.txtPassword.TabIndex = 3;
             // 
@@ -127,11 +130,33 @@
             this.lbCountries.Size = new System.Drawing.Size(260, 108);
             this.lbCountries.TabIndex = 9;
             // 
-            // Form1
+            // btnTransmitters
+            // 
+            this.btnTransmitters.Location = new System.Drawing.Point(360, 82);
+            this.btnTransmitters.Name = "btnTransmitters";
+            this.btnTransmitters.Size = new System.Drawing.Size(86, 25);
+            this.btnTransmitters.TabIndex = 10;
+            this.btnTransmitters.Text = "Transmitters";
+            this.btnTransmitters.UseVisualStyleBackColor = true;
+            this.btnTransmitters.Click += new System.EventHandler(this.btnTransmitters_Click);
+            // 
+            // btnHeadends
+            // 
+            this.btnHeadends.Location = new System.Drawing.Point(360, 51);
+            this.btnHeadends.Name = "btnHeadends";
+            this.btnHeadends.Size = new System.Drawing.Size(86, 25);
+            this.btnHeadends.TabIndex = 11;
+            this.btnHeadends.Text = "Headends";
+            this.btnHeadends.UseVisualStyleBackColor = true;
+            this.btnHeadends.Click += new System.EventHandler(this.btnHeadends_Click);
+            // 
+            // formUIDemo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(548, 411);
+            this.Controls.Add(this.btnHeadends);
+            this.Controls.Add(this.btnTransmitters);
             this.Controls.Add(this.lbCountries);
             this.Controls.Add(this.lbContinents);
             this.Controls.Add(this.btnCountries);
@@ -142,8 +167,8 @@
             this.Controls.Add(this.txtLogin);
             this.Controls.Add(this.lblPassword);
             this.Controls.Add(this.lblLogin);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "formUIDemo";
+            this.Text = "SchedulesDirect.org Demo UI";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -161,6 +186,8 @@
         private System.Windows.Forms.Button btnCountries;
         private System.Windows.Forms.ListBox lbContinents;
         private System.Windows.Forms.ListBox lbCountries;
+        private System.Windows.Forms.Button btnTransmitters;
+        private System.Windows.Forms.Button btnHeadends;
     }
 }
 

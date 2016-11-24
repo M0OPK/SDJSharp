@@ -16,8 +16,32 @@ namespace SchedulesDirect
     public partial class SDJSON
     {
         private string loginToken;
+        private List<Exception> localErrors;
         private static string urlBase = "https://json.schedulesdirect.org/20141201/";
-        private static string userAgent = "SDJSharp JSON C# Library 1.0";
+        private static string userAgent = "SDJSharp JSON C# Library/1.0 (https://github.com/M0OPK/SDJSharp)";
+
+        public SDJSON()
+        {
+            localErrors = new List<Exception>();
+        }
+
+        public IEnumerable<Exception> GetRawErrors()
+        {
+            return localErrors.AsEnumerable();
+        }
+
+        public Exception GetLastError(bool pop = true)
+        {
+            Exception ex = localErrors.Last();
+            if (pop)
+                localErrors.Remove(ex);
+            return ex;
+        }
+
+        public void ClearErrors()
+        {
+            localErrors.Clear();
+        }
 
         public SDTokenResponse Login(string username, string password)
         {
@@ -26,7 +50,7 @@ namespace SchedulesDirect
             logon.password = hashPassword(password);
 
             SDTokenResponse response = SendJSON<SDTokenResponse, SDTokenMessage>("token", logon);
-            if (response.code != 0)
+            if (response == null || response.code != 0)
                 return null;
 
             loginToken = response.token;
@@ -85,6 +109,29 @@ namespace SchedulesDirect
             return countries;
         }
 
+        public IEnumerable<SDTransmitter> GetTransmitters(string countrycode)
+        {
+            dynamic result = GetDynamic(WebGet("transmitters/" + countrycode));
+            if (result == null)
+                return null;
+
+            List<SDTransmitter> txList = new List<SDTransmitter>();
+            foreach (string key in result.Keys)
+            {
+                SDTransmitter thisTx = new SDTransmitter();
+                thisTx.transmitterArea = key;
+                thisTx.transmitterID = result[key];
+                txList.Add(thisTx);
+            }
+
+            return txList.AsEnumerable();
+        }
+
+        public IEnumerable<SDHeadendsResponse> GetHeadends(string country, string postcode)
+        {
+            return SendJSON<IEnumerable<SDHeadendsResponse>>(string.Format("headends?country={0}&postalcode={1}", country, postcode), loginToken);
+        }
+
         private string CreateJSONstring<T>(T obj)
         {
             MemoryStream jsonStream = new MemoryStream();
@@ -104,6 +151,9 @@ namespace SchedulesDirect
 
         private T GetJSON<T>(string input)
         {
+            if (input == string.Empty)
+                return default(T);
+
             MemoryStream jsonStream = new MemoryStream(Encoding.UTF8.GetBytes(input));
             DataContractJsonSerializer jsonSer = new DataContractJsonSerializer(typeof(T));
 
@@ -131,10 +181,18 @@ namespace SchedulesDirect
             if (token != "")
                 tokenRequest.Headers.Add("token: " + token);
 
-            var resp = (HttpWebResponse)tokenRequest.GetResponse();
-            using (var sr = new StreamReader(resp.GetResponseStream()))
+            try
             {
-                return sr.ReadToEnd();
+                var resp = (HttpWebResponse)tokenRequest.GetResponse();
+                using (var sr = new StreamReader(resp.GetResponseStream()))
+                {
+                    return sr.ReadToEnd();
+                }
+            }
+            catch (System.Exception ex)
+            {
+                queueError(ex);
+                return "";
             }
         }
 
@@ -155,10 +213,18 @@ namespace SchedulesDirect
                 sr.Close();
             }
 
-            var resp = (HttpWebResponse)tokenRequest.GetResponse();
-            using (var sr = new StreamReader(resp.GetResponseStream()))
+            try
             {
-                return sr.ReadToEnd();
+                var resp = (HttpWebResponse)tokenRequest.GetResponse();
+                using (var sr = new StreamReader(resp.GetResponseStream()))
+                {
+                    return sr.ReadToEnd();
+                }
+            }
+            catch(Exception ex)
+            {
+                localErrors.Add(ex);
+                return "";
             }
         }
 
@@ -170,6 +236,11 @@ namespace SchedulesDirect
 
             string hexString = BitConverter.ToString(hashBytes);
             return hexString.Replace("-", "").ToLower();
+        }
+
+        private void queueError(Exception ex)
+        {
+            localErrors.Add(ex);
         }
     }
 }
