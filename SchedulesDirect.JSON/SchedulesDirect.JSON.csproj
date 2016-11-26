@@ -47,9 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SDJSON.cs" />
+    <Compile Include="SDJson.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SDJSON_Struct.cs" />
+    <Compile Include="SDJson_Struct.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

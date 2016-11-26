@@ -27,7 +27,7 @@ namespace SchedulesDirect
         [DataMember]
         public string message;
         [DataMember]
-        public string datetime;
+        public DateTime? datetime;
         [DataMember]
         public string token;
         [DataMember]
@@ -45,7 +45,7 @@ namespace SchedulesDirect
         [DataMember]
         public SDLineUps[] lineups;
         [DataMember]
-        public string lastDataUpdate;
+        public DateTime? lastDataUpdate;
         [DataMember]
         public string[] notifications;
         [DataMember]
@@ -53,7 +53,7 @@ namespace SchedulesDirect
         [DataMember]
         public string serverID;
         [DataMember]
-        public string datetime;
+        public DateTime? datetime;
         [DataMember]
         public int code;
 
@@ -74,9 +74,9 @@ namespace SchedulesDirect
             [DataMember]
             public string lineup;
             [DataMember]
-            public string modified;
+            public DateTime? modified;
             [DataMember]
-            public string url;
+            public string uri;
             [DataMember]
             public bool isDeleted;
         }
@@ -85,7 +85,7 @@ namespace SchedulesDirect
         public class SDSystemStatus
         {
             [DataMember]
-            public string date;
+            public DateTime? date;
             [DataMember]
             public string status;
             [DataMember]
@@ -110,7 +110,7 @@ namespace SchedulesDirect
         [DataMember]
         public string serverID;
         [DataMember]
-        public string datetime;
+        public DateTime? datetime;
         [DataMember]
         public string message;
     }
@@ -171,7 +171,9 @@ namespace SchedulesDirect
         public string transmitterID;
     }
 
+    // ===========================
     // Headends command structures
+    // ===========================
     [DataContract]
     public class SDHeadendsResponse
     {
@@ -192,6 +194,47 @@ namespace SchedulesDirect
             [DataMember]
             public string lineup;
             [DataMember]
+            public string uri;
+        }
+    }
+
+    // ================================
+    // Lineups (Add) command structures
+    // ================================
+    [DataContract]
+    public class SDAddLineupResponse
+    {
+        [DataMember]
+        public string response;
+        [DataMember]
+        public int code;
+        [DataMember]
+        public string serverID;
+        [DataMember]
+        public string message;
+        [DataMember]
+        public string changesRemaining;
+        [DataMember]
+        public DateTime? datetime;
+    }
+
+    // ================================
+    // Lineups (Get) command structures
+    // ================================
+    [DataContract]
+    public class SDLineupsResponse
+    {
+        public int code;
+        public string serverID;
+        public DateTime? datetime;
+        public SDLineups lineups;
+
+        public class SDLineups
+        {
+            public string lineup;
+            public string name;
+            public string transport;
+            public string location;
             public string uri;
         }
     }

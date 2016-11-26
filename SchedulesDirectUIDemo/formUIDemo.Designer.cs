@@ -40,6 +40,7 @@
             this.lbCountries = new System.Windows.Forms.ListBox();
             this.btnTransmitters = new System.Windows.Forms.Button();
             this.btnHeadends = new System.Windows.Forms.Button();
+            this.btnAddLineup = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lblLogin
@@ -150,11 +151,22 @@
             this.btnHeadends.UseVisualStyleBackColor = true;
             this.btnHeadends.Click += new System.EventHandler(this.btnHeadends_Click);
             // 
+            // btnAddLineup
+            // 
+            this.btnAddLineup.Location = new System.Drawing.Point(452, 51);
+            this.btnAddLineup.Name = "btnAddLineup";
+            this.btnAddLineup.Size = new System.Drawing.Size(86, 25);
+            this.btnAddLineup.TabIndex = 12;
+            this.btnAddLineup.Text = "Add Lineup";
+            this.btnAddLineup.UseVisualStyleBackColor = true;
+            this.btnAddLineup.Click += new System.EventHandler(this.btnAddLineup_Click);
+            // 
             // formUIDemo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(548, 411);
+            this.Controls.Add(this.btnAddLineup);
             this.Controls.Add(this.btnHeadends);
             this.Controls.Add(this.btnTransmitters);
             this.Controls.Add(this.lbCountries);
@@ -188,6 +200,7 @@
         private System.Windows.Forms.ListBox lbCountries;
         private System.Windows.Forms.Button btnTransmitters;
         private System.Windows.Forms.Button btnHeadends;
+        private System.Windows.Forms.Button btnAddLineup;
     }
 }
 

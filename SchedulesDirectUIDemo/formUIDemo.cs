@@ -15,13 +15,13 @@ namespace SchedulesDirect.UIDemo
     {
         SDCountries countryList;
         IEnumerable<SDHeadendsResponse> headEnds;
-        SDJSON sd;
+        SDJson sd;
         int mode;
 
         public formUIDemo()
         {
             InitializeComponent();
-            sd = new SDJSON();
+            sd = new SDJson();
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -74,6 +74,59 @@ namespace SchedulesDirect.UIDemo
             mode = 1;
         }
 
+        private void btnTransmitters_Click(object sender, EventArgs e)
+        {
+            var txList = sd.GetTransmitters("GB");
+
+            if (txList == null)
+            {
+                reportErrors();
+                return;
+            }
+
+            lbContinents.Items.Clear();
+            lbCountries.Items.Clear();
+
+            foreach (var tx in txList)
+            {
+                lbContinents.Items.Add(string.Format("{0}\t{1}", tx.transmitterArea, tx.transmitterID));
+            }
+            mode = 2;
+        }
+
+        private void btnHeadends_Click(object sender, EventArgs e)
+        {
+            headEnds = sd.GetHeadends("USA", "10001");
+            if (headEnds == null)
+            {
+                reportErrors();
+                return;
+            }
+
+            lbContinents.Items.Clear();
+            lbCountries.Items.Clear();
+            foreach (var headEnd in headEnds)
+            {
+                if (headEnd == null)
+                    continue;
+
+                lbContinents.Items.Add(string.Format("{0}\t{1}\t{2}", headEnd.headend, headEnd.location, headEnd.transport));
+            }
+            mode = 3;
+            if (lbContinents.Items.Count > 0)
+                lbContinents.SelectedIndex = 0;
+        }
+
+        private void btnAddLineup_Click(object sender, EventArgs e)
+        {
+            var result = sd.AddLineup("USA-DITV501-DEFAULT");
+            //var result = sd.AddLineup("GBR-ABC-AB123S");
+            //if (mode == 3)
+            //{
+            //    var headEnd = headEnds.Where(head => head.headend )
+
+        }
+
         private void lbContinents_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (mode == 1)
@@ -111,49 +164,6 @@ namespace SchedulesDirect.UIDemo
             }
         }
 
-        private void btnTransmitters_Click(object sender, EventArgs e)
-        {
-            var txList = sd.GetTransmitters("GB");
-
-            if (txList == null)
-            {
-                reportErrors();
-                return;
-            }
-
-            lbContinents.Items.Clear();
-            lbCountries.Items.Clear();
-
-            foreach (var tx in txList)
-            {
-                lbContinents.Items.Add(string.Format("{0}\t{1}", tx.transmitterArea, tx.transmitterID));
-            }
-            mode = 2;
-        }
-
-        private void btnHeadends_Click(object sender, EventArgs e)
-        {
-            headEnds = sd.GetHeadends("GBR", "RG457NW");
-            if (headEnds == null)
-            {
-                reportErrors();
-                return;
-            }
-
-            lbContinents.Items.Clear();
-            lbCountries.Items.Clear();
-            foreach (var headEnd in headEnds)
-            {
-                if (headEnd == null)
-                    continue;
-
-                lbContinents.Items.Add(string.Format("{0}\t{1}\t{2}", headEnd.headend, headEnd.location, headEnd.transport));
-            }
-            mode = 3;
-            if (lbContinents.Items.Count > 0)
-                lbContinents.SelectedIndex = 0;
-        }
-
         private void reportErrors()
         {
             var exceptions = sd.GetRawErrors();
@@ -162,10 +172,10 @@ namespace SchedulesDirect.UIDemo
             {
                 errors += ex.Message + "\r\n";
             }
+            sd.ClearErrors();
 
             if (errors != string.Empty)
                 MessageBox.Show(this, errors, "SDJSON Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-
     }
 }
