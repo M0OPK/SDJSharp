@@ -63,11 +63,11 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDTokenResponse Login(string username, string password)
         {
-            SDTokenMessage logon = new SDTokenMessage();
+            SDTokenRequest logon = new SDTokenRequest();
             logon.username = username;
             logon.password = hashPassword(password);
 
-            SDTokenResponse response = PostJSON<SDTokenResponse, SDTokenMessage>("token", logon);
+            SDTokenResponse response = PostJSON<SDTokenResponse, SDTokenRequest>("token", logon);
             if (response == null || response.code != 0)
                 return null;
 
@@ -183,9 +183,9 @@ namespace SchedulesDirect
         /// </summary>
         /// <param name="lineupID"></param>
         /// <returns></returns>
-        public SDAddLineupResponse AddLineup(string lineupID)
+        public SDAddRemoveLineupResponse AddLineup(string lineupID)
         {
-            return PutJSON<SDAddLineupResponse>("lineups/" + lineupID, loginToken);
+            return PutJSON<SDAddRemoveLineupResponse>("lineups/" + lineupID, loginToken);
         }
 
         /// <summary>
@@ -195,6 +195,73 @@ namespace SchedulesDirect
         public SDLineupsResponse GetLineups()
         {
             return GetJSON<SDLineupsResponse>("lineups", loginToken);
+        }
+
+        /// <summary>
+        /// Return map, stations and metadata for the specified lineup
+        /// </summary>
+        /// <param name="lineup"></param>
+        /// <param name="verbose"></param>
+        /// <returns></returns>
+        public SDGetLineupResponse GetLineup(string lineup, bool verbose = false)
+        {
+            WebHeaderCollection headers = null;
+
+            if (verbose)
+            {
+                headers = new WebHeaderCollection();
+                headers.Add("verboseMap: true");
+            }
+
+            return GetJSON<SDGetLineupResponse>("lineups/" + lineup, loginToken, headers);
+        }
+
+        /// <summary>
+        /// Return program information for the specified list of programs
+        /// </summary>
+        /// <param name="programs"></param>
+        /// <returns></returns>
+        public IEnumerable<SDProgramResponse> GetPrograms(string[] programs)
+        {
+            return PostJSON<IEnumerable<SDProgramResponse>, string[]>("programs", programs, loginToken);
+        }
+
+        /// <summary>
+        /// Return program descriptions for the specified list of programs
+        /// </summary>
+        /// <param name="programs"></param>
+        /// <returns></returns>
+        public IEnumerable<SDDescriptionResponse> GetDescriptions(string[] programs)
+        {
+            dynamic result = GetDynamic(WebPost("metadata/description", CreateJSONstring<string[]>(programs), loginToken));
+
+            if (result == null)
+                return null;
+
+            var programData = new List<SDDescriptionResponse>();
+            foreach (string key in result.Keys)
+            {
+                var thisProgram = new SDDescriptionResponse();
+                thisProgram.episodeID = key;
+                dynamic temp = result[key];
+                //thisProgram.episodeDescription = (SDDescriptionResponse.SDProgramDescription)result[key];
+                try { thisProgram.episodeDescription.code = temp["code"]; } catch { };
+                try { thisProgram.episodeDescription.description100 = temp["description100"]; } catch { };
+                try { thisProgram.episodeDescription.description1000 = temp["description1000"]; } catch { };
+                programData.Add(thisProgram);
+            }
+
+            return programData.AsEnumerable();
+        }
+
+        /// <summary>
+        /// Retrieve schedule for the provides list of station/timeframe
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public IEnumerable<SDScheduleResponse> GetSchedules(IEnumerable<SDScheduleRequest> request)
+        {
+            return PostJSON<IEnumerable<SDScheduleResponse>, IEnumerable<SDScheduleRequest>>("schedules", request, loginToken);
         }
 
         // For cases where we can't create a known object type
@@ -237,28 +304,28 @@ namespace SchedulesDirect
 
         // Parse incoming known object with JSON serializer.
         // Perform post action and parse response via JSON serializer to known object type
-        private V PostJSON<V, T>(string command, T obj, string token = "")
+        private V PostJSON<V, T>(string command, T obj, string token = "", WebHeaderCollection headers = null)
         {
             string requestString = CreateJSONstring(obj);
-            return ParseJSON<V>(WebPost(command, requestString, token));
+            return ParseJSON<V>(WebPost(command, requestString, token, headers));
         }
 
         // Perform get action and parse response via JSON serializer to known object type
-        private T GetJSON<T>(string command, string token = "")
+        private T GetJSON<T>(string command, string token = "", WebHeaderCollection headers = null)
         {
-            return ParseJSON<T>(WebGet(command, token));
+            return ParseJSON<T>(WebGet(command, token, headers));
         }
 
         // Perform put action and parse response via JSON serializer to known object type
-        private T PutJSON<T>(string command, string token = "")
+        private T PutJSON<T>(string command, string token = "", WebHeaderCollection headers = null)
         {
-            return ParseJSON<T>(WebPut(command, token));
+            return ParseJSON<T>(WebPut(command, token, headers));
         }
 
         // Handle get request, return response as string
-        private string WebGet(string command, string token = "")
+        private string WebGet(string command, string token = "", WebHeaderCollection headers = null)
         {
-            var getRequest = WebAction(urlBase + command, "GET", token);
+            var getRequest = WebAction(urlBase + command, "GET", token, headers);
 
             try
             {
@@ -276,9 +343,9 @@ namespace SchedulesDirect
         }
 
         // Handle put request, return response as string
-        private string WebPut(string command, string token = "")
+        private string WebPut(string command, string token = "", WebHeaderCollection headers = null)
         {
-            var putRequest = WebAction(urlBase + command, "PUT", token);
+            var putRequest = WebAction(urlBase + command, "PUT", token, headers);
 
             try
             {
@@ -297,9 +364,9 @@ namespace SchedulesDirect
         }
 
         // Handle delete request, return response as string
-        private string WebDelete(string command, string token = "")
+        private string WebDelete(string command, string token = "", WebHeaderCollection headers = null)
         {
-            var deleteRequest = WebAction(urlBase + command, "DELETE", token);
+            var deleteRequest = WebAction(urlBase + command, "DELETE", token, headers);
 
             try
             {
@@ -318,9 +385,9 @@ namespace SchedulesDirect
         }
 
         // Handle post request, return response as string
-        private string WebPost(string command, string jsonstring, string token = "")
+        private string WebPost(string command, string jsonstring, string token = "", WebHeaderCollection headers = null)
         {
-            var postRequest = WebAction(urlBase + command, "POST", token);
+            var postRequest = WebAction(urlBase + command, "POST", token, headers);
 
             using (var sr = new StreamWriter(postRequest.GetRequestStream()))
             {
@@ -345,13 +412,18 @@ namespace SchedulesDirect
         }
 
         // Create web request for specified action and URL
-        HttpWebRequest WebAction(string url, string action = "GET", string token = "")
+        HttpWebRequest WebAction(string url, string action = "GET", string token = "", WebHeaderCollection headers = null)
         {
             var webRequest = (HttpWebRequest)WebRequest.Create(url);
             webRequest.Method = action;
             webRequest.ContentType = "application/json; charset=utf-8";
             webRequest.Accept = "application/json; charset=utf-8";
             webRequest.UserAgent = userAgent;
+            webRequest.AutomaticDecompression = (DecompressionMethods.GZip | DecompressionMethods.Deflate);
+
+            if (headers != null)
+                webRequest.Headers = headers;
+
             if (token != "")
                 webRequest.Headers.Add("token: " + token);
 

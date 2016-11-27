@@ -127,6 +127,35 @@ namespace SchedulesDirect.UIDemo
 
         }
 
+        private void btnListLineups_Click(object sender, EventArgs e)
+        {
+            var result = sd.GetLineups();
+        }
+
+        private void btnGetLineup_Click(object sender, EventArgs e)
+        {
+            var results = sd.GetLineup("USA-DITV501-DEFAULT", true);
+        }
+
+        private void btnGetSchedule_Click(object sender, EventArgs e)
+        {
+            List<SDScheduleRequest> reqs = new List<SDScheduleRequest>();
+            SDScheduleRequest req = new SDScheduleRequest();
+            req.date[0] = "2016-11-27";
+            req.date[1] = "2016-11-28";
+            req.stationID = "16689";
+            reqs.Add(req);
+            var result = sd.GetSchedules(reqs.AsEnumerable());
+        }
+
+        private void btnGetProgram_Click(object sender, EventArgs e)
+        {
+            string[] programs = { "EP000014577789", "EP000000351331" };
+
+            var result = sd.GetPrograms(programs);
+            var results = sd.GetDescriptions(programs);
+        }
+
         private void lbContinents_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (mode == 1)

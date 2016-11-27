@@ -41,6 +41,11 @@
             this.btnTransmitters = new System.Windows.Forms.Button();
             this.btnHeadends = new System.Windows.Forms.Button();
             this.btnAddLineup = new System.Windows.Forms.Button();
+            this.btnDeleteLineup = new System.Windows.Forms.Button();
+            this.btnListLineups = new System.Windows.Forms.Button();
+            this.btnGetLineup = new System.Windows.Forms.Button();
+            this.btnGetSchedule = new System.Windows.Forms.Button();
+            this.btnGetProgram = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lblLogin
@@ -90,7 +95,7 @@
             // 
             this.rtResult.Location = new System.Drawing.Point(16, 119);
             this.rtResult.Name = "rtResult";
-            this.rtResult.Size = new System.Drawing.Size(522, 153);
+            this.rtResult.Size = new System.Drawing.Size(531, 153);
             this.rtResult.TabIndex = 5;
             this.rtResult.Text = "";
             // 
@@ -106,7 +111,7 @@
             // 
             // btnCountries
             // 
-            this.btnCountries.Location = new System.Drawing.Point(452, 82);
+            this.btnCountries.Location = new System.Drawing.Point(462, 82);
             this.btnCountries.Name = "btnCountries";
             this.btnCountries.Size = new System.Drawing.Size(86, 25);
             this.btnCountries.TabIndex = 7;
@@ -128,12 +133,12 @@
             this.lbCountries.FormattingEnabled = true;
             this.lbCountries.Location = new System.Drawing.Point(278, 278);
             this.lbCountries.Name = "lbCountries";
-            this.lbCountries.Size = new System.Drawing.Size(260, 108);
+            this.lbCountries.Size = new System.Drawing.Size(269, 108);
             this.lbCountries.TabIndex = 9;
             // 
             // btnTransmitters
             // 
-            this.btnTransmitters.Location = new System.Drawing.Point(360, 82);
+            this.btnTransmitters.Location = new System.Drawing.Point(370, 82);
             this.btnTransmitters.Name = "btnTransmitters";
             this.btnTransmitters.Size = new System.Drawing.Size(86, 25);
             this.btnTransmitters.TabIndex = 10;
@@ -143,7 +148,7 @@
             // 
             // btnHeadends
             // 
-            this.btnHeadends.Location = new System.Drawing.Point(360, 51);
+            this.btnHeadends.Location = new System.Drawing.Point(370, 51);
             this.btnHeadends.Name = "btnHeadends";
             this.btnHeadends.Size = new System.Drawing.Size(86, 25);
             this.btnHeadends.TabIndex = 11;
@@ -153,7 +158,7 @@
             // 
             // btnAddLineup
             // 
-            this.btnAddLineup.Location = new System.Drawing.Point(452, 51);
+            this.btnAddLineup.Location = new System.Drawing.Point(462, 51);
             this.btnAddLineup.Name = "btnAddLineup";
             this.btnAddLineup.Size = new System.Drawing.Size(86, 25);
             this.btnAddLineup.TabIndex = 12;
@@ -161,11 +166,65 @@
             this.btnAddLineup.UseVisualStyleBackColor = true;
             this.btnAddLineup.Click += new System.EventHandler(this.btnAddLineup_Click);
             // 
+            // btnDeleteLineup
+            // 
+            this.btnDeleteLineup.Location = new System.Drawing.Point(462, 20);
+            this.btnDeleteLineup.Name = "btnDeleteLineup";
+            this.btnDeleteLineup.Size = new System.Drawing.Size(86, 25);
+            this.btnDeleteLineup.TabIndex = 13;
+            this.btnDeleteLineup.Text = "Delete Lineup";
+            this.btnDeleteLineup.UseVisualStyleBackColor = true;
+            // 
+            // btnListLineups
+            // 
+            this.btnListLineups.Location = new System.Drawing.Point(370, 20);
+            this.btnListLineups.Name = "btnListLineups";
+            this.btnListLineups.Size = new System.Drawing.Size(86, 25);
+            this.btnListLineups.TabIndex = 14;
+            this.btnListLineups.Text = "List Lineup";
+            this.btnListLineups.UseVisualStyleBackColor = true;
+            this.btnListLineups.Click += new System.EventHandler(this.btnListLineups_Click);
+            // 
+            // btnGetLineup
+            // 
+            this.btnGetLineup.Location = new System.Drawing.Point(278, 20);
+            this.btnGetLineup.Name = "btnGetLineup";
+            this.btnGetLineup.Size = new System.Drawing.Size(86, 25);
+            this.btnGetLineup.TabIndex = 15;
+            this.btnGetLineup.Text = "Get Lineup";
+            this.btnGetLineup.UseVisualStyleBackColor = true;
+            this.btnGetLineup.Click += new System.EventHandler(this.btnGetLineup_Click);
+            // 
+            // btnGetSchedule
+            // 
+            this.btnGetSchedule.Location = new System.Drawing.Point(278, 51);
+            this.btnGetSchedule.Name = "btnGetSchedule";
+            this.btnGetSchedule.Size = new System.Drawing.Size(86, 25);
+            this.btnGetSchedule.TabIndex = 16;
+            this.btnGetSchedule.Text = "Get Schedule";
+            this.btnGetSchedule.UseVisualStyleBackColor = true;
+            this.btnGetSchedule.Click += new System.EventHandler(this.btnGetSchedule_Click);
+            // 
+            // btnGetProgram
+            // 
+            this.btnGetProgram.Location = new System.Drawing.Point(278, 82);
+            this.btnGetProgram.Name = "btnGetProgram";
+            this.btnGetProgram.Size = new System.Drawing.Size(86, 25);
+            this.btnGetProgram.TabIndex = 17;
+            this.btnGetProgram.Text = "Get Program";
+            this.btnGetProgram.UseVisualStyleBackColor = true;
+            this.btnGetProgram.Click += new System.EventHandler(this.btnGetProgram_Click);
+            // 
             // formUIDemo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(548, 411);
+            this.ClientSize = new System.Drawing.Size(559, 398);
+            this.Controls.Add(this.btnGetProgram);
+            this.Controls.Add(this.btnGetSchedule);
+            this.Controls.Add(this.btnGetLineup);
+            this.Controls.Add(this.btnListLineups);
+            this.Controls.Add(this.btnDeleteLineup);
             this.Controls.Add(this.btnAddLineup);
             this.Controls.Add(this.btnHeadends);
             this.Controls.Add(this.btnTransmitters);
@@ -201,6 +260,11 @@
         private System.Windows.Forms.Button btnTransmitters;
         private System.Windows.Forms.Button btnHeadends;
         private System.Windows.Forms.Button btnAddLineup;
+        private System.Windows.Forms.Button btnDeleteLineup;
+        private System.Windows.Forms.Button btnListLineups;
+        private System.Windows.Forms.Button btnGetLineup;
+        private System.Windows.Forms.Button btnGetSchedule;
+        private System.Windows.Forms.Button btnGetProgram;
     }
 }
 
