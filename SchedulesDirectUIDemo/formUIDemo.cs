@@ -215,7 +215,6 @@ namespace SchedulesDirect.UIDemo
             req.date[1] = "2016-11-29";
             req.stationID = "16689";
             reqs.Add(req);
-
             var result = sd.GetMD5(reqs.AsEnumerable());
         }
     }
