@@ -46,6 +46,7 @@
             this.btnGetLineup = new System.Windows.Forms.Button();
             this.btnGetSchedule = new System.Windows.Forms.Button();
             this.btnGetProgram = new System.Windows.Forms.Button();
+            this.btnGetMD5 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lblLogin
@@ -93,7 +94,7 @@
             // 
             // rtResult
             // 
-            this.rtResult.Location = new System.Drawing.Point(16, 119);
+            this.rtResult.Location = new System.Drawing.Point(16, 159);
             this.rtResult.Name = "rtResult";
             this.rtResult.Size = new System.Drawing.Size(531, 153);
             this.rtResult.TabIndex = 5;
@@ -122,7 +123,7 @@
             // lbContinents
             // 
             this.lbContinents.FormattingEnabled = true;
-            this.lbContinents.Location = new System.Drawing.Point(12, 278);
+            this.lbContinents.Location = new System.Drawing.Point(12, 318);
             this.lbContinents.Name = "lbContinents";
             this.lbContinents.Size = new System.Drawing.Size(260, 108);
             this.lbContinents.TabIndex = 8;
@@ -131,7 +132,7 @@
             // lbCountries
             // 
             this.lbCountries.FormattingEnabled = true;
-            this.lbCountries.Location = new System.Drawing.Point(278, 278);
+            this.lbCountries.Location = new System.Drawing.Point(278, 318);
             this.lbCountries.Name = "lbCountries";
             this.lbCountries.Size = new System.Drawing.Size(269, 108);
             this.lbCountries.TabIndex = 9;
@@ -215,11 +216,22 @@
             this.btnGetProgram.UseVisualStyleBackColor = true;
             this.btnGetProgram.Click += new System.EventHandler(this.btnGetProgram_Click);
             // 
+            // btnGetMD5
+            // 
+            this.btnGetMD5.Location = new System.Drawing.Point(278, 113);
+            this.btnGetMD5.Name = "btnGetMD5";
+            this.btnGetMD5.Size = new System.Drawing.Size(86, 25);
+            this.btnGetMD5.TabIndex = 18;
+            this.btnGetMD5.Text = "Get MD5";
+            this.btnGetMD5.UseVisualStyleBackColor = true;
+            this.btnGetMD5.Click += new System.EventHandler(this.btnGetMD5_Click);
+            // 
             // formUIDemo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(559, 398);
+            this.ClientSize = new System.Drawing.Size(559, 441);
+            this.Controls.Add(this.btnGetMD5);
             this.Controls.Add(this.btnGetProgram);
             this.Controls.Add(this.btnGetSchedule);
             this.Controls.Add(this.btnGetLineup);
@@ -265,6 +277,7 @@
         private System.Windows.Forms.Button btnGetLineup;
         private System.Windows.Forms.Button btnGetSchedule;
         private System.Windows.Forms.Button btnGetProgram;
+        private System.Windows.Forms.Button btnGetMD5;
     }
 }
 

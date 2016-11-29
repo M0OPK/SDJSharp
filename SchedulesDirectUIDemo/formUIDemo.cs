@@ -206,5 +206,17 @@ namespace SchedulesDirect.UIDemo
             if (errors != string.Empty)
                 MessageBox.Show(this, errors, "SDJSON Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+
+        private void btnGetMD5_Click(object sender, EventArgs e)
+        {
+            List<SDMD5Request> reqs = new List<SDMD5Request>();
+            SDMD5Request req = new SDMD5Request();
+            req.date[0] = "2016-11-28";
+            req.date[1] = "2016-11-29";
+            req.stationID = "16689";
+            reqs.Add(req);
+
+            var result = sd.GetMD5(reqs.AsEnumerable());
+        }
     }
 }

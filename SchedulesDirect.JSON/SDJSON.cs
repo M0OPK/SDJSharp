@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Json;
 using System.Security.Cryptography;
 using System.Net;
 using System.Web.Script.Serialization;
+using System.Globalization;
 
 namespace SchedulesDirect
 {
@@ -18,11 +19,14 @@ namespace SchedulesDirect
         private string loginToken;
         private List<Exception> localErrors;
         private static string urlBase = "https://json.schedulesdirect.org/20141201/";
-        private static string userAgent = "SDJSharp JSON C# Library/1.0 (https://github.com/M0OPK/SDJSharp)";
+        private static string userAgentDefault = "SDJSharp JSON C# Library/1.0 (https://github.com/M0OPK/SDJSharp)";
+        private static string userAgentShort = "SDJSharp JSON C# Library/1.0";
+        private static string userAgentFull;
 
-        public SDJson()
+        public SDJson(string clientUserAgent = "")
         {
             localErrors = new List<Exception>();
+            userAgentFull = (clientUserAgent == string.Empty) ? userAgentDefault : string.Format("{0} ({1})", userAgentShort, clientUserAgent);
         }
 
         /// <summary>
@@ -264,6 +268,43 @@ namespace SchedulesDirect
             return PostJSON<IEnumerable<SDScheduleResponse>, IEnumerable<SDScheduleRequest>>("schedules", request, loginToken);
         }
 
+        public IEnumerable<SDMD5Response> GetMD5(IEnumerable<SDMD5Request> request)
+        {
+            dynamic result = GetDynamic(WebPost("schedules/md5", CreateJSONstring<IEnumerable<SDMD5Request>>(request), loginToken));
+
+            if (result == null)
+                return null;
+
+            var md5Data = new List<SDMD5Response>();
+            foreach (string resultKey in result.Keys)
+            {
+                var thisResponse = new SDMD5Response();
+                thisResponse.stationID = resultKey;
+
+                dynamic dates = result[resultKey];
+
+                List<SDMD5Response.SDMD5Day> daysTemp = new List<SDMD5Response.SDMD5Day>();
+                foreach (string dateKey in dates.Keys)
+                {
+                    SDMD5Response.SDMD5Day thisDay = new SDMD5Response.SDMD5Day();
+                    thisDay.date = dateKey;
+                    try { thisDay.md5data.code = dates[dateKey]["code"]; } catch { };
+                    try { thisDay.md5data.message = dates[dateKey]["message"]; } catch { };
+                    //try { thisDay.md5data.lastModified = DateTime.TryParse(dates[dateKey]["lastModified"]; } catch { };
+                    DateTime testDate;
+                    if (DateTime.TryParse(dates[dateKey]["lastModified"], null, DateTimeStyles.RoundtripKind, out testDate))
+                        thisDay.md5data.lastModified = testDate;
+
+                    try { thisDay.md5data.md5 = dates[dateKey]["md5"]; } catch { };
+                    daysTemp.Add(thisDay);
+                }
+                thisResponse.md5day = daysTemp.ToArray();
+                md5Data.Add(thisResponse);
+            }
+
+            return md5Data.AsEnumerable();
+        }
+
         // For cases where we can't create a known object type
         // Parse JSON string and return dynamic type
         private dynamic GetDynamic(string jsonstring)
@@ -418,7 +459,7 @@ namespace SchedulesDirect
             webRequest.Method = action;
             webRequest.ContentType = "application/json; charset=utf-8";
             webRequest.Accept = "application/json; charset=utf-8";
-            webRequest.UserAgent = userAgent;
+            webRequest.UserAgent = userAgentFull;
             webRequest.AutomaticDecompression = (DecompressionMethods.GZip | DecompressionMethods.Deflate);
 
             if (headers != null)

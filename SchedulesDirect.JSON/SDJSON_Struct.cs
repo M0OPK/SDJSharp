@@ -521,6 +521,17 @@ namespace SchedulesDirect
         public string stationID;
         [DataMember]
         public SDScheduleProgram[] programs;
+        [DataMember]
+        public SDScheduleMetadata metadata;
+        // Possible error fields
+        [DataMember]
+        public string serverID;
+        [DataMember]
+        public int code;
+        [DataMember]
+        public string response;
+        [DataMember]
+        public DateTime? retryTime;
 
         [DataContract]
         public class SDScheduleProgram
@@ -536,9 +547,120 @@ namespace SchedulesDirect
             [DataMember(Name="new")]
             public bool isNew;
             [DataMember]
+            public bool cableInTheClassroom;
+            [DataMember]
+            public bool catchup;
+            [DataMember]
+            public bool continued;
+            [DataMember]
+            public bool educational;
+            [DataMember]
+            public bool joinedInProgress;
+            [DataMember]
+            public bool leftInProgress;
+            [DataMember]
+            public bool premiere;
+            [DataMember]
+            public bool programBreak;
+            [DataMember]
+            public bool repeat;
+            [DataMember]
+            public bool signed;
+            [DataMember]
+            public bool subjectToBlackout;
+            [DataMember]
+            public bool timeApproximate;
+            [DataMember]
+            public bool free;
+            [DataMember]
+            public string liveTapeDelay;
+            [DataMember]
+            public string isPremiereOrFinale;
+            [DataMember]
             public string[] audioProperties;
             [DataMember]
             public string[] videoProperties;
+            [DataMember]
+            public SDScheduleRatings[] ratings;
+            [DataMember]
+            public SDScheduleMultipart multipart;
+
+            [DataContract]
+            public class SDScheduleRatings
+            {
+                [DataMember]
+                public string body;
+                [DataMember]
+                public string code;
+            }
+
+            [DataContract]
+            public class SDScheduleMultipart
+            {
+                [DataMember]
+                public int partNumber;
+                [DataMember]
+                public int totalParts;
+            }
+        }
+
+        [DataContract]
+        public class SDScheduleMetadata
+        {
+            [DataMember]
+            public int code;
+            [DataMember]
+            public DateTime? modified;
+            [DataMember]
+            public string md5;
+            [DataMember]
+            public string startDate;
         }
     }
+
+    /// <summary>
+    /// MD5 hash request structure. Contains stations and date ranges to request hash values for
+    /// </summary>
+    [DataContract]
+    public class SDMD5Request
+    {
+        [DataMember]
+        public string stationID;
+        [DataMember]
+        public string[] date;
+
+        public SDMD5Request()
+        {
+            date = new string[2];
+        }
+    }
+
+    /// <summary>
+    /// MD5 hash response structure. Generated from dynamic data.
+    /// </summary>
+    public class SDMD5Response
+    {
+        public string stationID;
+        public SDMD5Day[] md5day;
+
+        public class SDMD5Day
+        {
+            public string date;
+            public SDMD5Data md5data;
+
+            public class SDMD5Data
+            {
+                public int code;
+                public string message;
+                public DateTime? lastModified;
+                public string md5;
+            }
+
+            public SDMD5Day()
+            {
+                md5data = new SDMD5Data();
+            }
+        }
+    }
+
 }
