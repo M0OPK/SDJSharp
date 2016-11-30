@@ -750,6 +750,9 @@ namespace SchedulesDirect
         public DateTime? datetime;
     }
 
+    /// <summary>
+    /// Live/Still running response structure. Contains scores for ongoing live events
+    /// </summary>
     [DataContract]
     public class SDStillRunningResponse
     {
@@ -791,6 +794,9 @@ namespace SchedulesDirect
         }
     }
 
+    /// <summary>
+    /// Program metadata (image information) for programs response.
+    /// </summary>
     [DataContract]
     public class SDProgramMetadataResponse
     {
@@ -800,6 +806,9 @@ namespace SchedulesDirect
         public SDImageData[] data;
     }
 
+    /// <summary>
+    /// Image data (used by multiple command structures)
+    /// </summary>
     [DataContract]
     public class SDImageData
     {

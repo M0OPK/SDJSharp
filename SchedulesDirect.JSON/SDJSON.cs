@@ -325,16 +325,31 @@ namespace SchedulesDirect
             return GetJSON<SDStillRunningResponse>("metadata/stillRunning/" + programID, loginToken);
         }
 
+        /// <summary>
+        /// Obtain image data for assets for specified program ID(s)
+        /// </summary>
+        /// <param name="programs"></param>
+        /// <returns></returns>
         public IEnumerable<SDProgramMetadataResponse> GetProgramMetadata(string[] programs)
         {
             return PostJSON<IEnumerable<SDProgramMetadataResponse>, string[]>("metadata/programs/", programs);
         }
 
+        /// <summary>
+        /// Obtain image data for assets for specified root ID
+        /// </summary>
+        /// <param name="rootId"></param>
+        /// <returns></returns>
         public IEnumerable<SDImageData> GetProgramRootMetadata(string rootId)
         {
             return GetJSON<IEnumerable<SDImageData>>("metadata/programs/" + rootId);
         }
 
+        /// <summary>
+        /// Return image data for assets for specified celebrity ID
+        /// </summary>
+        /// <param name="celebrityID"></param>
+        /// <returns></returns>
         public IEnumerable<SDImageData> GetCelebrityMetadata(string celebrityID)
         {
             return GetJSON<IEnumerable<SDImageData>>("metadata/celebrity/" + celebrityID);
