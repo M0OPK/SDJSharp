@@ -67,11 +67,7 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDTokenResponse Login(string username, string password)
         {
-            SDTokenRequest logon = new SDTokenRequest();
-            logon.username = username;
-            logon.password = hashPassword(password);
-
-            SDTokenResponse response = PostJSON<SDTokenResponse, SDTokenRequest>("token", logon);
+            SDTokenResponse response = PostJSON<SDTokenResponse, SDTokenRequest>("token", new SDTokenRequest(username, hashPassword(password)));
             if (response == null || response.code != 0)
                 return null;
 
@@ -268,6 +264,11 @@ namespace SchedulesDirect
             return PostJSON<IEnumerable<SDScheduleResponse>, IEnumerable<SDScheduleRequest>>("schedules", request, loginToken);
         }
 
+        /// <summary>
+        /// Retrieve MD5 hashes for provided list of station/timeframe
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public IEnumerable<SDMD5Response> GetMD5(IEnumerable<SDMD5Request> request)
         {
             dynamic result = GetDynamic(WebPost("schedules/md5", CreateJSONstring<IEnumerable<SDMD5Request>>(request), loginToken));
@@ -290,7 +291,6 @@ namespace SchedulesDirect
                     thisDay.date = dateKey;
                     try { thisDay.md5data.code = dates[dateKey]["code"]; } catch { };
                     try { thisDay.md5data.message = dates[dateKey]["message"]; } catch { };
-                    //try { thisDay.md5data.lastModified = DateTime.TryParse(dates[dateKey]["lastModified"]; } catch { };
                     DateTime testDate;
                     if (DateTime.TryParse(dates[dateKey]["lastModified"], null, DateTimeStyles.RoundtripKind, out testDate))
                         thisDay.md5data.lastModified = testDate;
@@ -303,6 +303,41 @@ namespace SchedulesDirect
             }
 
             return md5Data.AsEnumerable();
+        }
+
+        /// <summary>
+        /// Delete specified system message from login status
+        /// </summary>
+        /// <param name="messageID"></param>
+        /// <returns></returns>
+        public SDDeleteResponse DeleteMessage(string messageID)
+        {
+            return DeleteJSON<SDDeleteResponse>("messages/" + messageID, loginToken);
+        }
+
+        /// <summary>
+        /// Obtain live program information for example, for sporting events (if available)
+        /// </summary>
+        /// <param name="programID"></param>
+        /// <returns></returns>
+        public SDStillRunningResponse GetStillRunning(string programID)
+        {
+            return GetJSON<SDStillRunningResponse>("metadata/stillRunning/" + programID, loginToken);
+        }
+
+        public IEnumerable<SDProgramMetadataResponse> GetProgramMetadata(string[] programs)
+        {
+            return PostJSON<IEnumerable<SDProgramMetadataResponse>, string[]>("metadata/programs/", programs);
+        }
+
+        public IEnumerable<SDImageData> GetProgramRootMetadata(string rootId)
+        {
+            return GetJSON<IEnumerable<SDImageData>>("metadata/programs/" + rootId);
+        }
+
+        public IEnumerable<SDImageData> GetCelebrityMetadata(string celebrityID)
+        {
+            return GetJSON<IEnumerable<SDImageData>>("metadata/celebrity/" + celebrityID);
         }
 
         // For cases where we can't create a known object type
@@ -361,6 +396,11 @@ namespace SchedulesDirect
         private T PutJSON<T>(string command, string token = "", WebHeaderCollection headers = null)
         {
             return ParseJSON<T>(WebPut(command, token, headers));
+        }
+
+        private T DeleteJSON<T>(string command, string token = "", WebHeaderCollection headers = null)
+        {
+            return ParseJSON<T>(WebDelete(command, token, headers));
         }
 
         // Handle get request, return response as string

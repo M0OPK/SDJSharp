@@ -47,6 +47,9 @@
             this.btnGetSchedule = new System.Windows.Forms.Button();
             this.btnGetProgram = new System.Windows.Forms.Button();
             this.btnGetMD5 = new System.Windows.Forms.Button();
+            this.btnDeleteMsg = new System.Windows.Forms.Button();
+            this.btnGetLive = new System.Windows.Forms.Button();
+            this.btnGetLogo = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lblLogin
@@ -84,7 +87,7 @@
             // 
             // btnLogin
             // 
-            this.btnLogin.Location = new System.Drawing.Point(197, 82);
+            this.btnLogin.Location = new System.Drawing.Point(17, 113);
             this.btnLogin.Name = "btnLogin";
             this.btnLogin.Size = new System.Drawing.Size(75, 25);
             this.btnLogin.TabIndex = 4;
@@ -226,11 +229,44 @@
             this.btnGetMD5.UseVisualStyleBackColor = true;
             this.btnGetMD5.Click += new System.EventHandler(this.btnGetMD5_Click);
             // 
+            // btnDeleteMsg
+            // 
+            this.btnDeleteMsg.Location = new System.Drawing.Point(370, 113);
+            this.btnDeleteMsg.Name = "btnDeleteMsg";
+            this.btnDeleteMsg.Size = new System.Drawing.Size(86, 25);
+            this.btnDeleteMsg.TabIndex = 19;
+            this.btnDeleteMsg.Text = "Delete Message";
+            this.btnDeleteMsg.UseVisualStyleBackColor = true;
+            this.btnDeleteMsg.Click += new System.EventHandler(this.btnDeleteMsg_Click);
+            // 
+            // btnGetLive
+            // 
+            this.btnGetLive.Location = new System.Drawing.Point(461, 113);
+            this.btnGetLive.Name = "btnGetLive";
+            this.btnGetLive.Size = new System.Drawing.Size(86, 25);
+            this.btnGetLive.TabIndex = 20;
+            this.btnGetLive.Text = "Get Live Info";
+            this.btnGetLive.UseVisualStyleBackColor = true;
+            this.btnGetLive.Click += new System.EventHandler(this.btnGetLive_Click);
+            // 
+            // btnGetLogo
+            // 
+            this.btnGetLogo.Location = new System.Drawing.Point(186, 113);
+            this.btnGetLogo.Name = "btnGetLogo";
+            this.btnGetLogo.Size = new System.Drawing.Size(86, 25);
+            this.btnGetLogo.TabIndex = 21;
+            this.btnGetLogo.Text = "Get Logo info";
+            this.btnGetLogo.UseVisualStyleBackColor = true;
+            this.btnGetLogo.Click += new System.EventHandler(this.btnGetLogo_Click);
+            // 
             // formUIDemo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(559, 441);
+            this.Controls.Add(this.btnGetLogo);
+            this.Controls.Add(this.btnGetLive);
+            this.Controls.Add(this.btnDeleteMsg);
             this.Controls.Add(this.btnGetMD5);
             this.Controls.Add(this.btnGetProgram);
             this.Controls.Add(this.btnGetSchedule);
@@ -278,6 +314,9 @@
         private System.Windows.Forms.Button btnGetSchedule;
         private System.Windows.Forms.Button btnGetProgram;
         private System.Windows.Forms.Button btnGetMD5;
+        private System.Windows.Forms.Button btnDeleteMsg;
+        private System.Windows.Forms.Button btnGetLive;
+        private System.Windows.Forms.Button btnGetLogo;
     }
 }
 

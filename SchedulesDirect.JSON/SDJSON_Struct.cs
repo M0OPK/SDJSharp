@@ -63,6 +63,12 @@ namespace SchedulesDirect
         public string username;
         [DataMember]
         public string password;
+
+        public SDTokenRequest(string Username = "", string Password = "")
+        {
+            username = Username;
+            password = Password;
+        }
     }
 
     /// <summary>
@@ -555,6 +561,14 @@ namespace SchedulesDirect
         {
             date = new string[2];
         }
+
+        public SDScheduleRequest(string station, DateTime start, DateTime end)
+        {
+            stationID = station;
+            string dateStart = start.ToString("yyyy-MM-dd");
+            string dateEnd = end.ToString("yyyy-MM-dd");
+            date = new string[] { dateStart, dateEnd };
+        }
     }
 
     /// <summary>
@@ -679,6 +693,15 @@ namespace SchedulesDirect
         {
             date = new string[2];
         }
+
+        public SDMD5Request(string station, DateTime start, DateTime end)
+        {
+            stationID = station;
+            string dateStart = start.ToString("yyyy-MM-dd");
+            string dateEnd = end.ToString("yyyy-MM-dd");
+            date = new string[] { dateStart, dateEnd };
+        }
+
     }
 
     /// <summary>
@@ -706,6 +729,108 @@ namespace SchedulesDirect
             {
                 md5data = new SDMD5Data();
             }
+        }
+    }
+
+    /// <summary>
+    /// Delete message response structure. Contains result and messages for this operation
+    /// </summary>
+    [DataContract]
+    public class SDDeleteResponse
+    {
+        [DataMember]
+        public int code;
+        [DataMember]
+        public string response;
+        [DataMember]
+        public string serverID;
+        [DataMember]
+        public string message;
+        [DataMember]
+        public DateTime? datetime;
+    }
+
+    [DataContract]
+    public class SDStillRunningResponse
+    {
+        [DataMember]
+        public int code;
+        [DataMember]
+        public string message;
+        [DataMember]
+        public string programID;
+        [DataMember]
+        public string response;
+        [DataMember]
+        public bool isComplete;
+        [DataMember]
+        public string serverID;
+        [DataMember]
+        public DateTime? datetime;
+        [DataMember]
+        public string eventStartDateTime;
+        [DataMember]
+        public SDStillRunningResult result;
+
+        [DataContract]
+        public class SDStillRunningResult
+        {
+            [DataMember]
+            public SDStillRunningTeamInfo homeTeam;
+            [DataMember]
+            public SDStillRunningTeamInfo awayTeam;
+
+            [DataContract]
+            public class SDStillRunningTeamInfo
+            {
+                [DataMember]
+                public string name;
+                [DataMember]
+                public string score;
+            }
+        }
+    }
+
+    [DataContract]
+    public class SDProgramMetadataResponse
+    {
+        [DataMember]
+        public string programID;
+        [DataMember]
+        public SDImageData[] data;
+    }
+
+    [DataContract]
+    public class SDImageData
+    {
+        [DataMember]
+        public string width;
+        [DataMember]
+        public string height;
+        [DataMember]
+        public string uri;
+        [DataMember]
+        public string size;
+        [DataMember]
+        public string aspect;
+        [DataMember]
+        public string category;
+        [DataMember]
+        public string text;
+        [DataMember]
+        public string primary;
+        [DataMember]
+        public string tier;
+        [DataMember]
+        public SDProgramImageCaption caption;
+
+        [DataContract]
+        public class SDProgramImageCaption
+        {
+            [DataMember]
+            public string content;
+            [DataMember]
+            public string lang;
         }
     }
 

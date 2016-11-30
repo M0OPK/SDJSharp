@@ -140,20 +140,27 @@ namespace SchedulesDirect.UIDemo
         private void btnGetSchedule_Click(object sender, EventArgs e)
         {
             List<SDScheduleRequest> reqs = new List<SDScheduleRequest>();
-            SDScheduleRequest req = new SDScheduleRequest();
-            req.date[0] = "2016-11-27";
-            req.date[1] = "2016-11-28";
-            req.stationID = "16689";
+            SDScheduleRequest req = new SDScheduleRequest("45399", DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30"));
             reqs.Add(req);
+            SDScheduleRequest req2 = new SDScheduleRequest("82547", DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30"));
+            reqs.Add(req2);
             var result = sd.GetSchedules(reqs.AsEnumerable());
         }
 
         private void btnGetProgram_Click(object sender, EventArgs e)
         {
-            string[] programs = { "EP000014577789", "EP000000351331" };
+            string[] programs = { "EP008403901236", "SP003484480000" };
 
             var result = sd.GetPrograms(programs);
             var results = sd.GetDescriptions(programs);
+        }
+
+        private void btnGetMD5_Click(object sender, EventArgs e)
+        {
+            List<SDMD5Request> reqs = new List<SDMD5Request>();
+            SDMD5Request req = new SDMD5Request("16689", DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30"));
+            reqs.Add(req);
+            var result = sd.GetMD5(reqs.AsEnumerable());
         }
 
         private void lbContinents_SelectedIndexChanged(object sender, EventArgs e)
@@ -207,15 +214,19 @@ namespace SchedulesDirect.UIDemo
                 MessageBox.Show(this, errors, "SDJSON Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        private void btnGetMD5_Click(object sender, EventArgs e)
+        private void btnDeleteMsg_Click(object sender, EventArgs e)
         {
-            List<SDMD5Request> reqs = new List<SDMD5Request>();
-            SDMD5Request req = new SDMD5Request();
-            req.date[0] = "2016-11-28";
-            req.date[1] = "2016-11-29";
-            req.stationID = "16689";
-            reqs.Add(req);
-            var result = sd.GetMD5(reqs.AsEnumerable());
+            var result = sd.DeleteMessage("101");
+        }
+
+        private void btnGetLive_Click(object sender, EventArgs e)
+        {
+            var result = sd.GetStillRunning("SP003484480000");
+        }
+
+        private void btnGetLogo_Click(object sender, EventArgs e)
+        {
+            var result = sd.GetProgramMetadata(new string[] { "EP000014577789", "EP000000351331", "EP008403901236", "SP003484480000" });
         }
     }
 }
