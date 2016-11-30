@@ -526,7 +526,7 @@ namespace SchedulesDirect
             return webRequest;
         }
 
-        // SHA1 hash functuion for passwords
+        // SHA1 hash function for passwords
         private string hashPassword(string password)
         {
             byte[] passBytes = Encoding.UTF8.GetBytes(password);

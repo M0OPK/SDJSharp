@@ -842,5 +842,4 @@ namespace SchedulesDirect
             public string lang;
         }
     }
-
 }
