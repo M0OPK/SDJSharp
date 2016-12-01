@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchedulesDirect.JSON", "Sch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLTV.Core", "XMLTV.Core\XMLTV.Core.csproj", "{49CEE588-E156-403B-9FC3-505545E059BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLTVDemoUI", "XMLTVDemoUI\XMLTVDemoUI.csproj", "{8EF27773-2373-4EEC-B951-753A3CE48F9E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{49CEE588-E156-403B-9FC3-505545E059BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49CEE588-E156-403B-9FC3-505545E059BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49CEE588-E156-403B-9FC3-505545E059BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EF27773-2373-4EEC-B951-753A3CE48F9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EF27773-2373-4EEC-B951-753A3CE48F9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EF27773-2373-4EEC-B951-753A3CE48F9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EF27773-2373-4EEC-B951-753A3CE48F9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

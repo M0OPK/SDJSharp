@@ -206,7 +206,7 @@ namespace SchedulesDirect.UIDemo
             string errors = string.Empty;
             foreach (var ex in exceptions)
             {
-                errors += ex.Message + "\r\n";
+                errors += ex.message + "\r\n";
             }
             sd.ClearErrors();
 

@@ -374,7 +374,7 @@ namespace SchedulesDirect
             [DataMember]
             public SDStationBroadcaster broadcaster;
             [DataMember]
-            bool isCommercialFree;
+            public bool isCommercialFree;
             [DataMember]
             public SDStationLogo logo;
 

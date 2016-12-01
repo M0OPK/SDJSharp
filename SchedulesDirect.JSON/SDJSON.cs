@@ -17,7 +17,7 @@ namespace SchedulesDirect
     public partial class SDJson
     {
         private string loginToken;
-        private List<Exception> localErrors;
+        private List<SDJsonError> localErrors;
         private static string urlBase = "https://json.schedulesdirect.org/20141201/";
         private static string userAgentDefault = "SDJSharp JSON C# Library/1.0 (https://github.com/M0OPK/SDJSharp)";
         private static string userAgentShort = "SDJSharp JSON C# Library/1.0";
@@ -25,7 +25,7 @@ namespace SchedulesDirect
 
         public SDJson(string clientUserAgent = "")
         {
-            localErrors = new List<Exception>();
+            localErrors = new List<SDJsonError>();
             userAgentFull = (clientUserAgent == string.Empty) ? userAgentDefault : string.Format("{0} ({1})", userAgentShort, clientUserAgent);
         }
 
@@ -33,7 +33,7 @@ namespace SchedulesDirect
         /// Return raw error details (if any)
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<Exception> GetRawErrors()
+        public IEnumerable<SDJsonError> GetRawErrors()
         {
             return localErrors.AsEnumerable();
         }
@@ -43,12 +43,12 @@ namespace SchedulesDirect
         /// </summary>
         /// <param name="pop"></param>
         /// <returns></returns>
-        public Exception GetLastError(bool pop = true)
+        public SDJsonError GetLastError(bool pop = true)
         {
-            Exception ex = localErrors.Last();
+            var thisError = localErrors.Last();
             if (pop)
-                localErrors.Remove(ex);
-            return ex;
+                localErrors.Remove(thisError);
+            return thisError;
         }
 
         /// <summary>
@@ -59,6 +59,56 @@ namespace SchedulesDirect
             localErrors.Clear();
         }
 
+        private void addError(Exception ex)
+        {
+            localErrors.Add(new SDJsonError(ex));
+        }
+
+        private void addError(int errorcode, string errormessage, SDJsonError.ErrorSeverity errorseverity = SDJsonError.ErrorSeverity.Error, string errordescription = "", string errorsource = "")
+        {
+            localErrors.Add(new SDJsonError(errorcode, errormessage, errorseverity, errordescription, errorsource));
+        }
+
+        public class SDJsonError
+        {
+            public Exception exception;
+            public bool isException;
+            public int code;
+            public string message;
+            public string description;
+            public string source;
+            public ErrorSeverity severity;
+
+            public enum ErrorSeverity
+            {
+                Info,
+                Warning,
+                Error,
+                Fatal
+            }
+
+            public SDJsonError(Exception ex)
+            {
+                isException = true;
+                exception = ex;
+                code = ex.HResult;
+                message = ex.Message;
+                description = ex.StackTrace;
+                source = ex.Source;
+                severity = ErrorSeverity.Fatal;
+            }
+
+            public SDJsonError(int errorcode, string errormessage, ErrorSeverity errorseverity = ErrorSeverity.Error, string errordescription = "", string errorsource = "")
+            {
+                isException = false;
+                exception = null;
+                code = errorcode;
+                message = errormessage;
+                description = errordescription;
+                source = errorsource;
+                severity = errorseverity;
+            }
+        }
         /// <summary>
         /// Log in, and retrieve login token for session
         /// </summary>
@@ -489,7 +539,6 @@ namespace SchedulesDirect
             {
                 sr.Write(jsonstring);
                 sr.Flush();
-                sr.Close();
             }
 
             try
@@ -502,7 +551,7 @@ namespace SchedulesDirect
             }
             catch(Exception ex)
             {
-                localErrors.Add(ex);
+                addError(ex);
                 return "";
             }
         }
@@ -541,7 +590,7 @@ namespace SchedulesDirect
         // @Todo: Create local error class, encompassing local errors and exceptions
         private void queueError(Exception ex)
         {
-            localErrors.Add(ex);
+            addError(ex);
         }
     }
 }
