@@ -9,6 +9,9 @@ namespace XMLTV
 {
     public partial class XmlTV
     {
+        /// <summary>
+        /// Structure and helper properties for XMLTV File holder
+        /// </summary>
         public class XmlTVData
         {
             public XmlDocument rootDocument;
@@ -35,6 +38,9 @@ namespace XMLTV
             }
         }
 
+        /// <summary>
+        /// Generic type for XML strings with a language identifier. Used a lot in XMLTV files
+        /// </summary>
         public class XmlLangText
         {
             public string lang;
@@ -47,6 +53,53 @@ namespace XMLTV
             }
         }
 
+        /// <summary>
+        /// Error object, contains information about an error, either exception or user
+        /// </summary>
+        public class XMLTVError
+        {
+            public Exception exception;
+            public bool isException;
+            public int code;
+            public string message;
+            public string description;
+            public string source;
+            public ErrorSeverity severity;
+
+            public enum ErrorSeverity
+            {
+                Info,
+                Warning,
+                Error,
+                Fatal
+            }
+
+            public XMLTVError(Exception ex)
+            {
+                isException = true;
+                exception = ex;
+                code = ex.HResult;
+                message = ex.Message;
+                description = ex.StackTrace;
+                source = ex.Source;
+                severity = ErrorSeverity.Fatal;
+            }
+
+            public XMLTVError(int errorcode, string errormessage, ErrorSeverity errorseverity = ErrorSeverity.Error, string errordescription = "", string errorsource = "")
+            {
+                isException = false;
+                exception = null;
+                code = errorcode;
+                message = errormessage;
+                description = errordescription;
+                source = errorsource;
+                severity = errorseverity;
+            }
+        }
+
+        /// <summary>
+        /// Configuration structure for XMLTV
+        /// </summary>
         public class Config
         {
             public bool RemoveDupeChannels;
