@@ -23,10 +23,14 @@ namespace SchedulesDirect
         private static string userAgentShort = "SDJSharp JSON C# Library/1.0";
         private static string userAgentFull;
 
-        public SDJson(string clientUserAgent = "")
+        public SDJson(string clientUserAgent = "", string token = "")
         {
             localErrors = new List<SDJsonError>();
             userAgentFull = (clientUserAgent == string.Empty) ? userAgentDefault : string.Format("{0} ({1})", userAgentShort, clientUserAgent);
+
+            // If token supplied, use it
+            if (token != string.Empty)
+                loginToken = token;
         }
 
         /// <summary>
@@ -109,15 +113,32 @@ namespace SchedulesDirect
                 severity = errorseverity;
             }
         }
+
+        /// <summary>
+        /// Provide password hash in correct format for ScheduleDirect login
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public string hashPassword(string password)
+        {
+            byte[] passBytes = Encoding.UTF8.GetBytes(password);
+            SHA1 hash = SHA1.Create();
+            byte[] hashBytes = hash.ComputeHash(passBytes);
+
+            string hexString = BitConverter.ToString(hashBytes);
+            return hexString.Replace("-", "").ToLower();
+        }
+
         /// <summary>
         /// Log in, and retrieve login token for session
         /// </summary>
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public SDTokenResponse Login(string username, string password)
+        public SDTokenResponse Login(string username, string password, bool isHash = false)
         {
-            SDTokenResponse response = PostJSON<SDTokenResponse, SDTokenRequest>("token", new SDTokenRequest(username, hashPassword(password)));
+            string passHash = isHash ? password : hashPassword(password);
+            SDTokenResponse response = PostJSON<SDTokenResponse, SDTokenRequest>("token", new SDTokenRequest(username, passHash));
             if (response == null || response.code != 0)
                 return null;
 
@@ -236,6 +257,11 @@ namespace SchedulesDirect
         public SDAddRemoveLineupResponse AddLineup(string lineupID)
         {
             return PutJSON<SDAddRemoveLineupResponse>("lineups/" + lineupID, loginToken);
+        }
+
+        public SDAddRemoveLineupResponse DeleteLineup(string lineupID)
+        {
+            return DeleteJSON<SDAddRemoveLineupResponse>("lineups/" + lineupID, loginToken);
         }
 
         /// <summary>
@@ -573,17 +599,6 @@ namespace SchedulesDirect
                 webRequest.Headers.Add("token: " + token);
 
             return webRequest;
-        }
-
-        // SHA1 hash function for passwords
-        private string hashPassword(string password)
-        {
-            byte[] passBytes = Encoding.UTF8.GetBytes(password);
-            SHA1 hash = SHA1.Create();
-            byte[] hashBytes = hash.ComputeHash(passBytes);
-
-            string hexString = BitConverter.ToString(hashBytes);
-            return hexString.Replace("-", "").ToLower();
         }
 
         // Queue exception to local errors

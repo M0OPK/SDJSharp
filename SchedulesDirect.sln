@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLTV.Core", "XMLTV.Core\XM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLTVDemoUI", "XMLTVDemoUI\XMLTVDemoUI.csproj", "{8EF27773-2373-4EEC-B951-753A3CE48F9E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDGrabSharp.UI", "SDGrabSharp\SDGrabSharp.UI.csproj", "{99251793-3B8D-4D35-98AA-D8F5D103A8E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDGrabSharp.Common", "SDGrabSharp.Common\SDGrabSharp.Common.csproj", "{334A06D5-A914-4CCC-A6A0-C7EEF20B731D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{8EF27773-2373-4EEC-B951-753A3CE48F9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8EF27773-2373-4EEC-B951-753A3CE48F9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EF27773-2373-4EEC-B951-753A3CE48F9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99251793-3B8D-4D35-98AA-D8F5D103A8E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99251793-3B8D-4D35-98AA-D8F5D103A8E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99251793-3B8D-4D35-98AA-D8F5D103A8E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99251793-3B8D-4D35-98AA-D8F5D103A8E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{334A06D5-A914-4CCC-A6A0-C7EEF20B731D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{334A06D5-A914-4CCC-A6A0-C7EEF20B731D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{334A06D5-A914-4CCC-A6A0-C7EEF20B731D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{334A06D5-A914-4CCC-A6A0-C7EEF20B731D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

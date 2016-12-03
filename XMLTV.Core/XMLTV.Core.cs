@@ -305,6 +305,10 @@ namespace XMLTV
             return false;
         }
 
+        /// <summary>
+        /// Save current data to an XMLTV format file
+        /// </summary>
+        /// <param name="filename"></param>
         public void SaveXmlTV(string filename)
         {
             try
