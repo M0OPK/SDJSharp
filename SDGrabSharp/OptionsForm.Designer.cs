@@ -60,6 +60,7 @@
             this.lbLogin = new System.Windows.Forms.Label();
             this.tpXMLTV1 = new System.Windows.Forms.TabPage();
             this.gbStationMap = new System.Windows.Forms.GroupBox();
+            this.btnCustomGrid = new System.Windows.Forms.Button();
             this.lvAddedChans = new System.Windows.Forms.ListView();
             this.chAddedID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chAddedName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -93,7 +94,6 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
-            this.btnCustomGrid = new System.Windows.Forms.Button();
             this.tcConfig.SuspendLayout();
             this.tpSD1.SuspendLayout();
             this.gbStations.SuspendLayout();
@@ -451,6 +451,16 @@
             this.gbStationMap.TabStop = false;
             this.gbStationMap.Text = "Station mapping";
             // 
+            // btnCustomGrid
+            // 
+            this.btnCustomGrid.Location = new System.Drawing.Point(286, 411);
+            this.btnCustomGrid.Name = "btnCustomGrid";
+            this.btnCustomGrid.Size = new System.Drawing.Size(75, 23);
+            this.btnCustomGrid.TabIndex = 25;
+            this.btnCustomGrid.Text = "Custom Grid";
+            this.btnCustomGrid.UseVisualStyleBackColor = true;
+            this.btnCustomGrid.Click += new System.EventHandler(this.btnCustomGrid_Click);
+            // 
             // lvAddedChans
             // 
             this.lvAddedChans.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -493,7 +503,6 @@
             this.txtCustom.Name = "txtCustom";
             this.txtCustom.Size = new System.Drawing.Size(141, 20);
             this.txtCustom.TabIndex = 22;
-            this.txtCustom.Leave += new System.EventHandler(this.txtCustom_Leave);
             this.txtCustom.Validated += new System.EventHandler(this.txtCustom_Validated);
             // 
             // rdCallsign
@@ -602,6 +611,7 @@
             this.btnRemoveChan.TabIndex = 6;
             this.btnRemoveChan.Text = "<";
             this.btnRemoveChan.UseVisualStyleBackColor = true;
+            this.btnRemoveChan.Click += new System.EventHandler(this.btnRemoveChan_Click);
             // 
             // btnAddChan
             // 
@@ -770,16 +780,6 @@
             this.btnOK.TabIndex = 5;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
-            // 
-            // btnCustomGrid
-            // 
-            this.btnCustomGrid.Location = new System.Drawing.Point(286, 411);
-            this.btnCustomGrid.Name = "btnCustomGrid";
-            this.btnCustomGrid.Size = new System.Drawing.Size(75, 23);
-            this.btnCustomGrid.TabIndex = 25;
-            this.btnCustomGrid.Text = "Custom Grid";
-            this.btnCustomGrid.UseVisualStyleBackColor = true;
-            this.btnCustomGrid.Click += new System.EventHandler(this.btnCustomGrid_Click);
             // 
             // frmOptions
             // 

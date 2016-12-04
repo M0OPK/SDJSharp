@@ -78,8 +78,8 @@ namespace SDGrabSharp.Common
                     translateNode.SetAttribute("lineup-id", translation.Value.LineupID);
                     translateNode.SetAttribute("station-id", translation.Value.SDStationID);
                     translateNode.SetAttribute("field-mode", ((int)translation.Value.FieldMode).ToString());
-                    if (translation.Value.CustomTranslate != string.Empty)
-                        translateNode.SetAttribute("custom-translate", translation.Value.CustomTranslate);
+                    if (translation.Value.FieldMode == XmlTVTranslation.TranslateField.Custom)
+                        translateNode.SetAttribute("custom-translate", translation.Value.CustomTranslate ?? string.Empty);
 
                     translateRootNode.AppendChild(translateNode);
                 }

@@ -23,6 +23,24 @@ namespace SDGrabSharp.UI
         private static string passwordHashEntry = "********";
         private Dictionary<string, Config.XmlTVTranslation> localTranslate;
         private bool autoControlUpdate;
+        private List<ChannelLocationInfo> locationInfo;
+
+        // Complex way to save a bit of time adding a channel back in the proper place
+        internal class ChannelLocationInfo
+        {
+            internal int originalPosition;
+            internal string lineUp;
+            internal string stationID;
+            internal bool isAvailable;
+
+            internal ChannelLocationInfo(int originalposition, string lineup, string stationid, bool available)
+            {
+                originalPosition = originalposition;
+                lineUp = lineup;
+                stationID = stationid;
+                isAvailable = available;
+            }
+        }
 
         public frmOptions(ref DataCache datacache, ref Config dataconfig)
         {
@@ -31,6 +49,8 @@ namespace SDGrabSharp.UI
             // Setup tooltips
             ToolTip optionsTooltip = new ToolTip();
             optionsTooltip.SetToolTip(btnLogin, "Logs into Schedules direct. Required for most functions");
+
+            //locationInfo = new List<ChannelLocationInfo>();
 
             config = dataconfig;
             cache = datacache;
@@ -165,7 +185,10 @@ namespace SDGrabSharp.UI
             {
                 foreach (var lineup in statusResponse.lineups)
                 {
-                    var item = new ListViewItem(new string[] { lineup.lineup, lineup.modified.GetValueOrDefault(DateTime.Parse("1900-01-01")).Date.ToShortDateString() });
+                    //var item = new ListViewItem(new string[] { lineup.lineup, lineup.modified.GetValueOrDefault(DateTime.Parse("1900-01-01")).Date.ToShortDateString() });
+                    var item = new ListViewItem();
+                    item.Text = lineup.lineup;
+                    item.SubItems.Add(lineup.modified.GetValueOrDefault().Date.ToShortDateString());
                     lvAccountLineups.Items.Add(item);
                 }
 
@@ -213,7 +236,9 @@ namespace SDGrabSharp.UI
                 {
                     foreach (var station in map.stations)
                     {
-                        ListViewItem item = new ListViewItem(new string[] { station.stationID, station.name });
+                        ListViewItem item = new ListViewItem();
+                        item.Text = station.stationID;
+                        item.SubItems.Add(station.name);
                         lvStations.Items.Add(item);
                     }
                 }
@@ -352,6 +377,7 @@ namespace SDGrabSharp.UI
                 return;
 
             SDStatusResponse status = sdJS.GetStatus();
+            cbLineup.Items.Clear();
             if (status.lineups.Count() > 0)
             {
                 foreach (var lineup in status.lineups)
@@ -369,8 +395,11 @@ namespace SDGrabSharp.UI
 
         private void showAddedChannels()
         {
+            if (cbLineup.SelectedItem == null)
+                return;
+
             lvAddedChans.Items.Clear();
-            foreach (var addedItem in localTranslate.Select(item => item.Value))
+            foreach (var addedItem in localTranslate.Select(item => item.Value).Where(line => !line.isDeleted && line.LineupID == (string)cbLineup.SelectedItem))
             {
                 var localItem = localTranslate[string.Format("{0},{1}", addedItem.LineupID, addedItem.SDStationID)];
                 if (localItem.displayNameHelper == null || localItem.displayNameHelper == string.Empty)
@@ -401,7 +430,7 @@ namespace SDGrabSharp.UI
                 ListViewItem item = new ListViewItem();
                 item.Text = localItem.SDStationID;
                 item.SubItems.Add(localItem.displayNameHelper);
-                item.Tag = localItem.LineupID;
+                item.Tag = (string)localItem.LineupID;
                 lvAddedChans.Items.Add(item);
             }
         }
@@ -412,18 +441,29 @@ namespace SDGrabSharp.UI
                 return;
 
             var stationInfo = cache.GetLineupData(ref sdJS, (string)cbLineup.SelectedItem);
+            if (stationInfo == null)
+                return;
+
+            locationInfo = new List<ChannelLocationInfo>();
 
             lvAvailableChans.Items.Clear();
+            int originalPosition = 0;
             foreach (var station in stationInfo.stations)
             {
+                ChannelLocationInfo thisInfo = new ChannelLocationInfo(originalPosition, (string)cbLineup.SelectedItem, station.stationID, false);
+
                 // Only add if not in added list
                 ListViewItem item = new ListViewItem();
                 item.Text = station.stationID;
-                if (!localTranslate.ContainsKey(string.Format("{0},{1}", (string)cbLineup.SelectedItem, station.stationID)))
+                string key = string.Format("{0},{1}", (string)cbLineup.SelectedItem, station.stationID);
+                if (!localTranslate.ContainsKey(key) || localTranslate[key].isDeleted)
                 {
                     item.SubItems.Add(station.name);
                     lvAvailableChans.Items.Add(item);
+                    thisInfo.isAvailable = true;
                 }
+                locationInfo.Add(thisInfo);
+                originalPosition++;
             }
         }
 
@@ -481,6 +521,9 @@ namespace SDGrabSharp.UI
             txtName.Text = string.Empty;
             txtAffiliate.Text = string.Empty;
             txtCallsign.Text = string.Empty;
+
+            if (lineupID == null)
+                return null;
 
             var stationInfo = cache.GetLineupData(ref sdJS, lineupID).stations.Where(station => station.stationID == stationID).FirstOrDefault();
 
@@ -836,15 +879,78 @@ namespace SDGrabSharp.UI
             addedItem.SubItems[1].Text = newName;
         }
 
-        private void txtCustom_Leave(object sender, EventArgs e)
-        {
-        }
-
         private void btnCustomGrid_Click(object sender, EventArgs e)
         {
             CustomGridEntry customGrid = new CustomGridEntry(ref sdJS, ref config, ref cache, ref localTranslate);
             customGrid.ShowDialog();
             showAddedChannels();
+        }
+
+        private void btnRemoveChan_Click(object sender, EventArgs e)
+        {
+            if (lvAddedChans.SelectedItems.Count == 0)
+                return;
+
+            foreach (ListViewItem chan in lvAddedChans.SelectedItems)
+            {
+                removeAddedChannel(chan);
+            }
+        }
+
+        private void removeAddedChannel(ListViewItem chan)
+        {
+            lvAddedChans.Items.Remove(chan);
+            string translateKey = string.Format("{0},{1}", (string)chan.Tag, chan.Text);
+
+            // Only add to left list, if selected lineup matches
+            if ((string)cbLineup.SelectedItem == (string)chan.Tag)
+            {
+                var thisLocal = localTranslate.Select(line => line.Value).Where(line => line.LineupID == (string)chan.Tag && line.SDStationID == chan.Text).FirstOrDefault();
+                if (thisLocal != null)
+                    thisLocal.isDeleted = true;
+
+                // Try to find original location
+                int thisOriginalLocation = locationInfo.Where(line => line.lineUp == (string)chan.Tag && line.stationID == chan.Text).Select(line => line.originalPosition).FirstOrDefault();
+                var nextLocation =
+                    (from listItem in lvAvailableChans.Items.Cast<ListViewItem>()
+                     join locInfo in locationInfo
+                        on new
+                        {
+                            joinLineup = (string)cbLineup.SelectedItem,
+                            joinStation = listItem.Text
+                        }
+                        equals new
+                        {
+                            joinLineup = locInfo.lineUp,
+                            joinStation = locInfo.stationID
+                        }
+                     where locInfo.originalPosition > thisOriginalLocation
+                     select listItem
+                    ).FirstOrDefault();
+
+                chan.Tag = null;
+                var stationInfo = cache.GetLineupData(ref sdJS, (string)cbLineup.SelectedItem).stations.Where(line => line.stationID == chan.Text).FirstOrDefault();
+
+                if (stationInfo != null)
+                    chan.SubItems[1].Text = stationInfo.name;
+
+                // If the nearest remaining neighbour was found, insert before it, else it goes to the end.
+                if (nextLocation != null)
+                    lvAvailableChans.Items.Insert(nextLocation.Index, chan);
+                else
+                    lvAvailableChans.Items.Add(chan);
+            }
+
+//            try { localTranslate.Remove(translateKey); } catch { };
+            //try { localTranslate[translateKey].isDeleted = true; } catch { };
+        }
+
+        private void AddAddedChannel(string lineup, ListViewItem chan)
+        {
+            lvAvailableChans.Items.Remove(chan);
+            chan.Tag = lineup;
+            lvAddedChans.Items.Add(chan);
+
         }
     }
 }
