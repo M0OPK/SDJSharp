@@ -21,6 +21,9 @@ namespace SDGrabSharp.UI
             if (System.IO.File.Exists("SDGrabSharp.xml"))
                 config.Load("SDGrabSharp.xml");
 
+            if (config.PersistantCache && config.cacheFilename != string.Empty && System.IO.File.Exists(config.cacheFilename))
+                cache.Load(config.cacheFilename);
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new frmMain(ref cache, ref config));

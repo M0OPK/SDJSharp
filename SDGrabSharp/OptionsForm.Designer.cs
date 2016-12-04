@@ -482,6 +482,7 @@
             this.rdCustom.TabStop = true;
             this.rdCustom.Text = "Custom";
             this.rdCustom.UseVisualStyleBackColor = true;
+            this.rdCustom.CheckedChanged += new System.EventHandler(this.rdCustom_CheckedChanged);
             // 
             // txtCustom
             // 
@@ -490,6 +491,8 @@
             this.txtCustom.Name = "txtCustom";
             this.txtCustom.Size = new System.Drawing.Size(141, 20);
             this.txtCustom.TabIndex = 22;
+            this.txtCustom.Leave += new System.EventHandler(this.txtCustom_Leave);
+            this.txtCustom.Validated += new System.EventHandler(this.txtCustom_Validated);
             // 
             // rdCallsign
             // 
@@ -501,6 +504,7 @@
             this.rdCallsign.TabStop = true;
             this.rdCallsign.Text = "Callsign";
             this.rdCallsign.UseVisualStyleBackColor = true;
+            this.rdCallsign.CheckedChanged += new System.EventHandler(this.rdCallsign_CheckedChanged);
             // 
             // rdAffiliate
             // 
@@ -512,6 +516,7 @@
             this.rdAffiliate.TabStop = true;
             this.rdAffiliate.Text = "Affiliate";
             this.rdAffiliate.UseVisualStyleBackColor = true;
+            this.rdAffiliate.CheckedChanged += new System.EventHandler(this.rdAffiliate_CheckedChanged);
             // 
             // rdName
             // 
@@ -523,6 +528,7 @@
             this.rdName.TabStop = true;
             this.rdName.Text = "Name";
             this.rdName.UseVisualStyleBackColor = true;
+            this.rdName.CheckedChanged += new System.EventHandler(this.rdName_CheckedChanged);
             // 
             // rdStation
             // 
@@ -534,6 +540,7 @@
             this.rdStation.TabStop = true;
             this.rdStation.Text = "Station ID";
             this.rdStation.UseVisualStyleBackColor = true;
+            this.rdStation.CheckedChanged += new System.EventHandler(this.rdStation_CheckedChanged);
             // 
             // txtCallsign
             // 
@@ -772,6 +779,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "frmOptions";
             this.Text = "Options";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmOptions_FormClosing);
             this.tcConfig.ResumeLayout(false);
             this.tpSD1.ResumeLayout(false);
             this.gbStations.ResumeLayout(false);

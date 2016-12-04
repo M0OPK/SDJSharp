@@ -22,6 +22,7 @@ namespace SDGrabSharp.UI
         private Config config;
         private static string passwordHashEntry = "********";
         private Dictionary<string, Config.XmlTVTranslation> localTranslate;
+        private bool autoControlUpdate;
 
         public frmOptions(ref DataCache datacache, ref Config dataconfig)
         {
@@ -439,13 +440,25 @@ namespace SDGrabSharp.UI
             updateControlsXmlTV();
         }
 
-        private void updateChannelNames(string lineupID, string stationID, bool addedMode = false)
+        private void setChannelMode(string lineupID, string stationID, Config.XmlTVTranslation.TranslateField mode)
         {
+            Config.XmlTVTranslation localItem = null;
+            try { localItem = localTranslate[string.Format("{0},{1}", lineupID, stationID)]; } catch { };
+            if (localItem == null)
+                return;
+
+            localItem.FieldMode = mode;
+        }
+
+        private string updateChannelNames(string lineupID, string stationID, bool addedMode = false, string customName = null)
+        {
+            string newName = string.Empty;
             txtStationID.Text = string.Empty;
             txtName.Text = string.Empty;
             txtAffiliate.Text = string.Empty;
             txtCallsign.Text = string.Empty;
-            txtCustom.Text = string.Empty;
+            if (!rdCustom.Checked)
+                txtCustom.Text = string.Empty;
 
             var stationInfo = cache.GetLineupData(ref sdJS, lineupID).stations.Where(station => station.stationID == stationID).FirstOrDefault();
 
@@ -463,7 +476,7 @@ namespace SDGrabSharp.UI
                 Config.XmlTVTranslation localItem = null;
                 try { localItem = localTranslate[string.Format("{0},{1}", lineupID, stationID)]; } catch { };
                 if (localItem == null)
-                    return;
+                    return null;
 
                 rdCustom.Enabled = true;
                 rdAffiliate.Enabled = true;
@@ -471,32 +484,48 @@ namespace SDGrabSharp.UI
                 rdStation.Enabled = true;
                 rdName.Enabled = true;
 
+                autoControlUpdate = true;
                 switch (localItem.FieldMode)
                 {
                     case Config.XmlTVTranslation.TranslateField.Custom:
                         rdCustom.Checked = true;
+                        if (customName != null)
+                        {
+                            newName = customName;
+                            localItem.CustomTranslate = newName;
+                        }
+                        else
+                            txtCustom.Text = localItem.CustomTranslate;  
+                        //localItem.CustomTranslate = newName;
                         break;
                     case Config.XmlTVTranslation.TranslateField.StationAffiliate:
                         rdAffiliate.Checked = true;
+                        newName = stationInfo.affiliate;
                         break;
                     case Config.XmlTVTranslation.TranslateField.StationCallsign:
                         rdCallsign.Checked = true;
+                        newName = stationInfo.callsign;
                         break;
                     case Config.XmlTVTranslation.TranslateField.StationID:
                         rdStation.Checked = true;
+                        newName = stationInfo.stationID;
                         break;
                     case Config.XmlTVTranslation.TranslateField.StationName:
                         rdName.Checked = true;
+                        newName = stationInfo.name;
                         break;
                 }
+                autoControlUpdate = false;
             }
             else
             {
+                autoControlUpdate = true;
                 rdCustom.Checked = false;
                 rdAffiliate.Checked = false;
                 rdCallsign.Checked = false;
                 rdStation.Checked = false;
                 rdName.Checked = false;
+                autoControlUpdate = false;
 
                 rdCustom.Enabled = false;
                 rdAffiliate.Enabled = false;
@@ -505,6 +534,7 @@ namespace SDGrabSharp.UI
                 rdName.Enabled = false;
 
             }
+            return newName;
         }
 
         private void updateControlsXmlTV()
@@ -528,6 +558,11 @@ namespace SDGrabSharp.UI
                 btnRemoveAllChans.Enabled = false;
             else
                 btnRemoveAllChans.Enabled = true;
+
+            if (lvAddedChans.SelectedItems.Count == 1 && rdCustom.Checked)
+                txtCustom.Enabled = true;
+            else
+                txtCustom.Enabled = false;
         }
 
         private void btnAddChan_Click(object sender, EventArgs e)
@@ -679,6 +714,102 @@ namespace SDGrabSharp.UI
 
             if (dialogResult.ToString() == "OK")
                 txtCacheFilename.Text = dialog.FileName;
+        }
+
+        private void frmOptions_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (config.PersistantCache && config.cacheFilename != string.Empty)
+                cache.Save(config.cacheFilename);
+        }
+
+        private void rdStation_CheckedChanged(object sender, EventArgs e)
+        {
+            if (autoControlUpdate || lvAddedChans.SelectedItems.Count == 0)
+                return;
+
+            txtCustom.Enabled = false;
+
+            foreach (ListViewItem addedChannel in lvAddedChans.SelectedItems)
+            {
+                setChannelMode((string)addedChannel.Tag, addedChannel.Text, Config.XmlTVTranslation.TranslateField.StationID);
+                string newName = updateChannelNames((string)addedChannel.Tag, addedChannel.Text, true);
+                addedChannel.SubItems[1].Text = newName;
+            }
+        }
+
+        private void rdName_CheckedChanged(object sender, EventArgs e)
+        {
+            if (autoControlUpdate || lvAddedChans.SelectedItems.Count == 0)
+                return;
+
+            txtCustom.Enabled = false;
+
+            foreach (ListViewItem addedChannel in lvAddedChans.SelectedItems)
+            {
+                setChannelMode((string)addedChannel.Tag, addedChannel.Text, Config.XmlTVTranslation.TranslateField.StationName);
+                string newName = updateChannelNames((string)addedChannel.Tag, addedChannel.Text, true);
+                addedChannel.SubItems[1].Text = newName;
+            }
+
+        }
+
+        private void rdAffiliate_CheckedChanged(object sender, EventArgs e)
+        {
+            if (autoControlUpdate || lvAddedChans.SelectedItems.Count == 0)
+                return;
+
+            txtCustom.Enabled = false;
+
+            foreach (ListViewItem addedChannel in lvAddedChans.SelectedItems)
+            {
+                setChannelMode((string)addedChannel.Tag, addedChannel.Text, Config.XmlTVTranslation.TranslateField.StationAffiliate);
+                string newName = updateChannelNames((string)addedChannel.Tag, addedChannel.Text, true);
+                addedChannel.SubItems[1].Text = newName;
+            }
+        }
+
+        private void rdCallsign_CheckedChanged(object sender, EventArgs e)
+        {
+            if (autoControlUpdate || lvAddedChans.SelectedItems.Count == 0)
+                return;
+
+            txtCustom.Enabled = false;
+
+            foreach (ListViewItem addedChannel in lvAddedChans.SelectedItems)
+            {
+                setChannelMode((string)addedChannel.Tag, addedChannel.Text, Config.XmlTVTranslation.TranslateField.StationCallsign);
+                string newName = updateChannelNames((string)addedChannel.Tag, addedChannel.Text, true);
+                addedChannel.SubItems[1].Text = newName;
+            }
+        }
+
+        private void rdCustom_CheckedChanged(object sender, EventArgs e)
+        {
+            if (autoControlUpdate || lvAddedChans.SelectedItems.Count == 0)
+                return;
+
+            txtCustom.Enabled = true;
+
+            foreach (ListViewItem addedChannel in lvAddedChans.SelectedItems)
+            {
+                setChannelMode((string)addedChannel.Tag, addedChannel.Text, Config.XmlTVTranslation.TranslateField.Custom);
+                string newName = updateChannelNames((string)addedChannel.Tag, addedChannel.Text, true);
+                addedChannel.SubItems[1].Text = newName;
+            }
+        }
+
+        private void txtCustom_Validated(object sender, EventArgs e)
+        {
+            if (lvAddedChans.SelectedItems.Count != 1)
+                return;
+
+            ListViewItem addedItem = lvAddedChans.SelectedItems[0];
+            string newName = updateChannelNames((string)addedItem.Tag, addedItem.Text, true, txtCustom.Text);
+            addedItem.SubItems[1].Text = newName;
+        }
+
+        private void txtCustom_Leave(object sender, EventArgs e)
+        {
         }
     }
 }
