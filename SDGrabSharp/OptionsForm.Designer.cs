@@ -93,6 +93,7 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
+            this.btnCustomGrid = new System.Windows.Forms.Button();
             this.tcConfig.SuspendLayout();
             this.tpSD1.SuspendLayout();
             this.gbStations.SuspendLayout();
@@ -424,6 +425,7 @@
             // 
             // gbStationMap
             // 
+            this.gbStationMap.Controls.Add(this.btnCustomGrid);
             this.gbStationMap.Controls.Add(this.lvAddedChans);
             this.gbStationMap.Controls.Add(this.rdCustom);
             this.gbStationMap.Controls.Add(this.txtCustom);
@@ -769,6 +771,16 @@
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
             // 
+            // btnCustomGrid
+            // 
+            this.btnCustomGrid.Location = new System.Drawing.Point(286, 411);
+            this.btnCustomGrid.Name = "btnCustomGrid";
+            this.btnCustomGrid.Size = new System.Drawing.Size(75, 23);
+            this.btnCustomGrid.TabIndex = 25;
+            this.btnCustomGrid.Text = "Custom Grid";
+            this.btnCustomGrid.UseVisualStyleBackColor = true;
+            this.btnCustomGrid.Click += new System.EventHandler(this.btnCustomGrid_Click);
+            // 
             // frmOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -867,5 +879,6 @@
         private System.Windows.Forms.CheckBox ckPersistentCache;
         private System.Windows.Forms.TextBox txtCacheFilename;
         private System.Windows.Forms.Label lbCacheFilename;
+        private System.Windows.Forms.Button btnCustomGrid;
     }
 }

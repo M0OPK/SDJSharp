@@ -47,6 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomGridEntry.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CustomGridEntry.Designer.cs">
+      <DependentUpon>CustomGridEntry.cs</DependentUpon>
+    </Compile>
     <Compile Include="OptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -61,6 +67,9 @@
     <Compile Include="SDGrabSharpMain.designer.cs">
       <DependentUpon>SDGrabSharpMain.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="CustomGridEntry.resx">
+      <DependentUpon>CustomGridEntry.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="OptionsForm.resx">
       <DependentUpon>OptionsForm.cs</DependentUpon>
     </EmbeddedResource>

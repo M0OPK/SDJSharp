@@ -369,6 +369,7 @@ namespace SDGrabSharp.UI
 
         private void showAddedChannels()
         {
+            lvAddedChans.Items.Clear();
             foreach (var addedItem in localTranslate.Select(item => item.Value))
             {
                 var localItem = localTranslate[string.Format("{0},{1}", addedItem.LineupID, addedItem.SDStationID)];
@@ -396,12 +397,12 @@ namespace SDGrabSharp.UI
                                 break;
                         }
                     }
-                    ListViewItem item = new ListViewItem();
-                    item.Text = localItem.SDStationID;
-                    item.SubItems.Add(localItem.displayNameHelper);
-                    item.Tag = localItem.LineupID;
-                    lvAddedChans.Items.Add(item);
                 }
+                ListViewItem item = new ListViewItem();
+                item.Text = localItem.SDStationID;
+                item.SubItems.Add(localItem.displayNameHelper);
+                item.Tag = localItem.LineupID;
+                lvAddedChans.Items.Add(item);
             }
         }
 
@@ -448,6 +449,29 @@ namespace SDGrabSharp.UI
                 return;
 
             localItem.FieldMode = mode;
+
+            var station = cache.GetLineupData(ref sdJS, localItem.LineupID).stations.
+                Where(line => line.stationID == localItem.SDStationID).FirstOrDefault();
+
+            switch (localItem.FieldMode)
+            {
+                case Config.XmlTVTranslation.TranslateField.StationID:
+                    localItem.displayNameHelper = station.stationID;
+                    break;
+                case Config.XmlTVTranslation.TranslateField.StationAffiliate:
+                    localItem.displayNameHelper = station.affiliate;
+                    break;
+                case Config.XmlTVTranslation.TranslateField.StationCallsign:
+                    localItem.displayNameHelper = station.callsign;
+                    break;
+                case Config.XmlTVTranslation.TranslateField.StationName:
+                    localItem.displayNameHelper = station.name;
+                    break;
+                case Config.XmlTVTranslation.TranslateField.Custom:
+                    localItem.displayNameHelper = localItem.CustomTranslate;
+                    break;
+            }
+
         }
 
         private string updateChannelNames(string lineupID, string stationID, bool addedMode = false, string customName = null)
@@ -457,8 +481,6 @@ namespace SDGrabSharp.UI
             txtName.Text = string.Empty;
             txtAffiliate.Text = string.Empty;
             txtCallsign.Text = string.Empty;
-            if (!rdCustom.Checked)
-                txtCustom.Text = string.Empty;
 
             var stationInfo = cache.GetLineupData(ref sdJS, lineupID).stations.Where(station => station.stationID == stationID).FirstOrDefault();
 
@@ -478,6 +500,9 @@ namespace SDGrabSharp.UI
                 if (localItem == null)
                     return null;
 
+                if (localItem.FieldMode != Config.XmlTVTranslation.TranslateField.Custom)
+                    txtCustom.Text = string.Empty;
+
                 rdCustom.Enabled = true;
                 rdAffiliate.Enabled = true;
                 rdCallsign.Enabled = true;
@@ -495,8 +520,10 @@ namespace SDGrabSharp.UI
                             localItem.CustomTranslate = newName;
                         }
                         else
-                            txtCustom.Text = localItem.CustomTranslate;  
-                        //localItem.CustomTranslate = newName;
+                        {
+                            txtCustom.Text = localItem.CustomTranslate;
+                            newName = localItem.CustomTranslate;
+                        }
                         break;
                     case Config.XmlTVTranslation.TranslateField.StationAffiliate:
                         rdAffiliate.Checked = true;
@@ -519,6 +546,7 @@ namespace SDGrabSharp.UI
             }
             else
             {
+                txtCustom.Text = string.Empty;
                 autoControlUpdate = true;
                 rdCustom.Checked = false;
                 rdAffiliate.Checked = false;
@@ -810,6 +838,13 @@ namespace SDGrabSharp.UI
 
         private void txtCustom_Leave(object sender, EventArgs e)
         {
+        }
+
+        private void btnCustomGrid_Click(object sender, EventArgs e)
+        {
+            CustomGridEntry customGrid = new CustomGridEntry(ref sdJS, ref config, ref cache, ref localTranslate);
+            customGrid.ShowDialog();
+            showAddedChannels();
         }
     }
 }
