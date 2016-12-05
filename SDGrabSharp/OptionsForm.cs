@@ -227,6 +227,8 @@ namespace SDGrabSharp.UI
 
         private void lvAccountLineups_SelectedIndexChanged(object sender, EventArgs e)
         {
+            Cursor.Current = Cursors.WaitCursor;
+            lvStations.SuspendLayout();
             lvStations.Items.Clear();
             if (lvAccountLineups.SelectedItems.Count > 0)
             {
@@ -249,6 +251,8 @@ namespace SDGrabSharp.UI
             else
                 btnDeleteLineup.Enabled = false;
 
+            lvStations.ResumeLayout(true);
+            Cursor.Current = Cursors.Default;
         }
 
         private void tvCountries_AfterSelect(object sender, TreeViewEventArgs e)
@@ -499,8 +503,14 @@ namespace SDGrabSharp.UI
 
         private void cbLineup_SelectedIndexChanged(object sender, EventArgs e)
         {
+            Cursor.Current = Cursors.WaitCursor;
+            lvAvailableChans.SuspendLayout();
+            lvAddedChans.SuspendLayout();
             showAvailableChannels();
             showAddedChannels();
+            lvAvailableChans.ResumeLayout(true);
+            lvAddedChans.ResumeLayout(true);
+            Cursor.Current = Cursors.Default;
         }
 
         private void lvAvailableChans_SelectedIndexChanged(object sender, EventArgs e)
