@@ -19,8 +19,8 @@ namespace SDGrabSharp.UI
         private DataCache cache;
         private Dictionary<string, Config.XmlTVTranslation> localTranslate;
 
-        public CustomGridEntry(ref SDJson sdJS, ref Config dataconfig, ref DataCache datacache,
-                               ref Dictionary<string, Config.XmlTVTranslation> dataLocalTranslate)
+        public CustomGridEntry(SDJson sdJS, Config dataconfig, DataCache datacache,
+                               Dictionary<string, Config.XmlTVTranslation> dataLocalTranslate)
         {
             InitializeComponent();
 
@@ -31,7 +31,7 @@ namespace SDGrabSharp.UI
 
             foreach (var item in dataLocalTranslate.Select(line => line.Value).Where(line => line.FieldMode == Config.XmlTVTranslation.TranslateField.Custom))
             {
-                var thisData = datacache.GetLineupData(ref sdJS, item.LineupID).stations.
+                var thisData = datacache.GetLineupData(sdJS, item.LineupID).stations.
                     Where(line => line.stationID == item.SDStationID).FirstOrDefault();
                 if (thisData == null)
                     continue;

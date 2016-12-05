@@ -26,7 +26,7 @@ namespace SDGrabSharp.UI
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain(ref cache, ref config));
+            Application.Run(new frmMain(cache, config));
         }
     }
 }

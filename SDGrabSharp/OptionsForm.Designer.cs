@@ -86,7 +86,9 @@
             this.lblLineup = new System.Windows.Forms.Label();
             this.cbLineup = new System.Windows.Forms.ComboBox();
             this.tpGeneral1 = new System.Windows.Forms.TabPage();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.gbRetrievalPeriod = new System.Windows.Forms.GroupBox();
+            this.lbDateRangeInfo = new System.Windows.Forms.Label();
+            this.ckIncludeYesterday = new System.Windows.Forms.CheckBox();
             this.txtProgrammePeriod = new System.Windows.Forms.TextBox();
             this.lbProgrammePeriod = new System.Windows.Forms.Label();
             this.tkbProgrammePeriod = new System.Windows.Forms.TrackBar();
@@ -109,8 +111,7 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
-            this.ckIncludeYesterday = new System.Windows.Forms.CheckBox();
-            this.lbDateRangeInfo = new System.Windows.Forms.Label();
+            this.gbChannelIDMap = new System.Windows.Forms.GroupBox();
             this.tcConfig.SuspendLayout();
             this.tpSD1.SuspendLayout();
             this.gbStations.SuspendLayout();
@@ -123,11 +124,12 @@
             this.gbAddedChannels.SuspendLayout();
             this.gbAvailableChannels.SuspendLayout();
             this.tpGeneral1.SuspendLayout();
-            this.groupBox1.SuspendLayout();
+            this.gbRetrievalPeriod.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tkbProgrammePeriod)).BeginInit();
             this.gbXmlTVAttr.SuspendLayout();
             this.gbPersistentCache.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.gbChannelIDMap.SuspendLayout();
             this.SuspendLayout();
             // 
             // tcConfig
@@ -184,6 +186,7 @@
             this.lvStations.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.chStationID,
             this.chName});
+            this.lvStations.FullRowSelect = true;
             this.lvStations.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.lvStations.Location = new System.Drawing.Point(6, 15);
             this.lvStations.Name = "lvStations";
@@ -447,19 +450,9 @@
             // 
             // gbStationMap
             // 
+            this.gbStationMap.Controls.Add(this.gbChannelIDMap);
             this.gbStationMap.Controls.Add(this.gbAddedChannels);
             this.gbStationMap.Controls.Add(this.gbAvailableChannels);
-            this.gbStationMap.Controls.Add(this.btnCustomGrid);
-            this.gbStationMap.Controls.Add(this.rdCustom);
-            this.gbStationMap.Controls.Add(this.txtCustom);
-            this.gbStationMap.Controls.Add(this.rdCallsign);
-            this.gbStationMap.Controls.Add(this.rdAffiliate);
-            this.gbStationMap.Controls.Add(this.rdName);
-            this.gbStationMap.Controls.Add(this.rdStation);
-            this.gbStationMap.Controls.Add(this.txtCallsign);
-            this.gbStationMap.Controls.Add(this.txtAffiliate);
-            this.gbStationMap.Controls.Add(this.txtName);
-            this.gbStationMap.Controls.Add(this.txtStationID);
             this.gbStationMap.Controls.Add(this.btnAddAllChans);
             this.gbStationMap.Controls.Add(this.btnRemoveAllChans);
             this.gbStationMap.Controls.Add(this.btnRemoveChan);
@@ -541,7 +534,7 @@
             // 
             // btnCustomGrid
             // 
-            this.btnCustomGrid.Location = new System.Drawing.Point(615, 173);
+            this.btnCustomGrid.Location = new System.Drawing.Point(3, 134);
             this.btnCustomGrid.Name = "btnCustomGrid";
             this.btnCustomGrid.Size = new System.Drawing.Size(75, 23);
             this.btnCustomGrid.TabIndex = 25;
@@ -552,7 +545,7 @@
             // rdCustom
             // 
             this.rdCustom.AutoSize = true;
-            this.rdCustom.Location = new System.Drawing.Point(615, 150);
+            this.rdCustom.Location = new System.Drawing.Point(6, 111);
             this.rdCustom.Name = "rdCustom";
             this.rdCustom.Size = new System.Drawing.Size(60, 17);
             this.rdCustom.TabIndex = 23;
@@ -564,16 +557,16 @@
             // txtCustom
             // 
             this.txtCustom.Enabled = false;
-            this.txtCustom.Location = new System.Drawing.Point(697, 149);
+            this.txtCustom.Location = new System.Drawing.Point(84, 110);
             this.txtCustom.Name = "txtCustom";
-            this.txtCustom.Size = new System.Drawing.Size(155, 20);
+            this.txtCustom.Size = new System.Drawing.Size(147, 20);
             this.txtCustom.TabIndex = 22;
             this.txtCustom.Validated += new System.EventHandler(this.txtCustom_Validated);
             // 
             // rdCallsign
             // 
             this.rdCallsign.AutoSize = true;
-            this.rdCallsign.Location = new System.Drawing.Point(615, 124);
+            this.rdCallsign.Location = new System.Drawing.Point(6, 88);
             this.rdCallsign.Name = "rdCallsign";
             this.rdCallsign.Size = new System.Drawing.Size(61, 17);
             this.rdCallsign.TabIndex = 21;
@@ -585,7 +578,7 @@
             // rdAffiliate
             // 
             this.rdAffiliate.AutoSize = true;
-            this.rdAffiliate.Location = new System.Drawing.Point(615, 98);
+            this.rdAffiliate.Location = new System.Drawing.Point(6, 65);
             this.rdAffiliate.Name = "rdAffiliate";
             this.rdAffiliate.Size = new System.Drawing.Size(59, 17);
             this.rdAffiliate.TabIndex = 20;
@@ -597,7 +590,7 @@
             // rdName
             // 
             this.rdName.AutoSize = true;
-            this.rdName.Location = new System.Drawing.Point(615, 72);
+            this.rdName.Location = new System.Drawing.Point(6, 42);
             this.rdName.Name = "rdName";
             this.rdName.Size = new System.Drawing.Size(53, 17);
             this.rdName.TabIndex = 19;
@@ -609,7 +602,7 @@
             // rdStation
             // 
             this.rdStation.AutoSize = true;
-            this.rdStation.Location = new System.Drawing.Point(615, 46);
+            this.rdStation.Location = new System.Drawing.Point(6, 19);
             this.rdStation.Name = "rdStation";
             this.rdStation.Size = new System.Drawing.Size(72, 17);
             this.rdStation.TabIndex = 18;
@@ -621,33 +614,33 @@
             // txtCallsign
             // 
             this.txtCallsign.Enabled = false;
-            this.txtCallsign.Location = new System.Drawing.Point(697, 123);
+            this.txtCallsign.Location = new System.Drawing.Point(84, 87);
             this.txtCallsign.Name = "txtCallsign";
-            this.txtCallsign.Size = new System.Drawing.Size(155, 20);
+            this.txtCallsign.Size = new System.Drawing.Size(147, 20);
             this.txtCallsign.TabIndex = 17;
             // 
             // txtAffiliate
             // 
             this.txtAffiliate.Enabled = false;
-            this.txtAffiliate.Location = new System.Drawing.Point(697, 97);
+            this.txtAffiliate.Location = new System.Drawing.Point(84, 64);
             this.txtAffiliate.Name = "txtAffiliate";
-            this.txtAffiliate.Size = new System.Drawing.Size(155, 20);
+            this.txtAffiliate.Size = new System.Drawing.Size(147, 20);
             this.txtAffiliate.TabIndex = 15;
             // 
             // txtName
             // 
             this.txtName.Enabled = false;
-            this.txtName.Location = new System.Drawing.Point(697, 71);
+            this.txtName.Location = new System.Drawing.Point(84, 41);
             this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(155, 20);
+            this.txtName.Size = new System.Drawing.Size(147, 20);
             this.txtName.TabIndex = 13;
             // 
             // txtStationID
             // 
             this.txtStationID.Enabled = false;
-            this.txtStationID.Location = new System.Drawing.Point(697, 45);
+            this.txtStationID.Location = new System.Drawing.Point(84, 18);
             this.txtStationID.Name = "txtStationID";
-            this.txtStationID.Size = new System.Drawing.Size(155, 20);
+            this.txtStationID.Size = new System.Drawing.Size(147, 20);
             this.txtStationID.TabIndex = 11;
             // 
             // btnAddAllChans
@@ -710,7 +703,7 @@
             // tpGeneral1
             // 
             this.tpGeneral1.BackColor = System.Drawing.SystemColors.Control;
-            this.tpGeneral1.Controls.Add(this.groupBox1);
+            this.tpGeneral1.Controls.Add(this.gbRetrievalPeriod);
             this.tpGeneral1.Controls.Add(this.gbXmlTVAttr);
             this.tpGeneral1.Controls.Add(this.gbPersistentCache);
             this.tpGeneral1.Location = new System.Drawing.Point(4, 22);
@@ -721,19 +714,39 @@
             this.tpGeneral1.Text = "General";
             this.tpGeneral1.Enter += new System.EventHandler(this.tpGeneral1_Enter);
             // 
-            // groupBox1
+            // gbRetrievalPeriod
             // 
-            this.groupBox1.Controls.Add(this.lbDateRangeInfo);
-            this.groupBox1.Controls.Add(this.ckIncludeYesterday);
-            this.groupBox1.Controls.Add(this.txtProgrammePeriod);
-            this.groupBox1.Controls.Add(this.lbProgrammePeriod);
-            this.groupBox1.Controls.Add(this.tkbProgrammePeriod);
-            this.groupBox1.Location = new System.Drawing.Point(380, 52);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(486, 113);
-            this.groupBox1.TabIndex = 2;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Programme Retrieval Period";
+            this.gbRetrievalPeriod.Controls.Add(this.lbDateRangeInfo);
+            this.gbRetrievalPeriod.Controls.Add(this.ckIncludeYesterday);
+            this.gbRetrievalPeriod.Controls.Add(this.txtProgrammePeriod);
+            this.gbRetrievalPeriod.Controls.Add(this.lbProgrammePeriod);
+            this.gbRetrievalPeriod.Controls.Add(this.tkbProgrammePeriod);
+            this.gbRetrievalPeriod.Location = new System.Drawing.Point(380, 52);
+            this.gbRetrievalPeriod.Name = "gbRetrievalPeriod";
+            this.gbRetrievalPeriod.Size = new System.Drawing.Size(486, 113);
+            this.gbRetrievalPeriod.TabIndex = 2;
+            this.gbRetrievalPeriod.TabStop = false;
+            this.gbRetrievalPeriod.Text = "Programme Retrieval Period";
+            // 
+            // lbDateRangeInfo
+            // 
+            this.lbDateRangeInfo.AutoSize = true;
+            this.lbDateRangeInfo.Location = new System.Drawing.Point(6, 69);
+            this.lbDateRangeInfo.Name = "lbDateRangeInfo";
+            this.lbDateRangeInfo.Size = new System.Drawing.Size(266, 13);
+            this.lbDateRangeInfo.TabIndex = 4;
+            this.lbDateRangeInfo.Text = "Example include date range 04/12/2016 - 07/12/2016";
+            // 
+            // ckIncludeYesterday
+            // 
+            this.ckIncludeYesterday.AutoSize = true;
+            this.ckIncludeYesterday.Location = new System.Drawing.Point(9, 42);
+            this.ckIncludeYesterday.Name = "ckIncludeYesterday";
+            this.ckIncludeYesterday.Size = new System.Drawing.Size(111, 17);
+            this.ckIncludeYesterday.TabIndex = 3;
+            this.ckIncludeYesterday.Text = "Include Yesterday";
+            this.ckIncludeYesterday.UseVisualStyleBackColor = true;
+            this.ckIncludeYesterday.CheckedChanged += new System.EventHandler(this.ckIncludeYesterday_CheckedChanged);
             // 
             // txtProgrammePeriod
             // 
@@ -976,25 +989,25 @@
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
-            // ckIncludeYesterday
+            // gbChannelIDMap
             // 
-            this.ckIncludeYesterday.AutoSize = true;
-            this.ckIncludeYesterday.Location = new System.Drawing.Point(9, 42);
-            this.ckIncludeYesterday.Name = "ckIncludeYesterday";
-            this.ckIncludeYesterday.Size = new System.Drawing.Size(111, 17);
-            this.ckIncludeYesterday.TabIndex = 3;
-            this.ckIncludeYesterday.Text = "Include Yesterday";
-            this.ckIncludeYesterday.UseVisualStyleBackColor = true;
-            this.ckIncludeYesterday.CheckedChanged += new System.EventHandler(this.ckIncludeYesterday_CheckedChanged);
-            // 
-            // lbDateRangeInfo
-            // 
-            this.lbDateRangeInfo.AutoSize = true;
-            this.lbDateRangeInfo.Location = new System.Drawing.Point(6, 69);
-            this.lbDateRangeInfo.Name = "lbDateRangeInfo";
-            this.lbDateRangeInfo.Size = new System.Drawing.Size(266, 13);
-            this.lbDateRangeInfo.TabIndex = 4;
-            this.lbDateRangeInfo.Text = "Example include date range 04/12/2016 - 07/12/2016";
+            this.gbChannelIDMap.Controls.Add(this.btnCustomGrid);
+            this.gbChannelIDMap.Controls.Add(this.txtStationID);
+            this.gbChannelIDMap.Controls.Add(this.txtName);
+            this.gbChannelIDMap.Controls.Add(this.txtAffiliate);
+            this.gbChannelIDMap.Controls.Add(this.rdCustom);
+            this.gbChannelIDMap.Controls.Add(this.txtCallsign);
+            this.gbChannelIDMap.Controls.Add(this.txtCustom);
+            this.gbChannelIDMap.Controls.Add(this.rdStation);
+            this.gbChannelIDMap.Controls.Add(this.rdCallsign);
+            this.gbChannelIDMap.Controls.Add(this.rdName);
+            this.gbChannelIDMap.Controls.Add(this.rdAffiliate);
+            this.gbChannelIDMap.Location = new System.Drawing.Point(615, 46);
+            this.gbChannelIDMap.Name = "gbChannelIDMap";
+            this.gbChannelIDMap.Size = new System.Drawing.Size(237, 167);
+            this.gbChannelIDMap.TabIndex = 28;
+            this.gbChannelIDMap.TabStop = false;
+            this.gbChannelIDMap.Text = "XMLTV Channel ID Map";
             // 
             // frmOptions
             // 
@@ -1022,14 +1035,16 @@
             this.gbAddedChannels.ResumeLayout(false);
             this.gbAvailableChannels.ResumeLayout(false);
             this.tpGeneral1.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.gbRetrievalPeriod.ResumeLayout(false);
+            this.gbRetrievalPeriod.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tkbProgrammePeriod)).EndInit();
             this.gbXmlTVAttr.ResumeLayout(false);
             this.gbXmlTVAttr.PerformLayout();
             this.gbPersistentCache.ResumeLayout(false);
             this.gbPersistentCache.PerformLayout();
             this.panel1.ResumeLayout(false);
+            this.gbChannelIDMap.ResumeLayout(false);
+            this.gbChannelIDMap.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1113,11 +1128,12 @@
         private System.Windows.Forms.CheckBox ckStationID;
         private System.Windows.Forms.CheckBox ckLogicalChannelNo;
         private System.Windows.Forms.CheckBox ckMD5;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox gbRetrievalPeriod;
         private System.Windows.Forms.TextBox txtProgrammePeriod;
         private System.Windows.Forms.Label lbProgrammePeriod;
         private System.Windows.Forms.TrackBar tkbProgrammePeriod;
         private System.Windows.Forms.Label lbDateRangeInfo;
         private System.Windows.Forms.CheckBox ckIncludeYesterday;
+        private System.Windows.Forms.GroupBox gbChannelIDMap;
     }
 }

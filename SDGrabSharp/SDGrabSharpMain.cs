@@ -15,7 +15,7 @@ namespace SDGrabSharp.UI
     {
         DataCache cache;
         Config config;
-        public frmMain(ref DataCache datacache, ref Config dataconfig)
+        public frmMain(DataCache datacache, Config dataconfig)
         {
             InitializeComponent();
             tsStatus.Text = "Ready";
@@ -30,7 +30,7 @@ namespace SDGrabSharp.UI
 
         private void toolStripMenuItemOptions_Click(object sender, EventArgs e)
         {
-            frmOptions opts = new frmOptions(ref cache, ref config);
+            frmOptions opts = new frmOptions(cache, config);
             opts.ShowDialog(this);
         }
 

@@ -71,19 +71,19 @@ namespace SDGrabSharp.Common
             configXml.AppendChild(rootConfigNode);
 
             // Simple config elements
-            AddSimpleXMLElement(ref rootConfigNode, "sd-username", SDUsername);
-            AddSimpleXMLElement(ref rootConfigNode, "sd-password", SDPasswordHash);
-            AddSimpleXMLElement(ref rootConfigNode, "sd-alwaysask", LoginAlwaysAsk ? "true" : "false");
-            AddSimpleXMLElement(ref rootConfigNode, "persistent-cache", PersistantCache ? "true" : "false");
-            AddSimpleXMLElement(ref rootConfigNode, "cache-filename", cacheFilename);
-            AddSimpleXMLElement(ref rootConfigNode, "attrib-logicalnumber", XmlTVLogicalChannelNumber ? "true" : "false");
-            AddSimpleXMLElement(ref rootConfigNode, "attrib-showtype", XmlTVShowType ? "true" : "false");
-            AddSimpleXMLElement(ref rootConfigNode, "attrib-afiliate", XmlTVStationAfilliate ? "true" : "false");
-            AddSimpleXMLElement(ref rootConfigNode, "attrib-callsgn", XmlTVStationCallsign ? "true" : "false");
-            AddSimpleXMLElement(ref rootConfigNode, "attrib-stationid", XmlTVStationID ? "true" : "false");
-            AddSimpleXMLElement(ref rootConfigNode, "attrib-stationname", XmlTVStationName ? "true" : "false");
-            AddSimpleXMLElement(ref rootConfigNode, "programme-retrieveyesterday", ProgrammeRetrieveYesterday ? "true" : "false");
-            AddSimpleXMLElement(ref rootConfigNode, "programme-retrieverangedays", ProgrammeRetrieveRangeDays.ToString());
+            AddSimpleXMLElement(rootConfigNode, "sd-username", SDUsername);
+            AddSimpleXMLElement(rootConfigNode, "sd-password", SDPasswordHash);
+            AddSimpleXMLElement(rootConfigNode, "sd-alwaysask", LoginAlwaysAsk ? "true" : "false");
+            AddSimpleXMLElement(rootConfigNode, "persistent-cache", PersistantCache ? "true" : "false");
+            AddSimpleXMLElement(rootConfigNode, "cache-filename", cacheFilename);
+            AddSimpleXMLElement(rootConfigNode, "attrib-logicalnumber", XmlTVLogicalChannelNumber ? "true" : "false");
+            AddSimpleXMLElement(rootConfigNode, "attrib-showtype", XmlTVShowType ? "true" : "false");
+            AddSimpleXMLElement(rootConfigNode, "attrib-afiliate", XmlTVStationAfilliate ? "true" : "false");
+            AddSimpleXMLElement(rootConfigNode, "attrib-callsgn", XmlTVStationCallsign ? "true" : "false");
+            AddSimpleXMLElement(rootConfigNode, "attrib-stationid", XmlTVStationID ? "true" : "false");
+            AddSimpleXMLElement(rootConfigNode, "attrib-stationname", XmlTVStationName ? "true" : "false");
+            AddSimpleXMLElement(rootConfigNode, "programme-retrieveyesterday", ProgrammeRetrieveYesterday ? "true" : "false");
+            AddSimpleXMLElement(rootConfigNode, "programme-retrieverangedays", ProgrammeRetrieveRangeDays.ToString());
 
             if (TranslationMatrix != null && TranslationMatrix.Count() != 0)
             {
@@ -199,7 +199,7 @@ namespace SDGrabSharp.Common
             return true;
         }
 
-        private void AddSimpleXMLElement(ref XmlElement parentNode, string nodeKey, string nodeValue)
+        private void AddSimpleXMLElement(XmlElement parentNode, string nodeKey, string nodeValue)
         {
             XmlElement newNode = parentNode.OwnerDocument.CreateElement(nodeKey);
             newNode.InnerText = nodeValue;

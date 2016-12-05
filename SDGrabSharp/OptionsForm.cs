@@ -42,10 +42,11 @@ namespace SDGrabSharp.UI
             }
         }
 
-        public frmOptions(ref DataCache datacache, ref Config dataconfig)
+        public frmOptions(DataCache datacache, Config dataconfig)
         {
             InitializeComponent();
 
+            Cursor.Current = Cursors.WaitCursor;
             // Setup tooltips
             ToolTip optionsTooltip = new ToolTip();
             optionsTooltip.SetToolTip(btnLogin, "Logs into Schedules direct. Required for most functions");
@@ -82,6 +83,7 @@ namespace SDGrabSharp.UI
                 onLoggedIn();
 
             updateControls(loggedIn);
+            Cursor.Current = Cursors.Default;
         }
 
         private void checkAlwaysAsk_CheckedChanged(object sender, EventArgs e)
@@ -200,7 +202,7 @@ namespace SDGrabSharp.UI
         private void showCountries()
         {
             tvCountries.Nodes.Clear();
-            var countryData = cache.GetCountryData(ref sdJS);
+            var countryData = cache.GetCountryData(sdJS);
 
             foreach (var continent in countryData.continents)
             {
@@ -230,7 +232,7 @@ namespace SDGrabSharp.UI
             {
                 // Key is first column
                 string key = lvAccountLineups.SelectedItems[0].SubItems[0].Text;
-                var map = cache.GetLineupData(ref sdJS, key);
+                var map = cache.GetLineupData(sdJS, key);
 
                 if (map != null)
                 {
@@ -281,7 +283,7 @@ namespace SDGrabSharp.UI
 
         private void showHeadEnds(string country, string postcode)
         {
-            var headendData = cache.GetHeadendData(ref sdJS, country, postcode);
+            var headendData = cache.GetHeadendData(sdJS, country, postcode);
             if (headendData != null)
             {
                 tvHeadends.Nodes.Clear();
@@ -405,12 +407,34 @@ namespace SDGrabSharp.UI
                 return;
 
             lvAddedChans.Items.Clear();
-            foreach (var addedItem in localTranslate.Select(item => item.Value).Where(line => !line.isDeleted && line.LineupID == (string)cbLineup.SelectedItem))
+
+            // LINQ query to ensure list is as close to original order from SD as possible
+            var addedList =
+            (
+                from localtrans in localTranslate
+                join locinfo in locationInfo
+                  on new
+                  {
+                      joinLineup = localtrans.Value.LineupID,
+                      joinStation = localtrans.Value.SDStationID
+                  }
+                  equals new
+                  {
+                      joinLineup = locinfo.lineUp,
+                      joinStation = locinfo.stationID
+                  }
+                where !localtrans.Value.isDeleted
+                  &&  localtrans.Value.LineupID == (string)cbLineup.SelectedItem
+                orderby locinfo.originalPosition
+                select localtrans.Value
+            );
+
+            foreach (var addedItem in addedList)
             {
                 var localItem = localTranslate[string.Format("{0},{1}", addedItem.LineupID, addedItem.SDStationID)];
                 if (localItem.displayNameHelper == null || localItem.displayNameHelper == string.Empty)
                 {
-                    var station = cache.GetLineupData(ref sdJS, localItem.LineupID).stations.Where(thisstation => thisstation.stationID == localItem.SDStationID).FirstOrDefault();
+                    var station = cache.GetLineupData(sdJS, localItem.LineupID).stations.Where(thisstation => thisstation.stationID == localItem.SDStationID).FirstOrDefault();
                     if (station != null)
                     {
                         switch (localItem.FieldMode)
@@ -446,7 +470,7 @@ namespace SDGrabSharp.UI
             if (cbLineup.SelectedText == null || (string)cbLineup.SelectedItem == string.Empty)
                 return;
 
-            var stationInfo = cache.GetLineupData(ref sdJS, (string)cbLineup.SelectedItem);
+            var stationInfo = cache.GetLineupData(sdJS, (string)cbLineup.SelectedItem);
             if (stationInfo == null)
                 return;
 
@@ -496,7 +520,7 @@ namespace SDGrabSharp.UI
 
             localItem.FieldMode = mode;
 
-            var station = cache.GetLineupData(ref sdJS, localItem.LineupID).stations.
+            var station = cache.GetLineupData(sdJS, localItem.LineupID).stations.
                 Where(line => line.stationID == localItem.SDStationID).FirstOrDefault();
 
             switch (localItem.FieldMode)
@@ -531,7 +555,7 @@ namespace SDGrabSharp.UI
             if (lineupID == null)
                 return null;
 
-            var stationInfo = cache.GetLineupData(ref sdJS, lineupID).stations.Where(station => station.stationID == stationID).FirstOrDefault();
+            var stationInfo = cache.GetLineupData(sdJS, lineupID).stations.Where(station => station.stationID == stationID).FirstOrDefault();
 
             if (stationInfo != null)
             {
@@ -677,7 +701,7 @@ namespace SDGrabSharp.UI
             else
             {
                 // Get SD Data for this station
-                var stationData = cache.GetLineupData(ref sdJS, (string)cbLineup.SelectedItem).stations.Where(station => station.stationID == item.Text).FirstOrDefault();
+                var stationData = cache.GetLineupData(sdJS, (string)cbLineup.SelectedItem).stations.Where(station => station.stationID == item.Text).FirstOrDefault();
                 if (stationData == null)
                     return;
 
@@ -729,7 +753,7 @@ namespace SDGrabSharp.UI
             if (customText != string.Empty)
                 localItem.CustomTranslate = customText;
 
-            var stationData = cache.GetLineupData(ref sdJS, (string)cbLineup.SelectedItem).stations.Where(station => station.stationID == item.Text).FirstOrDefault();
+            var stationData = cache.GetLineupData(sdJS, (string)cbLineup.SelectedItem).stations.Where(station => station.stationID == item.Text).FirstOrDefault();
             switch (localItem.FieldMode)
             {
                 case Config.XmlTVTranslation.TranslateField.StationID:
@@ -896,7 +920,7 @@ namespace SDGrabSharp.UI
 
         private void btnCustomGrid_Click(object sender, EventArgs e)
         {
-            CustomGridEntry customGrid = new CustomGridEntry(ref sdJS, ref config, ref cache, ref localTranslate);
+            CustomGridEntry customGrid = new CustomGridEntry(sdJS, config, cache, localTranslate);
             customGrid.ShowDialog();
             showAddedChannels();
         }
@@ -953,7 +977,7 @@ namespace SDGrabSharp.UI
                 }
 
                 chan.Tag = null;
-                var stationInfo = cache.GetLineupData(ref sdJS, (string)cbLineup.SelectedItem).stations.Where(line => line.stationID == chan.Text).FirstOrDefault();
+                var stationInfo = cache.GetLineupData(sdJS, (string)cbLineup.SelectedItem).stations.Where(line => line.stationID == chan.Text).FirstOrDefault();
 
                 if (stationInfo != null)
                     chan.SubItems[1].Text = stationInfo.name;
@@ -1011,7 +1035,7 @@ namespace SDGrabSharp.UI
                 }
 
                 chan.Tag = lineup;
-                var stationInfo = cache.GetLineupData(ref sdJS, (string)cbLineup.SelectedItem).stations.Where(line => line.stationID == chan.Text).FirstOrDefault();
+                var stationInfo = cache.GetLineupData(sdJS, (string)cbLineup.SelectedItem).stations.Where(line => line.stationID == chan.Text).FirstOrDefault();
 
                 if (stationInfo != null)
                     chan.SubItems[1].Text = stationInfo.name;

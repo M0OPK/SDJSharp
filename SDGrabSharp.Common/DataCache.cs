@@ -26,7 +26,7 @@ namespace SDGrabSharp.Common
             Clear();
         }
 
-        public IEnumerable<SDHeadendsResponse> GetHeadendData(ref SDJson sd, string country, string postcode)
+        public IEnumerable<SDHeadendsResponse> GetHeadendData(SDJson sd, string country, string postcode)
         {
             string headendKey = string.Format("{0},{1}", country, postcode);
             if (!headendData.ContainsKey(headendKey))
@@ -43,7 +43,7 @@ namespace SDGrabSharp.Common
             }
         }
 
-        public SDCountries GetCountryData(ref SDJson sd)
+        public SDCountries GetCountryData(SDJson sd)
         {
             if (countryData == null)
                 countryData = sd.GetCountries();
@@ -51,7 +51,7 @@ namespace SDGrabSharp.Common
             return countryData;
         }
 
-        public SDGetLineupResponse GetLineupData(ref SDJson sd, string lineup)
+        public SDGetLineupResponse GetLineupData(SDJson sd, string lineup)
         {
             if (!stationMapData.ContainsKey(lineup))
             {
