@@ -687,15 +687,18 @@ namespace SchedulesDirect
 
         public SDMD5Request()
         {
-            date = new string[2];
+
         }
 
-        public SDMD5Request(string station, DateTime start, DateTime end)
+        public SDMD5Request(string station, IEnumerable<DateTime> dates)
         {
             stationID = station;
-            string dateStart = start.ToString("yyyy-MM-dd");
-            string dateEnd = end.ToString("yyyy-MM-dd");
-            date = new string[] { dateStart, dateEnd };
+            //string dateStart = start.ToString("yyyy-MM-dd");
+            //string dateEnd = end.ToString("yyyy-MM-dd");
+            List<string> dateStrings = new List<string>();
+            foreach (DateTime thisDate in dates)
+                dateStrings.Add(thisDate.ToString("yyyy-MM-dd"));
+            date = dateStrings.ToArray();
         }
 
     }

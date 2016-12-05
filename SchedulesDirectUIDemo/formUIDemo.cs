@@ -160,7 +160,8 @@ namespace SchedulesDirect.UIDemo
         private void btnGetMD5_Click(object sender, EventArgs e)
         {
             List<SDMD5Request> reqs = new List<SDMD5Request>();
-            SDMD5Request req = new SDMD5Request("16689", DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30"));
+            SDMD5Request req = new SDMD5Request("16689", 
+                new DateTime[] { DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30") }.AsEnumerable() );
             reqs.Add(req);
             var result = sd.GetMD5(reqs.AsEnumerable());
         }
