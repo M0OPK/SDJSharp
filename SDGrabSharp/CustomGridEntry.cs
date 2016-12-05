@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SDGrabSharp.Common;
 using SchedulesDirect;
+using SDGrabSharp.Resources;
 
 namespace SDGrabSharp.UI
 {
@@ -23,6 +24,7 @@ namespace SDGrabSharp.UI
                                Dictionary<string, Config.XmlTVTranslation> dataLocalTranslate)
         {
             InitializeComponent();
+            Localize();
 
             sd = sdJS;
             config = dataconfig;
@@ -41,6 +43,18 @@ namespace SDGrabSharp.UI
 
             if (dgCustomEntry.Rows.Count > 0)
                 dgCustomEntry.CurrentCell = dgCustomEntry.Rows[0].Cells[3];
+        }
+
+        private void Localize()
+        {
+            btnOK.Text = Strings.btnOK;
+            btnCancel.Text = Strings.btnCancel;
+            gbCustomEntry.Text = Strings.gbCustomEntry;
+            CustomEntryLineup.HeaderText = Strings.CustomEntryLineup;
+            CustomEntryStationID.HeaderText = Strings.CustomEntryStationID;
+            CustomEntryName.HeaderText = Strings.CustomEntryName;
+            CustomEntryCustomName.HeaderText = Strings.CustomEntryCustomName;
+            this.Text = Strings.CustomGridEntry;
         }
 
         private void dgCustomEntry_CellValidated(object sender, DataGridViewCellEventArgs e)

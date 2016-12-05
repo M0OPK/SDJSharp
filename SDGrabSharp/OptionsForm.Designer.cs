@@ -60,6 +60,18 @@
             this.lbLogin = new System.Windows.Forms.Label();
             this.tpXMLTV1 = new System.Windows.Forms.TabPage();
             this.gbStationMap = new System.Windows.Forms.GroupBox();
+            this.gbChannelIDMap = new System.Windows.Forms.GroupBox();
+            this.btnCustomGrid = new System.Windows.Forms.Button();
+            this.txtStationID = new System.Windows.Forms.TextBox();
+            this.txtName = new System.Windows.Forms.TextBox();
+            this.txtAffiliate = new System.Windows.Forms.TextBox();
+            this.rdCustom = new System.Windows.Forms.RadioButton();
+            this.txtCallsign = new System.Windows.Forms.TextBox();
+            this.txtCustom = new System.Windows.Forms.TextBox();
+            this.rdStation = new System.Windows.Forms.RadioButton();
+            this.rdCallsign = new System.Windows.Forms.RadioButton();
+            this.rdName = new System.Windows.Forms.RadioButton();
+            this.rdAffiliate = new System.Windows.Forms.RadioButton();
             this.gbAddedChannels = new System.Windows.Forms.GroupBox();
             this.lvAddedChans = new System.Windows.Forms.ListView();
             this.chAddedID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -68,17 +80,6 @@
             this.lvAvailableChans = new System.Windows.Forms.ListView();
             this.chAvailID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chAvailName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.btnCustomGrid = new System.Windows.Forms.Button();
-            this.rdCustom = new System.Windows.Forms.RadioButton();
-            this.txtCustom = new System.Windows.Forms.TextBox();
-            this.rdCallsign = new System.Windows.Forms.RadioButton();
-            this.rdAffiliate = new System.Windows.Forms.RadioButton();
-            this.rdName = new System.Windows.Forms.RadioButton();
-            this.rdStation = new System.Windows.Forms.RadioButton();
-            this.txtCallsign = new System.Windows.Forms.TextBox();
-            this.txtAffiliate = new System.Windows.Forms.TextBox();
-            this.txtName = new System.Windows.Forms.TextBox();
-            this.txtStationID = new System.Windows.Forms.TextBox();
             this.btnAddAllChans = new System.Windows.Forms.Button();
             this.btnRemoveAllChans = new System.Windows.Forms.Button();
             this.btnRemoveChan = new System.Windows.Forms.Button();
@@ -111,7 +112,6 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
-            this.gbChannelIDMap = new System.Windows.Forms.GroupBox();
             this.tcConfig.SuspendLayout();
             this.tpSD1.SuspendLayout();
             this.gbStations.SuspendLayout();
@@ -121,6 +121,7 @@
             this.gbCreds.SuspendLayout();
             this.tpXMLTV1.SuspendLayout();
             this.gbStationMap.SuspendLayout();
+            this.gbChannelIDMap.SuspendLayout();
             this.gbAddedChannels.SuspendLayout();
             this.gbAvailableChannels.SuspendLayout();
             this.tpGeneral1.SuspendLayout();
@@ -129,7 +130,6 @@
             this.gbXmlTVAttr.SuspendLayout();
             this.gbPersistentCache.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.gbChannelIDMap.SuspendLayout();
             this.SuspendLayout();
             // 
             // tcConfig
@@ -466,6 +466,137 @@
             this.gbStationMap.TabStop = false;
             this.gbStationMap.Text = "Station mapping";
             // 
+            // gbChannelIDMap
+            // 
+            this.gbChannelIDMap.Controls.Add(this.btnCustomGrid);
+            this.gbChannelIDMap.Controls.Add(this.txtStationID);
+            this.gbChannelIDMap.Controls.Add(this.txtName);
+            this.gbChannelIDMap.Controls.Add(this.txtAffiliate);
+            this.gbChannelIDMap.Controls.Add(this.rdCustom);
+            this.gbChannelIDMap.Controls.Add(this.txtCallsign);
+            this.gbChannelIDMap.Controls.Add(this.txtCustom);
+            this.gbChannelIDMap.Controls.Add(this.rdStation);
+            this.gbChannelIDMap.Controls.Add(this.rdCallsign);
+            this.gbChannelIDMap.Controls.Add(this.rdName);
+            this.gbChannelIDMap.Controls.Add(this.rdAffiliate);
+            this.gbChannelIDMap.Location = new System.Drawing.Point(615, 46);
+            this.gbChannelIDMap.Name = "gbChannelIDMap";
+            this.gbChannelIDMap.Size = new System.Drawing.Size(237, 167);
+            this.gbChannelIDMap.TabIndex = 28;
+            this.gbChannelIDMap.TabStop = false;
+            this.gbChannelIDMap.Text = "XMLTV Channel ID Map";
+            // 
+            // btnCustomGrid
+            // 
+            this.btnCustomGrid.Location = new System.Drawing.Point(3, 134);
+            this.btnCustomGrid.Name = "btnCustomGrid";
+            this.btnCustomGrid.Size = new System.Drawing.Size(75, 23);
+            this.btnCustomGrid.TabIndex = 25;
+            this.btnCustomGrid.Text = "Custom Grid";
+            this.btnCustomGrid.UseVisualStyleBackColor = true;
+            this.btnCustomGrid.Click += new System.EventHandler(this.btnCustomGrid_Click);
+            // 
+            // txtStationID
+            // 
+            this.txtStationID.Enabled = false;
+            this.txtStationID.Location = new System.Drawing.Point(84, 18);
+            this.txtStationID.Name = "txtStationID";
+            this.txtStationID.Size = new System.Drawing.Size(147, 20);
+            this.txtStationID.TabIndex = 11;
+            // 
+            // txtName
+            // 
+            this.txtName.Enabled = false;
+            this.txtName.Location = new System.Drawing.Point(84, 41);
+            this.txtName.Name = "txtName";
+            this.txtName.Size = new System.Drawing.Size(147, 20);
+            this.txtName.TabIndex = 13;
+            // 
+            // txtAffiliate
+            // 
+            this.txtAffiliate.Enabled = false;
+            this.txtAffiliate.Location = new System.Drawing.Point(84, 64);
+            this.txtAffiliate.Name = "txtAffiliate";
+            this.txtAffiliate.Size = new System.Drawing.Size(147, 20);
+            this.txtAffiliate.TabIndex = 15;
+            // 
+            // rdCustom
+            // 
+            this.rdCustom.AutoSize = true;
+            this.rdCustom.Location = new System.Drawing.Point(6, 111);
+            this.rdCustom.Name = "rdCustom";
+            this.rdCustom.Size = new System.Drawing.Size(60, 17);
+            this.rdCustom.TabIndex = 23;
+            this.rdCustom.TabStop = true;
+            this.rdCustom.Text = "Custom";
+            this.rdCustom.UseVisualStyleBackColor = true;
+            this.rdCustom.CheckedChanged += new System.EventHandler(this.rdCustom_CheckedChanged);
+            // 
+            // txtCallsign
+            // 
+            this.txtCallsign.Enabled = false;
+            this.txtCallsign.Location = new System.Drawing.Point(84, 87);
+            this.txtCallsign.Name = "txtCallsign";
+            this.txtCallsign.Size = new System.Drawing.Size(147, 20);
+            this.txtCallsign.TabIndex = 17;
+            // 
+            // txtCustom
+            // 
+            this.txtCustom.Enabled = false;
+            this.txtCustom.Location = new System.Drawing.Point(84, 110);
+            this.txtCustom.Name = "txtCustom";
+            this.txtCustom.Size = new System.Drawing.Size(147, 20);
+            this.txtCustom.TabIndex = 22;
+            this.txtCustom.Validated += new System.EventHandler(this.txtCustom_Validated);
+            // 
+            // rdStation
+            // 
+            this.rdStation.AutoSize = true;
+            this.rdStation.Location = new System.Drawing.Point(6, 19);
+            this.rdStation.Name = "rdStation";
+            this.rdStation.Size = new System.Drawing.Size(72, 17);
+            this.rdStation.TabIndex = 18;
+            this.rdStation.TabStop = true;
+            this.rdStation.Text = "Station ID";
+            this.rdStation.UseVisualStyleBackColor = true;
+            this.rdStation.CheckedChanged += new System.EventHandler(this.rdStation_CheckedChanged);
+            // 
+            // rdCallsign
+            // 
+            this.rdCallsign.AutoSize = true;
+            this.rdCallsign.Location = new System.Drawing.Point(6, 88);
+            this.rdCallsign.Name = "rdCallsign";
+            this.rdCallsign.Size = new System.Drawing.Size(61, 17);
+            this.rdCallsign.TabIndex = 21;
+            this.rdCallsign.TabStop = true;
+            this.rdCallsign.Text = "Callsign";
+            this.rdCallsign.UseVisualStyleBackColor = true;
+            this.rdCallsign.CheckedChanged += new System.EventHandler(this.rdCallsign_CheckedChanged);
+            // 
+            // rdName
+            // 
+            this.rdName.AutoSize = true;
+            this.rdName.Location = new System.Drawing.Point(6, 42);
+            this.rdName.Name = "rdName";
+            this.rdName.Size = new System.Drawing.Size(53, 17);
+            this.rdName.TabIndex = 19;
+            this.rdName.TabStop = true;
+            this.rdName.Text = "Name";
+            this.rdName.UseVisualStyleBackColor = true;
+            this.rdName.CheckedChanged += new System.EventHandler(this.rdName_CheckedChanged);
+            // 
+            // rdAffiliate
+            // 
+            this.rdAffiliate.AutoSize = true;
+            this.rdAffiliate.Location = new System.Drawing.Point(6, 65);
+            this.rdAffiliate.Name = "rdAffiliate";
+            this.rdAffiliate.Size = new System.Drawing.Size(59, 17);
+            this.rdAffiliate.TabIndex = 20;
+            this.rdAffiliate.TabStop = true;
+            this.rdAffiliate.Text = "Affiliate";
+            this.rdAffiliate.UseVisualStyleBackColor = true;
+            this.rdAffiliate.CheckedChanged += new System.EventHandler(this.rdAffiliate_CheckedChanged);
+            // 
             // gbAddedChannels
             // 
             this.gbAddedChannels.Controls.Add(this.lvAddedChans);
@@ -532,117 +663,6 @@
             this.chAvailName.Text = "Name";
             this.chAvailName.Width = 184;
             // 
-            // btnCustomGrid
-            // 
-            this.btnCustomGrid.Location = new System.Drawing.Point(3, 134);
-            this.btnCustomGrid.Name = "btnCustomGrid";
-            this.btnCustomGrid.Size = new System.Drawing.Size(75, 23);
-            this.btnCustomGrid.TabIndex = 25;
-            this.btnCustomGrid.Text = "Custom Grid";
-            this.btnCustomGrid.UseVisualStyleBackColor = true;
-            this.btnCustomGrid.Click += new System.EventHandler(this.btnCustomGrid_Click);
-            // 
-            // rdCustom
-            // 
-            this.rdCustom.AutoSize = true;
-            this.rdCustom.Location = new System.Drawing.Point(6, 111);
-            this.rdCustom.Name = "rdCustom";
-            this.rdCustom.Size = new System.Drawing.Size(60, 17);
-            this.rdCustom.TabIndex = 23;
-            this.rdCustom.TabStop = true;
-            this.rdCustom.Text = "Custom";
-            this.rdCustom.UseVisualStyleBackColor = true;
-            this.rdCustom.CheckedChanged += new System.EventHandler(this.rdCustom_CheckedChanged);
-            // 
-            // txtCustom
-            // 
-            this.txtCustom.Enabled = false;
-            this.txtCustom.Location = new System.Drawing.Point(84, 110);
-            this.txtCustom.Name = "txtCustom";
-            this.txtCustom.Size = new System.Drawing.Size(147, 20);
-            this.txtCustom.TabIndex = 22;
-            this.txtCustom.Validated += new System.EventHandler(this.txtCustom_Validated);
-            // 
-            // rdCallsign
-            // 
-            this.rdCallsign.AutoSize = true;
-            this.rdCallsign.Location = new System.Drawing.Point(6, 88);
-            this.rdCallsign.Name = "rdCallsign";
-            this.rdCallsign.Size = new System.Drawing.Size(61, 17);
-            this.rdCallsign.TabIndex = 21;
-            this.rdCallsign.TabStop = true;
-            this.rdCallsign.Text = "Callsign";
-            this.rdCallsign.UseVisualStyleBackColor = true;
-            this.rdCallsign.CheckedChanged += new System.EventHandler(this.rdCallsign_CheckedChanged);
-            // 
-            // rdAffiliate
-            // 
-            this.rdAffiliate.AutoSize = true;
-            this.rdAffiliate.Location = new System.Drawing.Point(6, 65);
-            this.rdAffiliate.Name = "rdAffiliate";
-            this.rdAffiliate.Size = new System.Drawing.Size(59, 17);
-            this.rdAffiliate.TabIndex = 20;
-            this.rdAffiliate.TabStop = true;
-            this.rdAffiliate.Text = "Affiliate";
-            this.rdAffiliate.UseVisualStyleBackColor = true;
-            this.rdAffiliate.CheckedChanged += new System.EventHandler(this.rdAffiliate_CheckedChanged);
-            // 
-            // rdName
-            // 
-            this.rdName.AutoSize = true;
-            this.rdName.Location = new System.Drawing.Point(6, 42);
-            this.rdName.Name = "rdName";
-            this.rdName.Size = new System.Drawing.Size(53, 17);
-            this.rdName.TabIndex = 19;
-            this.rdName.TabStop = true;
-            this.rdName.Text = "Name";
-            this.rdName.UseVisualStyleBackColor = true;
-            this.rdName.CheckedChanged += new System.EventHandler(this.rdName_CheckedChanged);
-            // 
-            // rdStation
-            // 
-            this.rdStation.AutoSize = true;
-            this.rdStation.Location = new System.Drawing.Point(6, 19);
-            this.rdStation.Name = "rdStation";
-            this.rdStation.Size = new System.Drawing.Size(72, 17);
-            this.rdStation.TabIndex = 18;
-            this.rdStation.TabStop = true;
-            this.rdStation.Text = "Station ID";
-            this.rdStation.UseVisualStyleBackColor = true;
-            this.rdStation.CheckedChanged += new System.EventHandler(this.rdStation_CheckedChanged);
-            // 
-            // txtCallsign
-            // 
-            this.txtCallsign.Enabled = false;
-            this.txtCallsign.Location = new System.Drawing.Point(84, 87);
-            this.txtCallsign.Name = "txtCallsign";
-            this.txtCallsign.Size = new System.Drawing.Size(147, 20);
-            this.txtCallsign.TabIndex = 17;
-            // 
-            // txtAffiliate
-            // 
-            this.txtAffiliate.Enabled = false;
-            this.txtAffiliate.Location = new System.Drawing.Point(84, 64);
-            this.txtAffiliate.Name = "txtAffiliate";
-            this.txtAffiliate.Size = new System.Drawing.Size(147, 20);
-            this.txtAffiliate.TabIndex = 15;
-            // 
-            // txtName
-            // 
-            this.txtName.Enabled = false;
-            this.txtName.Location = new System.Drawing.Point(84, 41);
-            this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(147, 20);
-            this.txtName.TabIndex = 13;
-            // 
-            // txtStationID
-            // 
-            this.txtStationID.Enabled = false;
-            this.txtStationID.Location = new System.Drawing.Point(84, 18);
-            this.txtStationID.Name = "txtStationID";
-            this.txtStationID.Size = new System.Drawing.Size(147, 20);
-            this.txtStationID.TabIndex = 11;
-            // 
             // btnAddAllChans
             // 
             this.btnAddAllChans.Location = new System.Drawing.Point(282, 186);
@@ -651,6 +671,7 @@
             this.btnAddAllChans.TabIndex = 9;
             this.btnAddAllChans.Text = ">>";
             this.btnAddAllChans.UseVisualStyleBackColor = true;
+            this.btnAddAllChans.Click += new System.EventHandler(this.btnAddAllChans_Click);
             // 
             // btnRemoveAllChans
             // 
@@ -660,6 +681,7 @@
             this.btnRemoveAllChans.TabIndex = 7;
             this.btnRemoveAllChans.Text = "<<";
             this.btnRemoveAllChans.UseVisualStyleBackColor = true;
+            this.btnRemoveAllChans.Click += new System.EventHandler(this.btnRemoveAllChans_Click);
             // 
             // btnRemoveChan
             // 
@@ -989,26 +1011,6 @@
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
-            // gbChannelIDMap
-            // 
-            this.gbChannelIDMap.Controls.Add(this.btnCustomGrid);
-            this.gbChannelIDMap.Controls.Add(this.txtStationID);
-            this.gbChannelIDMap.Controls.Add(this.txtName);
-            this.gbChannelIDMap.Controls.Add(this.txtAffiliate);
-            this.gbChannelIDMap.Controls.Add(this.rdCustom);
-            this.gbChannelIDMap.Controls.Add(this.txtCallsign);
-            this.gbChannelIDMap.Controls.Add(this.txtCustom);
-            this.gbChannelIDMap.Controls.Add(this.rdStation);
-            this.gbChannelIDMap.Controls.Add(this.rdCallsign);
-            this.gbChannelIDMap.Controls.Add(this.rdName);
-            this.gbChannelIDMap.Controls.Add(this.rdAffiliate);
-            this.gbChannelIDMap.Location = new System.Drawing.Point(615, 46);
-            this.gbChannelIDMap.Name = "gbChannelIDMap";
-            this.gbChannelIDMap.Size = new System.Drawing.Size(237, 167);
-            this.gbChannelIDMap.TabIndex = 28;
-            this.gbChannelIDMap.TabStop = false;
-            this.gbChannelIDMap.Text = "XMLTV Channel ID Map";
-            // 
             // frmOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1032,6 +1034,8 @@
             this.tpXMLTV1.ResumeLayout(false);
             this.gbStationMap.ResumeLayout(false);
             this.gbStationMap.PerformLayout();
+            this.gbChannelIDMap.ResumeLayout(false);
+            this.gbChannelIDMap.PerformLayout();
             this.gbAddedChannels.ResumeLayout(false);
             this.gbAvailableChannels.ResumeLayout(false);
             this.tpGeneral1.ResumeLayout(false);
@@ -1043,8 +1047,6 @@
             this.gbPersistentCache.ResumeLayout(false);
             this.gbPersistentCache.PerformLayout();
             this.panel1.ResumeLayout(false);
-            this.gbChannelIDMap.ResumeLayout(false);
-            this.gbChannelIDMap.PerformLayout();
             this.ResumeLayout(false);
 
         }

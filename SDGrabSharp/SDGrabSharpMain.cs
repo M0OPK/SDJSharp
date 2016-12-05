@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SDGrabSharp.Common;
+using SDGrabSharp.Resources;
 
 namespace SDGrabSharp.UI
 {
@@ -18,9 +19,22 @@ namespace SDGrabSharp.UI
         public frmMain(DataCache datacache, Config dataconfig)
         {
             InitializeComponent();
-            tsStatus.Text = "Ready";
+            Localize();
+            tsStatus.Text = Strings.tsStatusDefaultText;
             cache = datacache;
             config = dataconfig;
+        }
+
+        private void Localize()
+        {
+            toolStripMenuItemFile.Text = Strings.toolStripMenuItemFile;
+            toolStripMenuItemRun.Text = Strings.toolStripMenuItemRun;
+            toolStripMenuItemExit.Text = Strings.toolStripMenuItemExit;
+            toolStripMenuItemTools.Text = Strings.toolStripMenuItemTools;
+            toolStripMenuItemOptions.Text = Strings.toolStripMenuItemOptions;
+            toolStripMenuItemHelp.Text = Strings.toolStripMenuItemHelp;
+            toolStripMenuItemAbout.Text = Strings.toolStripMenuItemAbout;
+            this.Text = string.Format(Strings.frmMainTitle, typeof(SDGrabSharp.UI.Program).Assembly.GetName().Version);
         }
 
         private void toolStripMenuItemExit_Click(object sender, EventArgs e)

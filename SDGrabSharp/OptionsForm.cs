@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SchedulesDirect;
 using SDGrabSharp.Common;
+using SDGrabSharp.Resources;
 
 namespace SDGrabSharp.UI
 {
@@ -45,13 +46,13 @@ namespace SDGrabSharp.UI
         public frmOptions(DataCache datacache, Config dataconfig)
         {
             InitializeComponent();
+            Localize();
 
             Cursor.Current = Cursors.WaitCursor;
+
             // Setup tooltips
             ToolTip optionsTooltip = new ToolTip();
             optionsTooltip.SetToolTip(btnLogin, "Logs into Schedules direct. Required for most functions");
-
-            //locationInfo = new List<ChannelLocationInfo>();
 
             config = dataconfig;
             cache = datacache;
@@ -84,6 +85,70 @@ namespace SDGrabSharp.UI
 
             updateControls(loggedIn);
             Cursor.Current = Cursors.Default;
+        }
+
+        private void Localize()
+        {
+            tpSD1.Text = Strings.tpSD1Title;
+            gbStations.Text = Strings.gbStations;
+            btnStationCacheClear.Text = Strings.btnStationCacheClear;
+            chStationID.Text = Strings.chStationID;
+            chName.Text = Strings.chName;
+            gbHeadends.Text = Strings.gbHeadends;
+            btnHeadendCacheClear.Text = Strings.btnHeadendCacheClear;
+            btnLineupAdd.Text = Strings.btnLineupAdd;
+            gbAccountLineups.Text = Strings.gbAccountLineups;
+            btnDeleteLineup.Text = Strings.btnDeleteLineup;
+            chLineup.Text = Strings.chLineup;
+            chModified.Text = Strings.chModified;
+            grpLocation.Text = Strings.grpLocation;
+            btnLocationCacheClear.Text = Strings.btnLocationCacheClear;
+            btnHeadends.Text = Strings.btnHeadends;
+            lbPostCode.Text = Strings.lbPostCode;
+            gbCreds.Text = Strings.gbCreds;
+            btnLogout.Text = Strings.btnLogout;
+            btnLogin.Text = Strings.btnLogin;
+            checkAlwaysAsk.Text = Strings.checkAlwaysAsk;
+            lbPassword.Text = Strings.lbPassword;
+            lbLogin.Text = Strings.lbLogin;
+            tpXMLTV1.Text = Strings.tpXMLTV1;
+            gbStationMap.Text = Strings.gbStationMap;
+            gbChannelIDMap.Text = Strings.gbChannelIDMap;
+            btnCustomGrid.Text = Strings.btnCustomGrid;
+            rdCustom.Text = Strings.rdCustom;
+            rdStation.Text = Strings.rdStation;
+            rdCallsign.Text = Strings.rdCallsign;
+            rdName.Text = Strings.rdName;
+            rdAffiliate.Text = Strings.rdAffiliate;
+            gbAddedChannels.Text = Strings.gbAddedChannels;
+            chAddedID.Text = Strings.chAddedID;
+            chAddedName.Text = Strings.chAddedName;
+            gbAvailableChannels.Text = Strings.gbAvailableChannels;
+            chAvailID.Text = Strings.chAvailID;
+            chAvailName.Text = Strings.chAvailName;
+            lblLineup.Text = Strings.lblLineup;
+            tpGeneral1.Text = Strings.tpGeneral1;
+            gbRetrievalPeriod.Text = Strings.gbRetrievalPeriod;
+            ckIncludeYesterday.Text = Strings.ckIncludeYesterday;
+            lbProgrammePeriod.Text = Strings.lbProgrammePeriod;
+            gbXmlTVAttr.Text = Strings.gbXmlTVAttr;
+            ckProgrammeID.Text = Strings.ckProgrammeID;
+            ckShowType.Text = Strings.ckShowType;
+            ckStationAfiliate.Text = Strings.ckStationAfiliate;
+            ckStationCallsign.Text = Strings.ckStationCallsign;
+            ckStationName.Text = Strings.ckStationName;
+            ckStationID.Text = Strings.ckStationID;
+            ckLogicalChannelNo.Text = Strings.ckLogicalChannelNo;
+            ckMD5.Text = Strings.ckMD5;
+            gbPersistentCache.Text = Strings.gbPersistentCache;
+            btnBrowseCache.Text = Strings.btnBrowseCache;
+            ckPersistentCache.Text = Strings.ckPersistentCache;
+            lbCacheFilename.Text = Strings.lbCacheFilename;
+            btnSaveAs.Text = Strings.btnSaveAs;
+            btnCancel.Text = Strings.btnCancel;
+            btnSave.Text = Strings.btnSave;
+            btnOK.Text = Strings.btnOK;
+            this.Text = Strings.frmOptionsTitle;
         }
 
         private void checkAlwaysAsk_CheckedChanged(object sender, EventArgs e)
@@ -220,9 +285,9 @@ namespace SDGrabSharp.UI
         private void updateLineupsStatus(int lineups, int maxlineups, int changestoday)
         {
             if (changestoday >= 0)
-                gbAccountLineups.Text = string.Format("Account Lineups {0} of {1} changes remaining {2}", lineups.ToString(), maxlineups.ToString(), changestoday.ToString());
+                gbAccountLineups.Text = string.Format(Strings.gbAccountLineupsRemaining, lineups.ToString(), maxlineups.ToString(), changestoday.ToString());
             else
-                gbAccountLineups.Text = string.Format("Account Lineups {0} of {1}", lineups.ToString(), maxlineups.ToString());
+                gbAccountLineups.Text = string.Format(Strings.gbAccountLineupsNormal, lineups.ToString(), maxlineups.ToString());
         }
 
         private void lvAccountLineups_SelectedIndexChanged(object sender, EventArgs e)
@@ -360,7 +425,7 @@ namespace SDGrabSharp.UI
                 config.SDPasswordHash = sdJS.hashPassword(txtPassword.Text);
             config.TranslationMatrix = localTranslate;
             config.Save(filename);
-            MessageBox.Show(this, "Configuration saved", "SDSharp", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(this, Strings.ConfigSaved, "SDSharp", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void btnLocationCacheClear_Click(object sender, EventArgs e)
@@ -681,10 +746,22 @@ namespace SDGrabSharp.UI
             if (lvAvailableChans.SelectedItems.Count == 0)
                 return;
 
-            foreach (ListViewItem chan in lvAvailableChans.SelectedItems)
+            try
             {
-                AddAddedChannel((string)cbLineup.SelectedItem, chan);
-                AddChannelToMatrix((string)cbLineup.SelectedItem, chan);
+                Cursor.Current = Cursors.WaitCursor;
+                lvAddedChans.BeginUpdate();
+                lvAvailableChans.BeginUpdate();
+                foreach (ListViewItem chan in lvAvailableChans.SelectedItems)
+                {
+                    AddAddedChannel((string)cbLineup.SelectedItem, chan);
+                    AddChannelToMatrix((string)cbLineup.SelectedItem, chan);
+                }
+            }
+            finally
+            {
+                lvAddedChans.EndUpdate();
+                lvAvailableChans.EndUpdate();
+                Cursor.Current = Cursors.Default;
             }
         }
 
@@ -827,9 +904,9 @@ namespace SDGrabSharp.UI
                 initialFile = "persistentcache.xml";
 
             dialog.InitialDirectory = folder;
-            dialog.Filter = "XML Files (*.xml)|*.xml|All Files|*.*";
+            dialog.Filter = string.Format("{0}|*.xml|{1}|*.*", Strings.XmlFiles, Strings.AllFiles);
             dialog.FileName = initialFile;
-            dialog.Title = "Choose save location for persistent cache";
+            dialog.Title = Strings.SaveCacheDialogCaption;
             var dialogResult = dialog.ShowDialog(this);
 
             if (dialogResult.ToString() == "OK")
@@ -940,9 +1017,18 @@ namespace SDGrabSharp.UI
             if (lvAddedChans.SelectedItems.Count == 0)
                 return;
 
-            foreach (ListViewItem chan in lvAddedChans.SelectedItems)
+            try
             {
-                removeAddedChannel(chan);
+                Cursor.Current = Cursors.WaitCursor;
+                lvAvailableChans.BeginUpdate();
+                lvAddedChans.BeginUpdate();
+                foreach (ListViewItem chan in lvAddedChans.SelectedItems)
+                    removeAddedChannel(chan);
+            }
+            finally
+            {
+                lvAddedChans.EndUpdate();
+                lvAvailableChans.EndUpdate();
             }
         }
 
@@ -1073,8 +1159,8 @@ namespace SDGrabSharp.UI
                 initialFile = "SDGrabSharp.xml";
 
             dialog.InitialDirectory = folder;
-            dialog.Title = "Select save location for configuration";
-            dialog.Filter = "XML Files (*.xml)|*.xml|All Files|*.*";
+            dialog.Title = Strings.SaveConfigDialogCaption;
+            dialog.Filter = string.Format("{0}|*.xml|{1}|*.*", Strings.XmlFiles, Strings.AllFiles);
             dialog.FileName = initialFile;
             var dialogResult = dialog.ShowDialog(this);
 
@@ -1132,7 +1218,7 @@ namespace SDGrabSharp.UI
             if (ckIncludeYesterday.Checked)
                 dateMin = dateMin.AddDays(-1.0f);
 
-            lbDateRangeInfo.Text = string.Format("Example included date range {0} - {1}",
+            lbDateRangeInfo.Text = string.Format(Strings.lbDateRangeInfo,
                 dateMin.ToShortDateString(), dateMax.ToShortDateString());
         }
 
@@ -1156,6 +1242,51 @@ namespace SDGrabSharp.UI
         {
             config.ProgrammeRetrieveYesterday = ckIncludeYesterday.Checked;
             updateDateRange();
+        }
+
+        private void btnAddAllChans_Click(object sender, EventArgs e)
+        {
+            if (lvAvailableChans.Items.Count == 0)
+                return;
+
+            try
+            {
+                Cursor.Current = Cursors.WaitCursor;
+                lvAddedChans.BeginUpdate();
+                lvAvailableChans.BeginUpdate();
+                foreach (ListViewItem chan in lvAvailableChans.Items)
+                {
+                    AddAddedChannel((string)cbLineup.SelectedItem, chan);
+                    AddChannelToMatrix((string)cbLineup.SelectedItem, chan);
+                }
+            }
+            finally
+            {
+                lvAddedChans.EndUpdate();
+                lvAvailableChans.EndUpdate();
+                Cursor.Current = Cursors.Default;
+            }
+        }
+
+        private void btnRemoveAllChans_Click(object sender, EventArgs e)
+        {
+            if (lvAddedChans.Items.Count == 0)
+                return;
+
+            try
+            {
+                Cursor.Current = Cursors.WaitCursor;
+                lvAddedChans.BeginUpdate();
+                lvAvailableChans.BeginUpdate();
+                foreach (ListViewItem chan in lvAddedChans.Items)
+                    removeAddedChannel(chan);
+            }
+            finally
+            {
+                lvAddedChans.EndUpdate();
+                lvAvailableChans.EndUpdate();
+                Cursor.Current = Cursors.Default;
+            }
         }
     }
 }

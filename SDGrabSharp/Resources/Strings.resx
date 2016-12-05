@@ -1,0 +1,375 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AllFiles" xml:space="preserve">
+    <value>All Files</value>
+  </data>
+  <data name="btnBrowseCache" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="btnCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="btnCustomGrid" xml:space="preserve">
+    <value>Custom Grid</value>
+  </data>
+  <data name="btnDeleteLineup" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="btnHeadendCacheClear" xml:space="preserve">
+    <value>Clear Cache</value>
+  </data>
+  <data name="btnHeadends" xml:space="preserve">
+    <value>Headends</value>
+  </data>
+  <data name="btnLineupAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="btnLocationCacheClear" xml:space="preserve">
+    <value>Clear Cache</value>
+  </data>
+  <data name="btnLogin" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="btnLogout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="btnOK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="btnSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="btnSaveAs" xml:space="preserve">
+    <value>Save As</value>
+  </data>
+  <data name="btnStationCacheClear" xml:space="preserve">
+    <value>Clear Cache</value>
+  </data>
+  <data name="chAddedID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="chAddedName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="chAvailID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="chAvailName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="checkAlwaysAsk" xml:space="preserve">
+    <value>Always Ask</value>
+  </data>
+  <data name="chLineup" xml:space="preserve">
+    <value>Lineup</value>
+  </data>
+  <data name="chModified" xml:space="preserve">
+    <value>Date Modified</value>
+  </data>
+  <data name="chName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="chStationID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ckIncludeYesterday" xml:space="preserve">
+    <value>Include Yesterday</value>
+  </data>
+  <data name="ckLogicalChannelNo" xml:space="preserve">
+    <value>Logical Channel Number (Map)</value>
+  </data>
+  <data name="ckMD5" xml:space="preserve">
+    <value>Programme MD5 (Required)</value>
+  </data>
+  <data name="ckPersistentCache" xml:space="preserve">
+    <value>Persistent Cache</value>
+  </data>
+  <data name="ckProgrammeID" xml:space="preserve">
+    <value>Programme ID (Required)</value>
+  </data>
+  <data name="ckShowType" xml:space="preserve">
+    <value>Show Type (programme)</value>
+  </data>
+  <data name="ckStationAfiliate" xml:space="preserve">
+    <value>Station Affiliate (station)</value>
+  </data>
+  <data name="ckStationCallsign" xml:space="preserve">
+    <value>Station Callsign (station)</value>
+  </data>
+  <data name="ckStationID" xml:space="preserve">
+    <value>Station ID (station)</value>
+  </data>
+  <data name="ckStationName" xml:space="preserve">
+    <value>Station Name (station)</value>
+  </data>
+  <data name="ConfigSaved" xml:space="preserve">
+    <value>Configuration saved</value>
+  </data>
+  <data name="CustomEntryCustomName" xml:space="preserve">
+    <value>Custom Name</value>
+  </data>
+  <data name="CustomEntryLineup" xml:space="preserve">
+    <value>Lineup</value>
+  </data>
+  <data name="CustomEntryName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="CustomEntryStationID" xml:space="preserve">
+    <value>Station ID</value>
+  </data>
+  <data name="CustomGridEntry" xml:space="preserve">
+    <value>Entry Custom Channel names</value>
+  </data>
+  <data name="frmMainTitle" xml:space="preserve">
+    <value>SDGrabSharp {0} (Alpha)</value>
+  </data>
+  <data name="frmOptionsTitle" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="gbAccountLineups" xml:space="preserve">
+    <value>Account Lineups</value>
+  </data>
+  <data name="gbAccountLineupsNormal" xml:space="preserve">
+    <value>Account Lineups {0} of {1}</value>
+  </data>
+  <data name="gbAccountLineupsRemaining" xml:space="preserve">
+    <value>Account Lineups {0} of {1} changes remaining {2}</value>
+  </data>
+  <data name="gbAddedChannels" xml:space="preserve">
+    <value>Added Channels</value>
+  </data>
+  <data name="gbAvailableChannels" xml:space="preserve">
+    <value>Available Channels</value>
+  </data>
+  <data name="gbChannelIDMap" xml:space="preserve">
+    <value>XMLTV Channel ID Map</value>
+  </data>
+  <data name="gbCreds" xml:space="preserve">
+    <value>Credentials</value>
+  </data>
+  <data name="gbCustomEntry" xml:space="preserve">
+    <value>Custom Channel Entry</value>
+  </data>
+  <data name="gbHeadends" xml:space="preserve">
+    <value>Headend/Lineup</value>
+  </data>
+  <data name="gbPersistentCache" xml:space="preserve">
+    <value>Persistent Cache</value>
+  </data>
+  <data name="gbRetrievalPeriod" xml:space="preserve">
+    <value>Programme Retrieval Period</value>
+  </data>
+  <data name="gbStationMap" xml:space="preserve">
+    <value>Station mapping</value>
+  </data>
+  <data name="gbStations" xml:space="preserve">
+    <value>Stations</value>
+  </data>
+  <data name="gbXmlTVAttr" xml:space="preserve">
+    <value>Schedules Direct XMLTV Attributes</value>
+  </data>
+  <data name="grpLocation" xml:space="preserve">
+    <value>Location Selection</value>
+  </data>
+  <data name="lbCacheFilename" xml:space="preserve">
+    <value>Cache Filename</value>
+  </data>
+  <data name="lbDateRangeInfo" xml:space="preserve">
+    <value>Example include date range {0} - {1}</value>
+  </data>
+  <data name="lblLineup" xml:space="preserve">
+    <value>Lineup</value>
+  </data>
+  <data name="lbLogin" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="lbPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="lbPostCode" xml:space="preserve">
+    <value>Post Code</value>
+  </data>
+  <data name="lbProgrammePeriod" xml:space="preserve">
+    <value>Retrieval Period (Days)</value>
+  </data>
+  <data name="OptionsbtnCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="OptionsbtnOK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="rdAffiliate" xml:space="preserve">
+    <value>Affiliate</value>
+  </data>
+  <data name="rdCallsign" xml:space="preserve">
+    <value>Callsign</value>
+  </data>
+  <data name="rdCustom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="rdName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="rdStation" xml:space="preserve">
+    <value>Station ID</value>
+  </data>
+  <data name="SaveCacheDialogCaption" xml:space="preserve">
+    <value>Choose save location for persistent cache</value>
+  </data>
+  <data name="SaveConfigDialogCaption" xml:space="preserve">
+    <value>Select save location for configuration</value>
+  </data>
+  <data name="toolStripMenuItemAbout" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="toolStripMenuItemExit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="toolStripMenuItemFile" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="toolStripMenuItemHelp" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="toolStripMenuItemOptions" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="toolStripMenuItemRun" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="toolStripMenuItemTools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="tpGeneral1" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="tpSD1Title" xml:space="preserve">
+    <value>Schedules Direct</value>
+  </data>
+  <data name="tpXMLTV1" xml:space="preserve">
+    <value>XMLTV Mapping</value>
+  </data>
+  <data name="tsStatusDefaultText" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="XmlFiles" xml:space="preserve">
+    <value>XML Files (*.xml)</value>
+  </data>
+</root>
