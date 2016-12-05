@@ -16,6 +16,14 @@ namespace SDGrabSharp.Common
         public bool PersistantCache;
         public XmlTVTranslation.TranslateField defaultTranslateMode;
         public Dictionary<string, XmlTVTranslation> TranslationMatrix;
+        public bool XmlTVLogicalChannelNumber;
+        public bool XmlTVStationAfilliate;
+        public bool XmlTVStationID;
+        public bool XmlTVShowType;
+        public bool XmlTVStationName;
+        public bool XmlTVStationCallsign;
+        public bool ProgrammeRetrieveYesterday;
+        public int ProgrammeRetrieveRangeDays;
 
         public Config()
         {
@@ -23,6 +31,8 @@ namespace SDGrabSharp.Common
             cacheFilename = "persistentcache.xml";
             PersistantCache = true;
             defaultTranslateMode = XmlTVTranslation.TranslateField.StationName;
+
+            ProgrammeRetrieveRangeDays = 3;
         }
 
         public class XmlTVTranslation
@@ -66,6 +76,14 @@ namespace SDGrabSharp.Common
             AddSimpleXMLElement(ref rootConfigNode, "sd-alwaysask", LoginAlwaysAsk ? "true" : "false");
             AddSimpleXMLElement(ref rootConfigNode, "persistent-cache", PersistantCache ? "true" : "false");
             AddSimpleXMLElement(ref rootConfigNode, "cache-filename", cacheFilename);
+            AddSimpleXMLElement(ref rootConfigNode, "attrib-logicalnumber", XmlTVLogicalChannelNumber ? "true" : "false");
+            AddSimpleXMLElement(ref rootConfigNode, "attrib-showtype", XmlTVShowType ? "true" : "false");
+            AddSimpleXMLElement(ref rootConfigNode, "attrib-afiliate", XmlTVStationAfilliate ? "true" : "false");
+            AddSimpleXMLElement(ref rootConfigNode, "attrib-callsgn", XmlTVStationCallsign ? "true" : "false");
+            AddSimpleXMLElement(ref rootConfigNode, "attrib-stationid", XmlTVStationID ? "true" : "false");
+            AddSimpleXMLElement(ref rootConfigNode, "attrib-stationname", XmlTVStationName ? "true" : "false");
+            AddSimpleXMLElement(ref rootConfigNode, "programme-retrieveyesterday", ProgrammeRetrieveYesterday ? "true" : "false");
+            AddSimpleXMLElement(ref rootConfigNode, "programme-retrieverangedays", ProgrammeRetrieveRangeDays.ToString());
 
             if (TranslationMatrix != null && TranslationMatrix.Count() != 0)
             {
@@ -121,6 +139,38 @@ namespace SDGrabSharp.Common
             workNode = rootConfigNode.SelectSingleNode("cache-filename");
             if (workNode != null)
                 cacheFilename = workNode.InnerText;
+
+            workNode = rootConfigNode.SelectSingleNode("attrib-logicalnumber");
+            if (workNode != null)
+                XmlTVLogicalChannelNumber = (workNode.InnerText == "true");
+
+            workNode = rootConfigNode.SelectSingleNode("attrib-showtype");
+            if (workNode != null)
+                XmlTVShowType = (workNode.InnerText == "true");
+
+            workNode = rootConfigNode.SelectSingleNode("attrib-afiliate");
+            if (workNode != null)
+                XmlTVStationAfilliate = (workNode.InnerText == "true");
+
+            workNode = rootConfigNode.SelectSingleNode("attrib-callsgn");
+            if (workNode != null)
+                XmlTVStationCallsign = (workNode.InnerText == "true");
+
+            workNode = rootConfigNode.SelectSingleNode("attrib-stationid");
+            if (workNode != null)
+                XmlTVStationID = (workNode.InnerText == "true");
+
+            workNode = rootConfigNode.SelectSingleNode("attrib-stationname");
+            if (workNode != null)
+                XmlTVStationName = (workNode.InnerText == "true");
+
+            workNode = rootConfigNode.SelectSingleNode("programme-retrieveyesterday");
+            if (workNode != null)
+                ProgrammeRetrieveYesterday = (workNode.InnerText == "true");
+
+            workNode = rootConfigNode.SelectSingleNode("programme-retrieverangedays");
+            if (workNode != null)
+                try { ProgrammeRetrieveRangeDays = int.Parse(workNode.InnerText); } catch { }
 
             XmlNode translateListNode = rootConfigNode.SelectSingleNode("TranslationMatrix");
             if (translateListNode != null)

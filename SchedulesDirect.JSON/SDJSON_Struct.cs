@@ -557,17 +557,13 @@ namespace SchedulesDirect
         [DataMember]
         public string[] date;
 
-        public SDScheduleRequest()
-        {
-            date = new string[2];
-        }
-
-        public SDScheduleRequest(string station, DateTime start, DateTime end)
+        public SDScheduleRequest(string station, IEnumerable<DateTime> dates)
         {
             stationID = station;
-            string dateStart = start.ToString("yyyy-MM-dd");
-            string dateEnd = end.ToString("yyyy-MM-dd");
-            date = new string[] { dateStart, dateEnd };
+            List<string> dateStrings = new List<string>();
+            foreach (DateTime thisDate in dates)
+                dateStrings.Add(thisDate.ToString("yyyy-MM-dd"));
+            date = dateStrings.ToArray();
         }
     }
 

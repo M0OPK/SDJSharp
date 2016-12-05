@@ -140,9 +140,11 @@ namespace SchedulesDirect.UIDemo
         private void btnGetSchedule_Click(object sender, EventArgs e)
         {
             List<SDScheduleRequest> reqs = new List<SDScheduleRequest>();
-            SDScheduleRequest req = new SDScheduleRequest("45399", DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30"));
+            SDScheduleRequest req = new SDScheduleRequest("45399", 
+                new DateTime[] { DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30") }.AsEnumerable());
             reqs.Add(req);
-            SDScheduleRequest req2 = new SDScheduleRequest("82547", DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30"));
+            SDScheduleRequest req2 = new SDScheduleRequest("82547", 
+                new DateTime[] { DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30") }.AsEnumerable());
             reqs.Add(req2);
             var result = sd.GetSchedules(reqs.AsEnumerable());
         }

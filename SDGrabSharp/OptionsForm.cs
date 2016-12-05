@@ -341,14 +341,20 @@ namespace SDGrabSharp.UI
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            //cache.Save("F:\\SchedulesDirect\\persistentcache.xml");
+            SaveConfig("SDGrabSharp.xml");
+            this.Close();
+        }
+
+        private void SaveConfig(string filename)
+        {
             config.cacheFilename = txtCacheFilename.Text;
             config.PersistantCache = ckPersistentCache.Checked;
             config.SDUsername = txtLogin.Text;
             if (txtPassword.Text != passwordHashEntry)
                 config.SDPasswordHash = sdJS.hashPassword(txtPassword.Text);
             config.TranslationMatrix = localTranslate;
-            config.Save("SDGrabSharp.xml");
+            config.Save(filename);
+            MessageBox.Show(this, "Configuration saved", "SDSharp", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void btnLocationCacheClear_Click(object sender, EventArgs e)
@@ -643,9 +649,7 @@ namespace SDGrabSharp.UI
 
             foreach (ListViewItem chan in lvAvailableChans.SelectedItems)
             {
-                lvAvailableChans.Items.Remove(chan);
-                chan.Tag = (string)cbLineup.SelectedItem;
-                lvAddedChans.Items.Add(chan);
+                AddAddedChannel((string)cbLineup.SelectedItem, chan);
                 AddChannelToMatrix((string)cbLineup.SelectedItem, chan);
             }
         }
@@ -754,6 +758,16 @@ namespace SDGrabSharp.UI
             lbCacheFilename.Enabled = config.PersistantCache;
             txtCacheFilename.Enabled = config.PersistantCache;
             btnBrowseCache.Enabled = config.PersistantCache;
+            ckLogicalChannelNo.Checked = config.XmlTVLogicalChannelNumber;
+            ckShowType.Checked = config.XmlTVShowType;
+            ckStationAfiliate.Checked = config.XmlTVStationAfilliate;
+            ckStationCallsign.Checked = config.XmlTVStationCallsign;
+            ckStationID.Checked = config.XmlTVStationID;
+            ckStationName.Checked = config.XmlTVStationName;
+            ckIncludeYesterday.Checked = config.ProgrammeRetrieveYesterday;
+            tkbProgrammePeriod.Value = config.ProgrammeRetrieveRangeDays;
+            txtProgrammePeriod.Text = config.ProgrammeRetrieveRangeDays.ToString();
+            updateDateRange();
         }
 
         private void ckPersistentCache_CheckedChanged(object sender, EventArgs e)
@@ -781,6 +795,7 @@ namespace SDGrabSharp.UI
             dialog.InitialDirectory = folder;
             dialog.Filter = "XML Files (*.xml)|*.xml|All Files|*.*";
             dialog.FileName = initialFile;
+            dialog.Title = "Choose save location for persistent cache";
             var dialogResult = dialog.ShowDialog(this);
 
             if (dialogResult.ToString() == "OK")
@@ -905,28 +920,37 @@ namespace SDGrabSharp.UI
             // Only add to left list, if selected lineup matches
             if ((string)cbLineup.SelectedItem == (string)chan.Tag)
             {
-                var thisLocal = localTranslate.Select(line => line.Value).Where(line => line.LineupID == (string)chan.Tag && line.SDStationID == chan.Text).FirstOrDefault();
+                var thisLocal = localTranslate.Select(line => line.Value).
+                    Where(line => line.LineupID == (string)chan.Tag && line.SDStationID == chan.Text).FirstOrDefault();
                 if (thisLocal != null)
                     thisLocal.isDeleted = true;
 
                 // Try to find original location
-                int thisOriginalLocation = locationInfo.Where(line => line.lineUp == (string)chan.Tag && line.stationID == chan.Text).Select(line => line.originalPosition).FirstOrDefault();
-                var nextLocation =
-                    (from listItem in lvAvailableChans.Items.Cast<ListViewItem>()
-                     join locInfo in locationInfo
-                        on new
-                        {
-                            joinLineup = (string)cbLineup.SelectedItem,
-                            joinStation = listItem.Text
-                        }
-                        equals new
-                        {
-                            joinLineup = locInfo.lineUp,
-                            joinStation = locInfo.stationID
-                        }
-                     where locInfo.originalPosition > thisOriginalLocation
-                     select listItem
-                    ).FirstOrDefault();
+                var thisOriginalLocation = locationInfo.
+                    Where(line => line.lineUp == (string)chan.Tag && line.stationID == chan.Text).FirstOrDefault();
+
+                ListViewItem nextLocation = null;
+
+                if (thisOriginalLocation != null)
+                {
+                    nextLocation =
+                        (from listItem in lvAvailableChans.Items.Cast<ListViewItem>()
+                         join locInfo in locationInfo
+                            on new
+                            {
+                                joinLineup = (string)cbLineup.SelectedItem,
+                                joinStation = listItem.Text
+                            }
+                            equals new
+                            {
+                                joinLineup = locInfo.lineUp,
+                                joinStation = locInfo.stationID
+                            }
+                         where locInfo.originalPosition > thisOriginalLocation.originalPosition
+                            && locInfo.isAvailable
+                         select listItem
+                        ).FirstOrDefault();
+                }
 
                 chan.Tag = null;
                 var stationInfo = cache.GetLineupData(ref sdJS, (string)cbLineup.SelectedItem).stations.Where(line => line.stationID == chan.Text).FirstOrDefault();
@@ -939,18 +963,165 @@ namespace SDGrabSharp.UI
                     lvAvailableChans.Items.Insert(nextLocation.Index, chan);
                 else
                     lvAvailableChans.Items.Add(chan);
-            }
 
-//            try { localTranslate.Remove(translateKey); } catch { };
-            //try { localTranslate[translateKey].isDeleted = true; } catch { };
+                if (thisOriginalLocation != null)
+                    thisOriginalLocation.isAvailable = true;
+            }
         }
 
         private void AddAddedChannel(string lineup, ListViewItem chan)
         {
             lvAvailableChans.Items.Remove(chan);
-            chan.Tag = lineup;
-            lvAddedChans.Items.Add(chan);
 
+            string translateKey = string.Format("{0},{1}", lineup, chan.Text);
+
+            // Only add to left list, if selected lineup matches
+            if ((string)cbLineup.SelectedItem == lineup)
+            {
+                var thisLocal = localTranslate.Select(line => line.Value).
+                    Where(line => line.LineupID == lineup && line.SDStationID == chan.Text).FirstOrDefault();
+
+                if (thisLocal != null)
+                    thisLocal.isDeleted = false;
+
+                // Try to find original location
+                var thisOriginalLocation = locationInfo.
+                    Where(line => line.lineUp == lineup && line.stationID == chan.Text).FirstOrDefault();
+
+                ListViewItem nextLocation = null;
+                if (thisOriginalLocation != null)
+                {
+                    nextLocation =
+                        (from listItem in lvAddedChans.Items.Cast<ListViewItem>()
+                         join locInfo in locationInfo
+                            on new
+                            {
+                                joinLineup = (string)cbLineup.SelectedItem,
+                                joinStation = listItem.Text
+                            }
+                            equals new
+                            {
+                                joinLineup = locInfo.lineUp,
+                                joinStation = locInfo.stationID
+                            }
+                         where locInfo.originalPosition > thisOriginalLocation.originalPosition
+                            && !locInfo.isAvailable
+                         select listItem
+                        ).FirstOrDefault();
+                }
+
+                chan.Tag = lineup;
+                var stationInfo = cache.GetLineupData(ref sdJS, (string)cbLineup.SelectedItem).stations.Where(line => line.stationID == chan.Text).FirstOrDefault();
+
+                if (stationInfo != null)
+                    chan.SubItems[1].Text = stationInfo.name;
+
+                // If the nearest remaining neighbour was found, insert before it, else it goes to the end.
+                if (nextLocation != null)
+                    lvAddedChans.Items.Insert(nextLocation.Index, chan);
+                else
+                    lvAddedChans.Items.Add(chan);
+
+                if (thisOriginalLocation != null)
+                    thisOriginalLocation.isAvailable = false;
+            }
+        }
+
+        private void btnSaveAs_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            string folder = string.Empty;
+            if (txtCacheFilename.Text != string.Empty)
+                folder = new DirectoryInfo(txtCacheFilename.Text).Name;
+
+            string initialFile = new FileInfo(config.cacheFilename).Name;
+            if (initialFile == string.Empty)
+                initialFile = "SDGrabSharp.xml";
+
+            dialog.InitialDirectory = folder;
+            dialog.Title = "Select save location for configuration";
+            dialog.Filter = "XML Files (*.xml)|*.xml|All Files|*.*";
+            dialog.FileName = initialFile;
+            var dialogResult = dialog.ShowDialog(this);
+
+            if (dialogResult.ToString() == "OK")
+                SaveConfig(dialog.FileName);
+        }
+
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void ckStationCallsign_CheckedChanged(object sender, EventArgs e)
+        {
+            config.XmlTVStationCallsign = ckStationCallsign.Checked;
+        }
+
+        private void ckStationID_CheckedChanged(object sender, EventArgs e)
+        {
+            config.XmlTVStationID = ckStationID.Checked;
+        }
+
+        private void ckStationName_CheckedChanged(object sender, EventArgs e)
+        {
+            config.XmlTVStationName = ckStationName.Checked;
+        }
+
+        private void ckStationAfiliate_CheckedChanged(object sender, EventArgs e)
+        {
+            config.XmlTVStationAfilliate = ckStationAfiliate.Checked;
+        }
+
+        private void ckShowType_CheckedChanged(object sender, EventArgs e)
+        {
+            config.XmlTVShowType = ckShowType.Checked;
+        }
+
+        private void ckLogicalChannelNo_CheckedChanged(object sender, EventArgs e)
+        {
+            config.XmlTVLogicalChannelNumber = ckLogicalChannelNo.Checked;
+        }
+
+        private void tkbProgrammePeriod_Scroll(object sender, EventArgs e)
+        {
+            txtProgrammePeriod.Text = tkbProgrammePeriod.Value.ToString();
+            config.ProgrammeRetrieveRangeDays = tkbProgrammePeriod.Value;
+            updateDateRange();
+        }
+
+        private void updateDateRange()
+        {
+            DateTime dateMin = DateTime.Today.Date;
+            DateTime dateMax = dateMin.AddDays(tkbProgrammePeriod.Value);
+
+            if (ckIncludeYesterday.Checked)
+                dateMin = dateMin.AddDays(-1.0f);
+
+            lbDateRangeInfo.Text = string.Format("Example included date range {0} - {1}",
+                dateMin.ToShortDateString(), dateMax.ToShortDateString());
+        }
+
+        private void txtProgrammePeriod_Validated(object sender, EventArgs e)
+        {
+            int newValue = 0;
+            if (int.TryParse(txtProgrammePeriod.Text, out newValue))
+            {
+                if (newValue >= tkbProgrammePeriod.Minimum && newValue <= tkbProgrammePeriod.Maximum)
+                {
+                    tkbProgrammePeriod.Value = newValue;
+                    config.ProgrammeRetrieveRangeDays = newValue;
+                }
+                else
+                    txtProgrammePeriod.Text = tkbProgrammePeriod.Value.ToString();
+                updateDateRange();
+            }
+        }
+
+        private void ckIncludeYesterday_CheckedChanged(object sender, EventArgs e)
+        {
+            config.ProgrammeRetrieveYesterday = ckIncludeYesterday.Checked;
+            updateDateRange();
         }
     }
 }
