@@ -133,15 +133,41 @@ namespace XMLTV
         {
             try
             {
-                if (channelID == string.Empty)
+                XmlElement channelNode = buildChannelNode(channelID, displayName, url, iconUrl, extraattributes, extranodes);
+                if (channelNode == null)
                     return false;
+
+                // Find last channel if there is one
+                XmlNode lastChannel = xmlData.channelNodes.Cast<XmlNode>().LastOrDefault();
+
+                if (lastChannel == null)
+                    xmlData.rootNode.AppendChild(channelNode);
+                else
+                    xmlData.rootNode.InsertAfter(channelNode, lastChannel);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return false;
+        }
+
+        private XmlElement buildChannelNode(string channelID, XmlLangText[] displayName, string url = null, string iconUrl = null,
+                                            IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
+        {
+            try
+            {
+                if (channelID == string.Empty)
+                    return null;
 
                 XmlNode collideChannel = FindFirstChannel(channelID);
 
                 if (collideChannel != null)
                 {
                     addError(1001, "Duplicate channel found", XMLTVError.ErrorSeverity.Error, string.Format("Duplicate channel found:\r\n{0}\r\n", channelID), "AddChannel");
-                    return false;
+                    return null;
                 }
 
                 XmlElement channelNode = xmlData.rootDocument.CreateElement("channel");
@@ -187,15 +213,27 @@ namespace XMLTV
                     foreach (XmlNode extra in extranodes)
                         channelNode.AppendChild(extra);
                 }
+                return channelNode;
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
+        }
 
-                // Find last channel if there is one
-                XmlNode lastChannel = xmlData.channelNodes.Cast<XmlNode>().LastOrDefault();
+        public bool DeleteChannelNode(string channelID)
+        {
+            try
+            {
+                if (channelID == null || channelID == string.Empty)
+                    return false;
 
-                if (lastChannel == null)
-                    xmlData.rootNode.AppendChild(channelNode);
-                else
-                    xmlData.rootNode.InsertAfter(channelNode, lastChannel);
+                XmlNode thisChannel = FindFirstChannel(channelID);
+                if (thisChannel == null)
+                    return false;
 
+                xmlData.rootDocument.RemoveChild(thisChannel);
                 return true;
             }
             catch (Exception ex)
@@ -223,9 +261,34 @@ namespace XMLTV
         {
             try
             {
+                XmlElement programmelNode = buildProgrammeNode(start, stop, channel, title, subtitle, description,
+                                                            categories, extraattributes, extranodes);
+
+                // Find last channel if there is one
+                XmlNode lastProgramme = xmlData.programmeNodes.Cast<XmlNode>().LastOrDefault();
+
+                if (lastProgramme == null)
+                    xmlData.rootNode.AppendChild(programmelNode);
+                else
+                    xmlData.rootNode.InsertAfter(programmelNode, lastProgramme);
+            }
+            catch (System.Exception ex)
+            {
+                addError(ex);
+            }
+            return false;
+        }
+
+        public XmlElement buildProgrammeNode(string start, string stop, string channel, XmlLangText title = null, 
+                                       XmlLangText subtitle = null, XmlLangText description = null,
+                                       XmlLangText[] categories = null, IEnumerable<XmlAttribute> extraattributes = null, 
+                                       IEnumerable<XmlNode> extranodes = null)
+        {
+            try
+            {
                 // We need at the very least a start/stop time and channel number
                 if (start == string.Empty || stop == string.Empty || channel == string.Empty)
-                    return false;
+                    return null;
 
                 XmlNode collide = FindFirstProgramme(start, stop, channel);
 
@@ -233,7 +296,7 @@ namespace XMLTV
                 {
                     addError(2001, "Duplicate programme found", XMLTVError.ErrorSeverity.Error,
                              string.Format("Duplicate programme found:\r\n{0} from {1} to {2}", start, stop, channel), "AddProgramme");
-                    return false;
+                    return null;
                 }
 
                 XmlElement programmelNode = xmlData.rootDocument.CreateElement("programme");
@@ -289,14 +352,28 @@ namespace XMLTV
                     foreach (XmlNode extra in extranodes)
                         programmelNode.AppendChild(extra);
                 }
+                return programmelNode;
+            }
+            catch (System.Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
+        }
 
-                // Find last channel if there is one
-                XmlNode lastProgramme = xmlData.programmeNodes.Cast<XmlNode>().LastOrDefault();
+        public bool DeleteProgrammeNodeByTimeExact(string start, string stop, string channel)
+        {
+            try
+            {
+                if (channel == null || start == null || stop == null || channel == string.Empty || start == string.Empty || stop == string.Empty)
+                    return false;
 
-                if (lastProgramme == null)
-                    xmlData.rootNode.AppendChild(programmelNode);
-                else
-                    xmlData.rootNode.InsertAfter(programmelNode, lastProgramme);
+                XmlNode thisNode = FindFirstProgramme(start, stop, channel);
+                if (thisNode == null)
+                    return false;
+
+                xmlData.rootDocument.RemoveChild(thisNode);
+                return true;
             }
             catch (System.Exception ex)
             {
