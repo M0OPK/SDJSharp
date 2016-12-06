@@ -128,7 +128,7 @@ namespace SDGrabSharp.UI
             chAvailName.Text = Strings.chAvailName;
             lblLineup.Text = Strings.lblLineup;
             tpGeneral1.Text = Strings.tpGeneral1;
-            gbRetrievalPeriod.Text = Strings.gbRetrievalPeriod;
+            gbRetrievalOptions.Text = Strings.gbRetrievalOptions;
             ckIncludeYesterday.Text = Strings.ckIncludeYesterday;
             lbProgrammePeriod.Text = Strings.lbProgrammePeriod;
             gbXmlTVAttr.Text = Strings.gbXmlTVAttr;
@@ -149,6 +149,8 @@ namespace SDGrabSharp.UI
             btnSave.Text = Strings.btnSave;
             btnOK.Text = Strings.btnOK;
             this.Text = Strings.frmOptionsTitle;
+            lblScheduleItems.Text = Strings.lblScheduleItems;
+            lblProgrammeItems.Text = Strings.lblProgrammeItems;
         }
 
         private void checkAlwaysAsk_CheckedChanged(object sender, EventArgs e)
@@ -878,6 +880,10 @@ namespace SDGrabSharp.UI
             ckIncludeYesterday.Checked = config.ProgrammeRetrieveYesterday;
             tkbProgrammePeriod.Value = config.ProgrammeRetrieveRangeDays;
             txtProgrammePeriod.Text = config.ProgrammeRetrieveRangeDays.ToString();
+            tkbScheduleItems.Value = config.ScheduleRetrievalItems;
+            txtScheduleItems.Text = config.ScheduleRetrievalItems.ToString();
+            tkbProgrammeItems.Value = config.ProgrammeRetrievalItems;
+            txtProgrammeItems.Text = config.ProgrammeRetrievalItems.ToString();
             updateDateRange();
         }
 
@@ -1286,6 +1292,48 @@ namespace SDGrabSharp.UI
                 lvAddedChans.EndUpdate();
                 lvAvailableChans.EndUpdate();
                 Cursor.Current = Cursors.Default;
+            }
+        }
+
+        private void tkbProgrammeItems_Scroll(object sender, EventArgs e)
+        {
+            txtProgrammeItems.Text = tkbProgrammeItems.Value.ToString();
+            config.ProgrammeRetrievalItems = tkbProgrammeItems.Value;
+        }
+
+        private void tkbScheduleItems_Scroll(object sender, EventArgs e)
+        {
+            txtScheduleItems.Text = tkbScheduleItems.Value.ToString();
+            config.ScheduleRetrievalItems = tkbScheduleItems.Value;
+        }
+
+        private void txtScheduleItems_Validated(object sender, EventArgs e)
+        {
+            int newValue = 0;
+            if (int.TryParse(txtScheduleItems.Text, out newValue))
+            {
+                if (newValue >= tkbScheduleItems.Minimum && newValue <= tkbScheduleItems.Maximum)
+                {
+                    tkbScheduleItems.Value = newValue;
+                    config.ScheduleRetrievalItems = newValue;
+                }
+                else
+                    txtScheduleItems.Text = tkbScheduleItems.Value.ToString();
+            }
+        }
+
+        private void txtProgrammeItems_Validated(object sender, EventArgs e)
+        {
+            int newValue = 0;
+            if (int.TryParse(txtProgrammeItems.Text, out newValue))
+            {
+                if (newValue >= tkbProgrammeItems.Minimum && newValue <= tkbProgrammeItems.Maximum)
+                {
+                    tkbProgrammeItems.Value = newValue;
+                    config.ProgrammeRetrievalItems = newValue;
+                }
+                else
+                    txtProgrammeItems.Text = tkbProgrammeItems.Value.ToString();
             }
         }
     }

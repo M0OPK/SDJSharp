@@ -87,12 +87,18 @@
             this.lblLineup = new System.Windows.Forms.Label();
             this.cbLineup = new System.Windows.Forms.ComboBox();
             this.tpGeneral1 = new System.Windows.Forms.TabPage();
-            this.gbRetrievalPeriod = new System.Windows.Forms.GroupBox();
+            this.gbRetrievalOptions = new System.Windows.Forms.GroupBox();
             this.lbDateRangeInfo = new System.Windows.Forms.Label();
+            this.lblProgrammeItems = new System.Windows.Forms.Label();
+            this.txtScheduleItems = new System.Windows.Forms.TextBox();
+            this.txtProgrammeItems = new System.Windows.Forms.TextBox();
+            this.tkbProgrammePeriod = new System.Windows.Forms.TrackBar();
+            this.tkbProgrammeItems = new System.Windows.Forms.TrackBar();
+            this.tkbScheduleItems = new System.Windows.Forms.TrackBar();
+            this.lblScheduleItems = new System.Windows.Forms.Label();
             this.ckIncludeYesterday = new System.Windows.Forms.CheckBox();
             this.txtProgrammePeriod = new System.Windows.Forms.TextBox();
             this.lbProgrammePeriod = new System.Windows.Forms.Label();
-            this.tkbProgrammePeriod = new System.Windows.Forms.TrackBar();
             this.gbXmlTVAttr = new System.Windows.Forms.GroupBox();
             this.ckProgrammeID = new System.Windows.Forms.CheckBox();
             this.ckShowType = new System.Windows.Forms.CheckBox();
@@ -125,8 +131,10 @@
             this.gbAddedChannels.SuspendLayout();
             this.gbAvailableChannels.SuspendLayout();
             this.tpGeneral1.SuspendLayout();
-            this.gbRetrievalPeriod.SuspendLayout();
+            this.gbRetrievalOptions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tkbProgrammePeriod)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tkbProgrammeItems)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tkbScheduleItems)).BeginInit();
             this.gbXmlTVAttr.SuspendLayout();
             this.gbPersistentCache.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -725,7 +733,7 @@
             // tpGeneral1
             // 
             this.tpGeneral1.BackColor = System.Drawing.SystemColors.Control;
-            this.tpGeneral1.Controls.Add(this.gbRetrievalPeriod);
+            this.tpGeneral1.Controls.Add(this.gbRetrievalOptions);
             this.tpGeneral1.Controls.Add(this.gbXmlTVAttr);
             this.tpGeneral1.Controls.Add(this.gbPersistentCache);
             this.tpGeneral1.Location = new System.Drawing.Point(4, 22);
@@ -736,66 +744,128 @@
             this.tpGeneral1.Text = "General";
             this.tpGeneral1.Enter += new System.EventHandler(this.tpGeneral1_Enter);
             // 
-            // gbRetrievalPeriod
+            // gbRetrievalOptions
             // 
-            this.gbRetrievalPeriod.Controls.Add(this.lbDateRangeInfo);
-            this.gbRetrievalPeriod.Controls.Add(this.ckIncludeYesterday);
-            this.gbRetrievalPeriod.Controls.Add(this.txtProgrammePeriod);
-            this.gbRetrievalPeriod.Controls.Add(this.lbProgrammePeriod);
-            this.gbRetrievalPeriod.Controls.Add(this.tkbProgrammePeriod);
-            this.gbRetrievalPeriod.Location = new System.Drawing.Point(380, 52);
-            this.gbRetrievalPeriod.Name = "gbRetrievalPeriod";
-            this.gbRetrievalPeriod.Size = new System.Drawing.Size(486, 113);
-            this.gbRetrievalPeriod.TabIndex = 2;
-            this.gbRetrievalPeriod.TabStop = false;
-            this.gbRetrievalPeriod.Text = "Programme Retrieval Period";
+            this.gbRetrievalOptions.Controls.Add(this.lbDateRangeInfo);
+            this.gbRetrievalOptions.Controls.Add(this.lblProgrammeItems);
+            this.gbRetrievalOptions.Controls.Add(this.txtScheduleItems);
+            this.gbRetrievalOptions.Controls.Add(this.txtProgrammeItems);
+            this.gbRetrievalOptions.Controls.Add(this.tkbProgrammePeriod);
+            this.gbRetrievalOptions.Controls.Add(this.tkbProgrammeItems);
+            this.gbRetrievalOptions.Controls.Add(this.tkbScheduleItems);
+            this.gbRetrievalOptions.Controls.Add(this.lblScheduleItems);
+            this.gbRetrievalOptions.Controls.Add(this.ckIncludeYesterday);
+            this.gbRetrievalOptions.Controls.Add(this.txtProgrammePeriod);
+            this.gbRetrievalOptions.Controls.Add(this.lbProgrammePeriod);
+            this.gbRetrievalOptions.Location = new System.Drawing.Point(380, 52);
+            this.gbRetrievalOptions.Name = "gbRetrievalOptions";
+            this.gbRetrievalOptions.Size = new System.Drawing.Size(486, 113);
+            this.gbRetrievalOptions.TabIndex = 2;
+            this.gbRetrievalOptions.TabStop = false;
+            this.gbRetrievalOptions.Text = "Programme Retrieval Period";
             // 
             // lbDateRangeInfo
             // 
             this.lbDateRangeInfo.AutoSize = true;
-            this.lbDateRangeInfo.Location = new System.Drawing.Point(6, 69);
+            this.lbDateRangeInfo.Location = new System.Drawing.Point(138, 92);
             this.lbDateRangeInfo.Name = "lbDateRangeInfo";
             this.lbDateRangeInfo.Size = new System.Drawing.Size(266, 13);
             this.lbDateRangeInfo.TabIndex = 4;
             this.lbDateRangeInfo.Text = "Example include date range 04/12/2016 - 07/12/2016";
             // 
+            // lblProgrammeItems
+            // 
+            this.lblProgrammeItems.AutoSize = true;
+            this.lblProgrammeItems.Location = new System.Drawing.Point(6, 43);
+            this.lblProgrammeItems.Name = "lblProgrammeItems";
+            this.lblProgrammeItems.Size = new System.Drawing.Size(133, 13);
+            this.lblProgrammeItems.TabIndex = 8;
+            this.lblProgrammeItems.Text = "Programme Items/Request";
+            // 
+            // txtScheduleItems
+            // 
+            this.txtScheduleItems.Location = new System.Drawing.Point(410, 14);
+            this.txtScheduleItems.Name = "txtScheduleItems";
+            this.txtScheduleItems.Size = new System.Drawing.Size(70, 20);
+            this.txtScheduleItems.TabIndex = 2;
+            this.txtScheduleItems.Validated += new System.EventHandler(this.txtScheduleItems_Validated);
+            // 
+            // txtProgrammeItems
+            // 
+            this.txtProgrammeItems.Location = new System.Drawing.Point(410, 40);
+            this.txtProgrammeItems.Name = "txtProgrammeItems";
+            this.txtProgrammeItems.Size = new System.Drawing.Size(70, 20);
+            this.txtProgrammeItems.TabIndex = 3;
+            this.txtProgrammeItems.Validated += new System.EventHandler(this.txtProgrammeItems_Validated);
+            // 
+            // tkbProgrammePeriod
+            // 
+            this.tkbProgrammePeriod.Location = new System.Drawing.Point(141, 66);
+            this.tkbProgrammePeriod.Maximum = 14;
+            this.tkbProgrammePeriod.Name = "tkbProgrammePeriod";
+            this.tkbProgrammePeriod.Size = new System.Drawing.Size(263, 45);
+            this.tkbProgrammePeriod.TabIndex = 15;
+            this.tkbProgrammePeriod.Value = 1;
+            this.tkbProgrammePeriod.Scroll += new System.EventHandler(this.tkbProgrammePeriod_Scroll);
+            // 
+            // tkbProgrammeItems
+            // 
+            this.tkbProgrammeItems.Location = new System.Drawing.Point(141, 40);
+            this.tkbProgrammeItems.Maximum = 5000;
+            this.tkbProgrammeItems.Minimum = 1;
+            this.tkbProgrammeItems.Name = "tkbProgrammeItems";
+            this.tkbProgrammeItems.Size = new System.Drawing.Size(263, 45);
+            this.tkbProgrammeItems.TabIndex = 14;
+            this.tkbProgrammeItems.Value = 1;
+            this.tkbProgrammeItems.Scroll += new System.EventHandler(this.tkbProgrammeItems_Scroll);
+            // 
+            // tkbScheduleItems
+            // 
+            this.tkbScheduleItems.Location = new System.Drawing.Point(141, 17);
+            this.tkbScheduleItems.Maximum = 5000;
+            this.tkbScheduleItems.Minimum = 1;
+            this.tkbScheduleItems.Name = "tkbScheduleItems";
+            this.tkbScheduleItems.Size = new System.Drawing.Size(263, 45);
+            this.tkbScheduleItems.TabIndex = 13;
+            this.tkbScheduleItems.Value = 1;
+            this.tkbScheduleItems.Scroll += new System.EventHandler(this.tkbScheduleItems_Scroll);
+            // 
+            // lblScheduleItems
+            // 
+            this.lblScheduleItems.AutoSize = true;
+            this.lblScheduleItems.Location = new System.Drawing.Point(6, 17);
+            this.lblScheduleItems.Name = "lblScheduleItems";
+            this.lblScheduleItems.Size = new System.Drawing.Size(125, 13);
+            this.lblScheduleItems.TabIndex = 5;
+            this.lblScheduleItems.Text = "Schedule Items/Request";
+            // 
             // ckIncludeYesterday
             // 
             this.ckIncludeYesterday.AutoSize = true;
-            this.ckIncludeYesterday.Location = new System.Drawing.Point(9, 42);
+            this.ckIncludeYesterday.Location = new System.Drawing.Point(6, 91);
             this.ckIncludeYesterday.Name = "ckIncludeYesterday";
             this.ckIncludeYesterday.Size = new System.Drawing.Size(111, 17);
-            this.ckIncludeYesterday.TabIndex = 3;
+            this.ckIncludeYesterday.TabIndex = 16;
             this.ckIncludeYesterday.Text = "Include Yesterday";
             this.ckIncludeYesterday.UseVisualStyleBackColor = true;
             this.ckIncludeYesterday.CheckedChanged += new System.EventHandler(this.ckIncludeYesterday_CheckedChanged);
             // 
             // txtProgrammePeriod
             // 
-            this.txtProgrammePeriod.Location = new System.Drawing.Point(410, 16);
+            this.txtProgrammePeriod.Location = new System.Drawing.Point(410, 66);
             this.txtProgrammePeriod.Name = "txtProgrammePeriod";
             this.txtProgrammePeriod.Size = new System.Drawing.Size(70, 20);
-            this.txtProgrammePeriod.TabIndex = 2;
+            this.txtProgrammePeriod.TabIndex = 4;
             this.txtProgrammePeriod.Validated += new System.EventHandler(this.txtProgrammePeriod_Validated);
             // 
             // lbProgrammePeriod
             // 
             this.lbProgrammePeriod.AutoSize = true;
-            this.lbProgrammePeriod.Location = new System.Drawing.Point(6, 20);
+            this.lbProgrammePeriod.Location = new System.Drawing.Point(6, 69);
             this.lbProgrammePeriod.Name = "lbProgrammePeriod";
             this.lbProgrammePeriod.Size = new System.Drawing.Size(115, 13);
             this.lbProgrammePeriod.TabIndex = 1;
             this.lbProgrammePeriod.Text = "Retrieval Period (Days)";
-            // 
-            // tkbProgrammePeriod
-            // 
-            this.tkbProgrammePeriod.Location = new System.Drawing.Point(135, 19);
-            this.tkbProgrammePeriod.Maximum = 14;
-            this.tkbProgrammePeriod.Name = "tkbProgrammePeriod";
-            this.tkbProgrammePeriod.Size = new System.Drawing.Size(269, 45);
-            this.tkbProgrammePeriod.TabIndex = 0;
-            this.tkbProgrammePeriod.Value = 1;
-            this.tkbProgrammePeriod.Scroll += new System.EventHandler(this.tkbProgrammePeriod_Scroll);
             // 
             // gbXmlTVAttr
             // 
@@ -823,7 +893,7 @@
             this.ckProgrammeID.Location = new System.Drawing.Point(214, 19);
             this.ckProgrammeID.Name = "ckProgrammeID";
             this.ckProgrammeID.Size = new System.Drawing.Size(145, 17);
-            this.ckProgrammeID.TabIndex = 7;
+            this.ckProgrammeID.TabIndex = 9;
             this.ckProgrammeID.Text = "Programme ID (Required)";
             this.ckProgrammeID.UseVisualStyleBackColor = true;
             // 
@@ -833,7 +903,7 @@
             this.ckShowType.Location = new System.Drawing.Point(214, 65);
             this.ckShowType.Name = "ckShowType";
             this.ckShowType.Size = new System.Drawing.Size(141, 17);
-            this.ckShowType.TabIndex = 6;
+            this.ckShowType.TabIndex = 11;
             this.ckShowType.Text = "Show Type (programme)";
             this.ckShowType.UseVisualStyleBackColor = true;
             this.ckShowType.CheckedChanged += new System.EventHandler(this.ckShowType_CheckedChanged);
@@ -844,7 +914,7 @@
             this.ckStationAfiliate.Location = new System.Drawing.Point(214, 42);
             this.ckStationAfiliate.Name = "ckStationAfiliate";
             this.ckStationAfiliate.Size = new System.Drawing.Size(136, 17);
-            this.ckStationAfiliate.TabIndex = 5;
+            this.ckStationAfiliate.TabIndex = 10;
             this.ckStationAfiliate.Text = "Station Affiliate (station)";
             this.ckStationAfiliate.UseVisualStyleBackColor = true;
             this.ckStationAfiliate.CheckedChanged += new System.EventHandler(this.ckStationAfiliate_CheckedChanged);
@@ -855,7 +925,7 @@
             this.ckStationCallsign.Location = new System.Drawing.Point(214, 88);
             this.ckStationCallsign.Name = "ckStationCallsign";
             this.ckStationCallsign.Size = new System.Drawing.Size(138, 17);
-            this.ckStationCallsign.TabIndex = 4;
+            this.ckStationCallsign.TabIndex = 12;
             this.ckStationCallsign.Text = "Station Callsign (station)";
             this.ckStationCallsign.UseVisualStyleBackColor = true;
             this.ckStationCallsign.CheckedChanged += new System.EventHandler(this.ckStationCallsign_CheckedChanged);
@@ -866,7 +936,7 @@
             this.ckStationName.Location = new System.Drawing.Point(6, 88);
             this.ckStationName.Name = "ckStationName";
             this.ckStationName.Size = new System.Drawing.Size(130, 17);
-            this.ckStationName.TabIndex = 3;
+            this.ckStationName.TabIndex = 8;
             this.ckStationName.Text = "Station Name (station)";
             this.ckStationName.UseVisualStyleBackColor = true;
             this.ckStationName.CheckedChanged += new System.EventHandler(this.ckStationName_CheckedChanged);
@@ -877,7 +947,7 @@
             this.ckStationID.Location = new System.Drawing.Point(6, 65);
             this.ckStationID.Name = "ckStationID";
             this.ckStationID.Size = new System.Drawing.Size(113, 17);
-            this.ckStationID.TabIndex = 2;
+            this.ckStationID.TabIndex = 7;
             this.ckStationID.Text = "Station ID (station)";
             this.ckStationID.UseVisualStyleBackColor = true;
             this.ckStationID.CheckedChanged += new System.EventHandler(this.ckStationID_CheckedChanged);
@@ -888,7 +958,7 @@
             this.ckLogicalChannelNo.Location = new System.Drawing.Point(6, 42);
             this.ckLogicalChannelNo.Name = "ckLogicalChannelNo";
             this.ckLogicalChannelNo.Size = new System.Drawing.Size(172, 17);
-            this.ckLogicalChannelNo.TabIndex = 1;
+            this.ckLogicalChannelNo.TabIndex = 6;
             this.ckLogicalChannelNo.Text = "Logical Channel Number (Map)";
             this.ckLogicalChannelNo.UseVisualStyleBackColor = true;
             this.ckLogicalChannelNo.CheckedChanged += new System.EventHandler(this.ckLogicalChannelNo_CheckedChanged);
@@ -902,7 +972,7 @@
             this.ckMD5.Location = new System.Drawing.Point(6, 19);
             this.ckMD5.Name = "ckMD5";
             this.ckMD5.Size = new System.Drawing.Size(157, 17);
-            this.ckMD5.TabIndex = 0;
+            this.ckMD5.TabIndex = 5;
             this.ckMD5.Text = "Programme MD5 (Required)";
             this.ckMD5.UseVisualStyleBackColor = true;
             // 
@@ -1039,9 +1109,11 @@
             this.gbAddedChannels.ResumeLayout(false);
             this.gbAvailableChannels.ResumeLayout(false);
             this.tpGeneral1.ResumeLayout(false);
-            this.gbRetrievalPeriod.ResumeLayout(false);
-            this.gbRetrievalPeriod.PerformLayout();
+            this.gbRetrievalOptions.ResumeLayout(false);
+            this.gbRetrievalOptions.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tkbProgrammePeriod)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tkbProgrammeItems)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tkbScheduleItems)).EndInit();
             this.gbXmlTVAttr.ResumeLayout(false);
             this.gbXmlTVAttr.PerformLayout();
             this.gbPersistentCache.ResumeLayout(false);
@@ -1130,12 +1202,18 @@
         private System.Windows.Forms.CheckBox ckStationID;
         private System.Windows.Forms.CheckBox ckLogicalChannelNo;
         private System.Windows.Forms.CheckBox ckMD5;
-        private System.Windows.Forms.GroupBox gbRetrievalPeriod;
+        private System.Windows.Forms.GroupBox gbRetrievalOptions;
         private System.Windows.Forms.TextBox txtProgrammePeriod;
         private System.Windows.Forms.Label lbProgrammePeriod;
         private System.Windows.Forms.TrackBar tkbProgrammePeriod;
         private System.Windows.Forms.Label lbDateRangeInfo;
         private System.Windows.Forms.CheckBox ckIncludeYesterday;
         private System.Windows.Forms.GroupBox gbChannelIDMap;
+        private System.Windows.Forms.Label lblProgrammeItems;
+        private System.Windows.Forms.TextBox txtScheduleItems;
+        private System.Windows.Forms.TextBox txtProgrammeItems;
+        private System.Windows.Forms.TrackBar tkbProgrammeItems;
+        private System.Windows.Forms.TrackBar tkbScheduleItems;
+        private System.Windows.Forms.Label lblScheduleItems;
     }
 }

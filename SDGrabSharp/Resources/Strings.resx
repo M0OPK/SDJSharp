@@ -273,8 +273,8 @@
   <data name="gbPersistentCache" xml:space="preserve">
     <value>Persistent Cache</value>
   </data>
-  <data name="gbRetrievalPeriod" xml:space="preserve">
-    <value>Programme Retrieval Period</value>
+  <data name="gbRetrievalOptions" xml:space="preserve">
+    <value>Programme Retrieval Options</value>
   </data>
   <data name="gbStationMap" xml:space="preserve">
     <value>Station mapping</value>
@@ -371,5 +371,11 @@
   </data>
   <data name="XmlFiles" xml:space="preserve">
     <value>XML Files (*.xml)</value>
+  </data>
+  <data name="lblProgrammeItems" xml:space="preserve">
+    <value>Programme Items/Request</value>
+  </data>
+  <data name="lblScheduleItems" xml:space="preserve">
+    <value>Schedule Items/Request</value>
   </data>
 </root>

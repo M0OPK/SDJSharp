@@ -24,6 +24,8 @@ namespace SDGrabSharp.Common
         public bool XmlTVStationCallsign;
         public bool ProgrammeRetrieveYesterday;
         public int ProgrammeRetrieveRangeDays;
+        public int ScheduleRetrievalItems;
+        public int ProgrammeRetrievalItems;
 
         public Config()
         {
@@ -33,6 +35,8 @@ namespace SDGrabSharp.Common
             defaultTranslateMode = XmlTVTranslation.TranslateField.StationName;
 
             ProgrammeRetrieveRangeDays = 3;
+            ScheduleRetrievalItems = 3000;
+            ProgrammeRetrievalItems = 3000;
         }
 
         public class XmlTVTranslation
@@ -84,6 +88,8 @@ namespace SDGrabSharp.Common
             AddSimpleXMLElement(rootConfigNode, "attrib-stationname", XmlTVStationName ? "true" : "false");
             AddSimpleXMLElement(rootConfigNode, "programme-retrieveyesterday", ProgrammeRetrieveYesterday ? "true" : "false");
             AddSimpleXMLElement(rootConfigNode, "programme-retrieverangedays", ProgrammeRetrieveRangeDays.ToString());
+            AddSimpleXMLElement(rootConfigNode, "schedule-maxitems", ScheduleRetrievalItems.ToString());
+            AddSimpleXMLElement(rootConfigNode, "programme-maxitems", ProgrammeRetrievalItems.ToString());
 
             if (TranslationMatrix != null && TranslationMatrix.Count() != 0)
             {
@@ -171,6 +177,14 @@ namespace SDGrabSharp.Common
             workNode = rootConfigNode.SelectSingleNode("programme-retrieverangedays");
             if (workNode != null)
                 try { ProgrammeRetrieveRangeDays = int.Parse(workNode.InnerText); } catch { }
+
+            workNode = rootConfigNode.SelectSingleNode("schedule-maxitems");
+            if (workNode != null)
+                try { ScheduleRetrievalItems = int.Parse(workNode.InnerText); } catch { }
+
+            workNode = rootConfigNode.SelectSingleNode("programme-maxitems");
+            if (workNode != null)
+                try { ProgrammeRetrievalItems = int.Parse(workNode.InnerText); } catch { }
 
             XmlNode translateListNode = rootConfigNode.SelectSingleNode("TranslationMatrix");
             if (translateListNode != null)

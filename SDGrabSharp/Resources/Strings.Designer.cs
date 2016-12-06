@@ -529,11 +529,11 @@ namespace SDGrabSharp.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Programme Retrieval Period.
+        ///   Looks up a localized string similar to Programme Retrieval Options.
         /// </summary>
-        internal static string gbRetrievalPeriod {
+        internal static string gbRetrievalOptions {
             get {
-                return ResourceManager.GetString("gbRetrievalPeriod", resourceCulture);
+                return ResourceManager.GetString("gbRetrievalOptions", resourceCulture);
             }
         }
         
@@ -606,6 +606,24 @@ namespace SDGrabSharp.Resources {
         internal static string lbLogin {
             get {
                 return ResourceManager.GetString("lbLogin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Programme Items/Request.
+        /// </summary>
+        internal static string lblProgrammeItems {
+            get {
+                return ResourceManager.GetString("lblProgrammeItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Schedule Items/Request.
+        /// </summary>
+        internal static string lblScheduleItems {
+            get {
+                return ResourceManager.GetString("lblScheduleItems", resourceCulture);
             }
         }
         
