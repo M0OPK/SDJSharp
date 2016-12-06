@@ -254,7 +254,6 @@ namespace SDGrabSharp.UI
             {
                 foreach (var lineup in statusResponse.lineups)
                 {
-                    //var item = new ListViewItem(new string[] { lineup.lineup, lineup.modified.GetValueOrDefault(DateTime.Parse("1900-01-01")).Date.ToShortDateString() });
                     var item = new ListViewItem();
                     item.Text = lineup.lineup;
                     item.SubItems.Add(lineup.modified.GetValueOrDefault().Date.ToShortDateString());
