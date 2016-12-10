@@ -378,4 +378,7 @@
   <data name="lblScheduleItems" xml:space="preserve">
     <value>Schedule Items/Request</value>
   </data>
+  <data name="lblChannelDisplayName" xml:space="preserve">
+    <value>Channel display-name source</value>
+  </data>
 </root>

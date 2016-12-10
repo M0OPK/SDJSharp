@@ -592,6 +592,15 @@ namespace SDGrabSharp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Channel display-name source.
+        /// </summary>
+        internal static string lblChannelDisplayName {
+            get {
+                return ResourceManager.GetString("lblChannelDisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Lineup.
         /// </summary>
         internal static string lblLineup {

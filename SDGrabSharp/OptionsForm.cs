@@ -151,6 +151,7 @@ namespace SDGrabSharp.UI
             this.Text = Strings.frmOptionsTitle;
             lblScheduleItems.Text = Strings.lblScheduleItems;
             lblProgrammeItems.Text = Strings.lblProgrammeItems;
+            lblChannelDisplayName.Text = Strings.lblChannelDisplayName;
         }
 
         private void checkAlwaysAsk_CheckedChanged(object sender, EventArgs e)
@@ -884,6 +885,10 @@ namespace SDGrabSharp.UI
             txtScheduleItems.Text = config.ScheduleRetrievalItems.ToString();
             tkbProgrammeItems.Value = config.ProgrammeRetrievalItems;
             txtProgrammeItems.Text = config.ProgrammeRetrievalItems.ToString();
+
+            if ((int)config.XmlTVDisplayNameMode >= 0 && (int)config.XmlTVDisplayNameMode < cbDisplayNameMode.Items.Count)
+                cbDisplayNameMode.SelectedIndex = (int)config.XmlTVDisplayNameMode;
+
             updateDateRange();
         }
 
@@ -1335,6 +1340,11 @@ namespace SDGrabSharp.UI
                 else
                     txtProgrammeItems.Text = tkbProgrammeItems.Value.ToString();
             }
+        }
+
+        private void cbDisplayNameMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            config.XmlTVDisplayNameMode = (Config.DisplayNameMode)cbDisplayNameMode.SelectedIndex;
         }
     }
 }

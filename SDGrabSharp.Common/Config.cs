@@ -26,6 +26,7 @@ namespace SDGrabSharp.Common
         public int ProgrammeRetrieveRangeDays;
         public int ScheduleRetrievalItems;
         public int ProgrammeRetrievalItems;
+        public DisplayNameMode XmlTVDisplayNameMode;
 
         public Config()
         {
@@ -60,6 +61,15 @@ namespace SDGrabSharp.Common
             }
         }
 
+        public enum DisplayNameMode
+        {
+            MatchChannelID,
+            StationID,
+            StationName,
+            StationAffiliate,
+            StationCallsign
+        }
+
         public void Save(string filename)
         {
             XmlDocument configXml = new XmlDocument();
@@ -90,6 +100,7 @@ namespace SDGrabSharp.Common
             AddSimpleXMLElement(rootConfigNode, "programme-retrieverangedays", ProgrammeRetrieveRangeDays.ToString());
             AddSimpleXMLElement(rootConfigNode, "schedule-maxitems", ScheduleRetrievalItems.ToString());
             AddSimpleXMLElement(rootConfigNode, "programme-maxitems", ProgrammeRetrievalItems.ToString());
+            AddSimpleXMLElement(rootConfigNode, "displayname-mode", ((int)XmlTVDisplayNameMode).ToString());
 
             if (TranslationMatrix != null && TranslationMatrix.Count() != 0)
             {
@@ -185,6 +196,10 @@ namespace SDGrabSharp.Common
             workNode = rootConfigNode.SelectSingleNode("programme-maxitems");
             if (workNode != null)
                 try { ProgrammeRetrievalItems = int.Parse(workNode.InnerText); } catch { }
+
+            workNode = rootConfigNode.SelectSingleNode("displayname-mode");
+            if (workNode != null)
+                try { XmlTVDisplayNameMode = (DisplayNameMode)int.Parse(workNode.InnerText); } catch { }
 
             XmlNode translateListNode = rootConfigNode.SelectSingleNode("TranslationMatrix");
             if (translateListNode != null)

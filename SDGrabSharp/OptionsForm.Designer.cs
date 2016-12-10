@@ -118,6 +118,8 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
+            this.lblChannelDisplayName = new System.Windows.Forms.Label();
+            this.cbDisplayNameMode = new System.Windows.Forms.ComboBox();
             this.tcConfig.SuspendLayout();
             this.tpSD1.SuspendLayout();
             this.gbStations.SuspendLayout();
@@ -759,7 +761,7 @@
             this.gbRetrievalOptions.Controls.Add(this.lbProgrammePeriod);
             this.gbRetrievalOptions.Location = new System.Drawing.Point(380, 52);
             this.gbRetrievalOptions.Name = "gbRetrievalOptions";
-            this.gbRetrievalOptions.Size = new System.Drawing.Size(486, 113);
+            this.gbRetrievalOptions.Size = new System.Drawing.Size(486, 140);
             this.gbRetrievalOptions.TabIndex = 2;
             this.gbRetrievalOptions.TabStop = false;
             this.gbRetrievalOptions.Text = "Programme Retrieval Period";
@@ -767,7 +769,7 @@
             // lbDateRangeInfo
             // 
             this.lbDateRangeInfo.AutoSize = true;
-            this.lbDateRangeInfo.Location = new System.Drawing.Point(138, 92);
+            this.lbDateRangeInfo.Location = new System.Drawing.Point(138, 118);
             this.lbDateRangeInfo.Name = "lbDateRangeInfo";
             this.lbDateRangeInfo.Size = new System.Drawing.Size(266, 13);
             this.lbDateRangeInfo.TabIndex = 4;
@@ -776,7 +778,7 @@
             // lblProgrammeItems
             // 
             this.lblProgrammeItems.AutoSize = true;
-            this.lblProgrammeItems.Location = new System.Drawing.Point(6, 43);
+            this.lblProgrammeItems.Location = new System.Drawing.Point(7, 53);
             this.lblProgrammeItems.Name = "lblProgrammeItems";
             this.lblProgrammeItems.Size = new System.Drawing.Size(133, 13);
             this.lblProgrammeItems.TabIndex = 8;
@@ -792,7 +794,7 @@
             // 
             // txtProgrammeItems
             // 
-            this.txtProgrammeItems.Location = new System.Drawing.Point(410, 40);
+            this.txtProgrammeItems.Location = new System.Drawing.Point(411, 50);
             this.txtProgrammeItems.Name = "txtProgrammeItems";
             this.txtProgrammeItems.Size = new System.Drawing.Size(70, 20);
             this.txtProgrammeItems.TabIndex = 3;
@@ -800,7 +802,7 @@
             // 
             // tkbProgrammePeriod
             // 
-            this.tkbProgrammePeriod.Location = new System.Drawing.Point(141, 66);
+            this.tkbProgrammePeriod.Location = new System.Drawing.Point(141, 85);
             this.tkbProgrammePeriod.Maximum = 14;
             this.tkbProgrammePeriod.Name = "tkbProgrammePeriod";
             this.tkbProgrammePeriod.Size = new System.Drawing.Size(263, 45);
@@ -810,7 +812,7 @@
             // 
             // tkbProgrammeItems
             // 
-            this.tkbProgrammeItems.Location = new System.Drawing.Point(141, 40);
+            this.tkbProgrammeItems.Location = new System.Drawing.Point(142, 50);
             this.tkbProgrammeItems.Maximum = 5000;
             this.tkbProgrammeItems.Minimum = 1;
             this.tkbProgrammeItems.Name = "tkbProgrammeItems";
@@ -842,7 +844,7 @@
             // ckIncludeYesterday
             // 
             this.ckIncludeYesterday.AutoSize = true;
-            this.ckIncludeYesterday.Location = new System.Drawing.Point(6, 91);
+            this.ckIncludeYesterday.Location = new System.Drawing.Point(6, 117);
             this.ckIncludeYesterday.Name = "ckIncludeYesterday";
             this.ckIncludeYesterday.Size = new System.Drawing.Size(111, 17);
             this.ckIncludeYesterday.TabIndex = 16;
@@ -852,7 +854,7 @@
             // 
             // txtProgrammePeriod
             // 
-            this.txtProgrammePeriod.Location = new System.Drawing.Point(410, 66);
+            this.txtProgrammePeriod.Location = new System.Drawing.Point(410, 85);
             this.txtProgrammePeriod.Name = "txtProgrammePeriod";
             this.txtProgrammePeriod.Size = new System.Drawing.Size(70, 20);
             this.txtProgrammePeriod.TabIndex = 4;
@@ -861,7 +863,7 @@
             // lbProgrammePeriod
             // 
             this.lbProgrammePeriod.AutoSize = true;
-            this.lbProgrammePeriod.Location = new System.Drawing.Point(6, 69);
+            this.lbProgrammePeriod.Location = new System.Drawing.Point(6, 88);
             this.lbProgrammePeriod.Name = "lbProgrammePeriod";
             this.lbProgrammePeriod.Size = new System.Drawing.Size(115, 13);
             this.lbProgrammePeriod.TabIndex = 1;
@@ -869,6 +871,8 @@
             // 
             // gbXmlTVAttr
             // 
+            this.gbXmlTVAttr.Controls.Add(this.cbDisplayNameMode);
+            this.gbXmlTVAttr.Controls.Add(this.lblChannelDisplayName);
             this.gbXmlTVAttr.Controls.Add(this.ckProgrammeID);
             this.gbXmlTVAttr.Controls.Add(this.ckShowType);
             this.gbXmlTVAttr.Controls.Add(this.ckStationAfiliate);
@@ -879,7 +883,7 @@
             this.gbXmlTVAttr.Controls.Add(this.ckMD5);
             this.gbXmlTVAttr.Location = new System.Drawing.Point(6, 52);
             this.gbXmlTVAttr.Name = "gbXmlTVAttr";
-            this.gbXmlTVAttr.Size = new System.Drawing.Size(368, 113);
+            this.gbXmlTVAttr.Size = new System.Drawing.Size(368, 140);
             this.gbXmlTVAttr.TabIndex = 1;
             this.gbXmlTVAttr.TabStop = false;
             this.gbXmlTVAttr.Text = "Schedules Direct XMLTV Attributes";
@@ -1081,6 +1085,30 @@
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
+            // lblChannelDisplayName
+            // 
+            this.lblChannelDisplayName.AutoSize = true;
+            this.lblChannelDisplayName.Location = new System.Drawing.Point(6, 114);
+            this.lblChannelDisplayName.Name = "lblChannelDisplayName";
+            this.lblChannelDisplayName.Size = new System.Drawing.Size(145, 13);
+            this.lblChannelDisplayName.TabIndex = 13;
+            this.lblChannelDisplayName.Text = "Channel display-name source";
+            // 
+            // cbDisplayNameMode
+            // 
+            this.cbDisplayNameMode.FormattingEnabled = true;
+            this.cbDisplayNameMode.Items.AddRange(new object[] {
+            "Same as channel-id.",
+            "Station ID",
+            "Station Name",
+            "Station Afiliate",
+            "Station Callsign"});
+            this.cbDisplayNameMode.Location = new System.Drawing.Point(157, 111);
+            this.cbDisplayNameMode.Name = "cbDisplayNameMode";
+            this.cbDisplayNameMode.Size = new System.Drawing.Size(205, 21);
+            this.cbDisplayNameMode.TabIndex = 14;
+            this.cbDisplayNameMode.SelectedIndexChanged += new System.EventHandler(this.cbDisplayNameMode_SelectedIndexChanged);
+            // 
             // frmOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1215,5 +1243,7 @@
         private System.Windows.Forms.TrackBar tkbProgrammeItems;
         private System.Windows.Forms.TrackBar tkbScheduleItems;
         private System.Windows.Forms.Label lblScheduleItems;
+        private System.Windows.Forms.ComboBox cbDisplayNameMode;
+        private System.Windows.Forms.Label lblChannelDisplayName;
     }
 }
