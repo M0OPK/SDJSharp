@@ -154,20 +154,46 @@ namespace XMLTV
             return false;
         }
 
+        public bool ReplaceChannel(string channelID, XmlLangText[] displayName, string url = null, string iconUrl = null,
+                                   IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
+        {
+            try
+            {
+                XmlNode existingChannel = FindFirstChannel(channelID);
+                if (existingChannel == null)
+                    return false;
+
+                XmlElement channelNode = buildChannelNode(channelID, displayName, url, iconUrl, extraattributes, extranodes, true);
+                if (channelNode == null)
+                    return false;
+
+                xmlData.rootNode.ReplaceChild(channelNode, existingChannel);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return false;
+        }
+
         private XmlElement buildChannelNode(string channelID, XmlLangText[] displayName, string url = null, string iconUrl = null,
-                                            IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
+                                            IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null, bool replace = false)
         {
             try
             {
                 if (channelID == string.Empty)
                     return null;
 
-                XmlNode collideChannel = FindFirstChannel(channelID);
-
-                if (collideChannel != null)
+                if (!replace)
                 {
-                    addError(1001, "Duplicate channel found", XMLTVError.ErrorSeverity.Error, string.Format("Duplicate channel found:\r\n{0}\r\n", channelID), "AddChannel");
-                    return null;
+                    XmlNode collideChannel = FindFirstChannel(channelID);
+
+                    if (collideChannel != null)
+                    {
+                        addError(1001, "Duplicate channel found", XMLTVError.ErrorSeverity.Error, string.Format("Duplicate channel found:\r\n{0}\r\n", channelID), "AddChannel");
+                        return null;
+                    }
                 }
 
                 XmlElement channelNode = xmlData.rootDocument.CreateElement("channel");
@@ -282,7 +308,7 @@ namespace XMLTV
         public XmlElement buildProgrammeNode(string start, string stop, string channel, XmlLangText title = null, 
                                        XmlLangText subtitle = null, XmlLangText description = null,
                                        XmlLangText[] categories = null, IEnumerable<XmlAttribute> extraattributes = null, 
-                                       IEnumerable<XmlNode> extranodes = null)
+                                       IEnumerable<XmlNode> extranodes = null, string SDProgrammeID = "", string SDMD5 = "", bool replace = false)
         {
             try
             {
@@ -290,19 +316,28 @@ namespace XMLTV
                 if (start == string.Empty || stop == string.Empty || channel == string.Empty)
                     return null;
 
-                XmlNode collide = FindFirstProgramme(start, stop, channel);
-
-                if (collide != null)
+                if (!replace)
                 {
-                    addError(2001, "Duplicate programme found", XMLTVError.ErrorSeverity.Error,
-                             string.Format("Duplicate programme found:\r\n{0} from {1} to {2}", start, stop, channel), "AddProgramme");
-                    return null;
+                    XmlNode collide = FindFirstProgramme(start, stop, channel);
+
+                    if (collide != null)
+                    {
+                        addError(2001, "Duplicate programme found", XMLTVError.ErrorSeverity.Error,
+                                 string.Format("Duplicate programme found:\r\n{0} from {1} to {2}", start, stop, channel), "AddProgramme");
+                        return null;
+                    }
                 }
 
                 XmlElement programmelNode = xmlData.rootDocument.CreateElement("programme");
                 programmelNode.SetAttribute("start", start);
                 programmelNode.SetAttribute("stop", stop);
                 programmelNode.SetAttribute("channel", channel);
+
+                if (SDProgrammeID != string.Empty)
+                    programmelNode.SetAttribute("sd-programmeid", SDProgrammeID);
+
+                if (SDMD5 != string.Empty)
+                    programmelNode.SetAttribute("sd-md5", SDMD5);
 
                 if (title != null)
                 {
@@ -380,6 +415,11 @@ namespace XMLTV
                 addError(ex);
             }
             return false;
+        }
+
+        public bool DeleteProgrammeNodeByID(string programmId, string channel)
+        {
+
         }
 
         /// <summary>
