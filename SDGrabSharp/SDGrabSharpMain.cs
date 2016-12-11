@@ -52,5 +52,11 @@ namespace SDGrabSharp.UI
         {
             cache.Load("F:\\SchedulesDirect\\persistentcache.xml");
         }
+
+        private void toolStripMenuItemRun_Click(object sender, EventArgs e)
+        {
+            var builder = new XmlTVBuilder(config, cache, null);
+            builder.AddChannels();
+        }
     }
 }

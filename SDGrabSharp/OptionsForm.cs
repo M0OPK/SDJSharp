@@ -152,6 +152,9 @@ namespace SDGrabSharp.UI
             lblScheduleItems.Text = Strings.lblScheduleItems;
             lblProgrammeItems.Text = Strings.lblProgrammeItems;
             lblChannelDisplayName.Text = Strings.lblChannelDisplayName;
+            gbXMLTVFile.Text = Strings.gbXMLTVFile;
+            lblOutputXmlTVFile.Text = Strings.lblOutputXmlTVFile;
+            btnBrowseXmlTVFile.Text = Strings.btnBrowseXmlTVFile;
         }
 
         private void checkAlwaysAsk_CheckedChanged(object sender, EventArgs e)
@@ -421,6 +424,7 @@ namespace SDGrabSharp.UI
         private void SaveConfig(string filename)
         {
             config.cacheFilename = txtCacheFilename.Text;
+            config.XmlTVFileName = txtOutputXmlTVFile.Text;
             config.PersistantCache = ckPersistentCache.Checked;
             config.SDUsername = txtLogin.Text;
             if (txtPassword.Text != passwordHashEntry)
@@ -884,6 +888,7 @@ namespace SDGrabSharp.UI
             txtScheduleItems.Text = config.ScheduleRetrievalItems.ToString();
             tkbProgrammeItems.Value = config.ProgrammeRetrievalItems;
             txtProgrammeItems.Text = config.ProgrammeRetrievalItems.ToString();
+            txtOutputXmlTVFile.Text = config.XmlTVFileName;
 
             if ((int)config.XmlTVDisplayNameMode >= 0 && (int)config.XmlTVDisplayNameMode < cbDisplayNameMode.Items.Count)
                 cbDisplayNameMode.SelectedIndex = (int)config.XmlTVDisplayNameMode;
@@ -1344,6 +1349,28 @@ namespace SDGrabSharp.UI
         private void cbDisplayNameMode_SelectedIndexChanged(object sender, EventArgs e)
         {
             config.XmlTVDisplayNameMode = (Config.DisplayNameMode)cbDisplayNameMode.SelectedIndex;
+        }
+
+        private void btnBrowseXmlTVFile_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            string folder = string.Empty;
+            if (txtOutputXmlTVFile.Text != string.Empty)
+                folder = new DirectoryInfo(txtOutputXmlTVFile.Text).Name;
+
+            string initialFile = new FileInfo(config.cacheFilename).Name;
+            if (initialFile == string.Empty)
+                initialFile = "guide.xml";
+
+            dialog.InitialDirectory = folder;
+            dialog.Filter = string.Format("{0}|*.xml|{1}|*.*", Strings.XmlFiles, Strings.AllFiles);
+            dialog.FileName = initialFile;
+            dialog.Title = Strings.SaveXmlTvFileDialog;
+            var dialogResult = dialog.ShowDialog(this);
+
+            if (dialogResult.ToString() == "OK")
+                txtOutputXmlTVFile.Text = dialog.FileName;
+
         }
     }
 }

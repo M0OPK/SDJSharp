@@ -13,7 +13,6 @@ using System.Globalization;
 
 namespace SchedulesDirect
 {
-
     public partial class SDJson
     {
         private string loginToken;
@@ -127,6 +126,11 @@ namespace SchedulesDirect
 
             string hexString = BitConverter.ToString(hashBytes);
             return hexString.Replace("-", "").ToLower();
+        }
+
+        public bool LoggedIn
+        {
+            get { return loginToken != string.Empty; }
         }
 
         /// <summary>

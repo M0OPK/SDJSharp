@@ -79,6 +79,15 @@ namespace SDGrabSharp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Browse.
+        /// </summary>
+        internal static string btnBrowseXmlTVFile {
+            get {
+                return ResourceManager.GetString("btnBrowseXmlTVFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         internal static string btnCancel {
@@ -565,6 +574,15 @@ namespace SDGrabSharp.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to XMLTV File.
+        /// </summary>
+        internal static string gbXMLTVFile {
+            get {
+                return ResourceManager.GetString("gbXMLTVFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Location Selection.
         /// </summary>
         internal static string grpLocation {
@@ -615,6 +633,15 @@ namespace SDGrabSharp.Resources {
         internal static string lbLogin {
             get {
                 return ResourceManager.GetString("lbLogin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Output XMLTV Filename.
+        /// </summary>
+        internal static string lblOutputXmlTVFile {
+            get {
+                return ResourceManager.GetString("lblOutputXmlTVFile", resourceCulture);
             }
         }
         
@@ -741,6 +768,15 @@ namespace SDGrabSharp.Resources {
         internal static string SaveConfigDialogCaption {
             get {
                 return ResourceManager.GetString("SaveConfigDialogCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select save location for XMLTV guide file.
+        /// </summary>
+        internal static string SaveXmlTvFileDialog {
+            get {
+                return ResourceManager.GetString("SaveXmlTvFileDialog", resourceCulture);
             }
         }
         

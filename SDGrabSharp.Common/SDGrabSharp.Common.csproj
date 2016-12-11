@@ -43,11 +43,16 @@
     <Compile Include="Config.cs" />
     <Compile Include="DataCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmlTVBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SchedulesDirect.JSON\SchedulesDirect.JSON.csproj">
       <Project>{e9b12afd-9cd6-4315-8999-2ea2f51ddebc}</Project>
       <Name>SchedulesDirect.JSON</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\XMLTV.Core\XMLTV.Core.csproj">
+      <Project>{49cee588-e156-403b-9fc3-505545e059be}</Project>
+      <Name>XMLTV.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

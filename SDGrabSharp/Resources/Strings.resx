@@ -381,4 +381,16 @@
   <data name="lblChannelDisplayName" xml:space="preserve">
     <value>Channel display-name source</value>
   </data>
+  <data name="btnBrowseXmlTVFile" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="gbXMLTVFile" xml:space="preserve">
+    <value>XMLTV File</value>
+  </data>
+  <data name="lblOutputXmlTVFile" xml:space="preserve">
+    <value>Output XMLTV Filename</value>
+  </data>
+  <data name="SaveXmlTvFileDialog" xml:space="preserve">
+    <value>Select save location for XMLTV guide file</value>
+  </data>
 </root>

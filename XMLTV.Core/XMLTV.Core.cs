@@ -282,8 +282,9 @@ namespace XMLTV
         /// <param name="extraattributes"></param>
         /// <param name="extranodes"></param>
         /// <returns></returns>
-        public bool AddProgramme(string start, string stop, string channel, XmlLangText title = null, XmlLangText subtitle = null, XmlLangText description = null,
-                                XmlLangText[] categories = null, IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
+        public bool AddProgramme(string start, string stop, string channel, XmlLangText title = null, XmlLangText 
+                                 subtitle = null, XmlLangText description = null, XmlLangText[] categories = null, 
+                                 IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
         {
             try
             {
@@ -297,6 +298,34 @@ namespace XMLTV
                     xmlData.rootNode.AppendChild(programmelNode);
                 else
                     xmlData.rootNode.InsertAfter(programmelNode, lastProgramme);
+
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                addError(ex);
+            }
+            return false;
+        }
+
+        public bool ReplaceProgramme(string start, string stop, string channel, XmlLangText title = null, XmlLangText
+                        subtitle = null, XmlLangText description = null, XmlLangText[] categories = null,
+                        IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
+        {
+            try
+            {
+                XmlNode originalProgrammeNode = FindFirstProgramme(start, stop, channel);
+                if (originalProgrammeNode == null)
+                    return false;
+
+                XmlElement newProgrammeNode = buildProgrammeNode(start, stop, channel, title, subtitle, description,
+                                                                 categories, extraattributes, extranodes, true);
+
+                if (newProgrammeNode == null)
+                    return false;
+
+                xmlData.rootNode.ReplaceChild(newProgrammeNode, originalProgrammeNode);
+                return true;
             }
             catch (System.Exception ex)
             {
@@ -306,9 +335,9 @@ namespace XMLTV
         }
 
         public XmlElement buildProgrammeNode(string start, string stop, string channel, XmlLangText title = null, 
-                                       XmlLangText subtitle = null, XmlLangText description = null,
-                                       XmlLangText[] categories = null, IEnumerable<XmlAttribute> extraattributes = null, 
-                                       IEnumerable<XmlNode> extranodes = null, string SDProgrammeID = "", string SDMD5 = "", bool replace = false)
+                                             XmlLangText subtitle = null, XmlLangText description = null,
+                                             XmlLangText[] categories = null, IEnumerable<XmlAttribute> extraattributes = null, 
+                                             IEnumerable<XmlNode> extranodes = null, bool replace = false)
         {
             try
             {
@@ -332,12 +361,6 @@ namespace XMLTV
                 programmelNode.SetAttribute("start", start);
                 programmelNode.SetAttribute("stop", stop);
                 programmelNode.SetAttribute("channel", channel);
-
-                if (SDProgrammeID != string.Empty)
-                    programmelNode.SetAttribute("sd-programmeid", SDProgrammeID);
-
-                if (SDMD5 != string.Empty)
-                    programmelNode.SetAttribute("sd-md5", SDMD5);
 
                 if (title != null)
                 {
@@ -417,9 +440,39 @@ namespace XMLTV
             return false;
         }
 
-        public bool DeleteProgrammeNodeByID(string programmId, string channel)
+        public IEnumerable<XmlNode> FindMatchingProgrammeNodes(ProgrammeSearch[] searchItems)
         {
+            return 
+                (
+                    from programme in xmlData.programmeNodes.Cast<XmlNode>()
+                    join searchItem in searchItems
+                    on new ProgrammeSearch()
+                    {
+                        Start = programme.Attributes["start"].Value,
+                        Stop = programme.Attributes["stop"].Value,
+                        Channel = programme.Attributes["channel"].Value
+                    }
+                    equals new ProgrammeSearch()
+                    {
+                        Start = searchItem.Start,
+                        Stop = searchItem.Stop,
+                        Channel = searchItem.Channel
+                    }
+                    where searchItem.Start != null
+                    select programme
+                ).AsEnumerable();
+        }
 
+        public IEnumerable<XmlNode> FindMatchingChannelNodes(string[] searchItems)
+        {
+            return
+                (
+                    from channel in xmlData.channelNodes.Cast<XmlNode>()
+                    join searchItem in searchItems
+                        on channel.Attributes["id"].Value equals searchItem
+                    where searchItem != null
+                    select channel
+                ).AsEnumerable();
         }
 
         /// <summary>

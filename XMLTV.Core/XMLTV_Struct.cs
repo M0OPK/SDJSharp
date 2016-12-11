@@ -97,6 +97,13 @@ namespace XMLTV
             }
         }
 
+        public class ProgrammeSearch
+        {
+            public string Start;
+            public string Stop;
+            public string Channel;
+        }
+
         /// <summary>
         /// Configuration structure for XMLTV
         /// </summary>

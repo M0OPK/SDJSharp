@@ -27,11 +27,13 @@ namespace SDGrabSharp.Common
         public int ScheduleRetrievalItems;
         public int ProgrammeRetrievalItems;
         public DisplayNameMode XmlTVDisplayNameMode;
+        public string XmlTVFileName;
 
         public Config()
         {
             TranslationMatrix = new Dictionary<string, XmlTVTranslation>();
             cacheFilename = "persistentcache.xml";
+            XmlTVFileName = "guide.xml";
             PersistantCache = true;
             defaultTranslateMode = XmlTVTranslation.TranslateField.StationName;
 
@@ -101,6 +103,7 @@ namespace SDGrabSharp.Common
             AddSimpleXMLElement(rootConfigNode, "schedule-maxitems", ScheduleRetrievalItems.ToString());
             AddSimpleXMLElement(rootConfigNode, "programme-maxitems", ProgrammeRetrievalItems.ToString());
             AddSimpleXMLElement(rootConfigNode, "displayname-mode", ((int)XmlTVDisplayNameMode).ToString());
+            AddSimpleXMLElement(rootConfigNode, "xmltv-filename", XmlTVFileName);
 
             if (TranslationMatrix != null && TranslationMatrix.Count() != 0)
             {
@@ -200,6 +203,10 @@ namespace SDGrabSharp.Common
             workNode = rootConfigNode.SelectSingleNode("displayname-mode");
             if (workNode != null)
                 try { XmlTVDisplayNameMode = (DisplayNameMode)int.Parse(workNode.InnerText); } catch { }
+
+            workNode = rootConfigNode.SelectSingleNode("xmltv-filename");
+            if (workNode != null)
+                XmlTVFileName = workNode.InnerText;
 
             XmlNode translateListNode = rootConfigNode.SelectSingleNode("TranslationMatrix");
             if (translateListNode != null)

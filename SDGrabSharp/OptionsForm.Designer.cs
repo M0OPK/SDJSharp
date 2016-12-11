@@ -87,6 +87,10 @@
             this.lblLineup = new System.Windows.Forms.Label();
             this.cbLineup = new System.Windows.Forms.ComboBox();
             this.tpGeneral1 = new System.Windows.Forms.TabPage();
+            this.gbXMLTVFile = new System.Windows.Forms.GroupBox();
+            this.btnBrowseXmlTVFile = new System.Windows.Forms.Button();
+            this.txtOutputXmlTVFile = new System.Windows.Forms.TextBox();
+            this.lblOutputXmlTVFile = new System.Windows.Forms.Label();
             this.gbRetrievalOptions = new System.Windows.Forms.GroupBox();
             this.lbDateRangeInfo = new System.Windows.Forms.Label();
             this.lblProgrammeItems = new System.Windows.Forms.Label();
@@ -100,6 +104,8 @@
             this.txtProgrammePeriod = new System.Windows.Forms.TextBox();
             this.lbProgrammePeriod = new System.Windows.Forms.Label();
             this.gbXmlTVAttr = new System.Windows.Forms.GroupBox();
+            this.cbDisplayNameMode = new System.Windows.Forms.ComboBox();
+            this.lblChannelDisplayName = new System.Windows.Forms.Label();
             this.ckProgrammeID = new System.Windows.Forms.CheckBox();
             this.ckShowType = new System.Windows.Forms.CheckBox();
             this.ckStationAfiliate = new System.Windows.Forms.CheckBox();
@@ -118,8 +124,6 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
-            this.lblChannelDisplayName = new System.Windows.Forms.Label();
-            this.cbDisplayNameMode = new System.Windows.Forms.ComboBox();
             this.tcConfig.SuspendLayout();
             this.tpSD1.SuspendLayout();
             this.gbStations.SuspendLayout();
@@ -133,6 +137,7 @@
             this.gbAddedChannels.SuspendLayout();
             this.gbAvailableChannels.SuspendLayout();
             this.tpGeneral1.SuspendLayout();
+            this.gbXMLTVFile.SuspendLayout();
             this.gbRetrievalOptions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tkbProgrammePeriod)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tkbProgrammeItems)).BeginInit();
@@ -735,6 +740,7 @@
             // tpGeneral1
             // 
             this.tpGeneral1.BackColor = System.Drawing.SystemColors.Control;
+            this.tpGeneral1.Controls.Add(this.gbXMLTVFile);
             this.tpGeneral1.Controls.Add(this.gbRetrievalOptions);
             this.tpGeneral1.Controls.Add(this.gbXmlTVAttr);
             this.tpGeneral1.Controls.Add(this.gbPersistentCache);
@@ -745,6 +751,44 @@
             this.tpGeneral1.TabIndex = 2;
             this.tpGeneral1.Text = "General";
             this.tpGeneral1.Enter += new System.EventHandler(this.tpGeneral1_Enter);
+            // 
+            // gbXMLTVFile
+            // 
+            this.gbXMLTVFile.Controls.Add(this.btnBrowseXmlTVFile);
+            this.gbXMLTVFile.Controls.Add(this.txtOutputXmlTVFile);
+            this.gbXMLTVFile.Controls.Add(this.lblOutputXmlTVFile);
+            this.gbXMLTVFile.Location = new System.Drawing.Point(6, 198);
+            this.gbXMLTVFile.Name = "gbXMLTVFile";
+            this.gbXMLTVFile.Size = new System.Drawing.Size(860, 41);
+            this.gbXMLTVFile.TabIndex = 3;
+            this.gbXMLTVFile.TabStop = false;
+            this.gbXMLTVFile.Text = "XMLTV File";
+            // 
+            // btnBrowseXmlTVFile
+            // 
+            this.btnBrowseXmlTVFile.Location = new System.Drawing.Point(764, 10);
+            this.btnBrowseXmlTVFile.Name = "btnBrowseXmlTVFile";
+            this.btnBrowseXmlTVFile.Size = new System.Drawing.Size(90, 24);
+            this.btnBrowseXmlTVFile.TabIndex = 6;
+            this.btnBrowseXmlTVFile.Text = "Browse";
+            this.btnBrowseXmlTVFile.UseVisualStyleBackColor = true;
+            this.btnBrowseXmlTVFile.Click += new System.EventHandler(this.btnBrowseXmlTVFile_Click);
+            // 
+            // txtOutputXmlTVFile
+            // 
+            this.txtOutputXmlTVFile.Location = new System.Drawing.Point(135, 13);
+            this.txtOutputXmlTVFile.Name = "txtOutputXmlTVFile";
+            this.txtOutputXmlTVFile.Size = new System.Drawing.Size(623, 20);
+            this.txtOutputXmlTVFile.TabIndex = 5;
+            // 
+            // lblOutputXmlTVFile
+            // 
+            this.lblOutputXmlTVFile.AutoSize = true;
+            this.lblOutputXmlTVFile.Location = new System.Drawing.Point(6, 16);
+            this.lblOutputXmlTVFile.Name = "lblOutputXmlTVFile";
+            this.lblOutputXmlTVFile.Size = new System.Drawing.Size(123, 13);
+            this.lblOutputXmlTVFile.TabIndex = 4;
+            this.lblOutputXmlTVFile.Text = "Output XMLTV Filename";
             // 
             // gbRetrievalOptions
             // 
@@ -887,6 +931,30 @@
             this.gbXmlTVAttr.TabIndex = 1;
             this.gbXmlTVAttr.TabStop = false;
             this.gbXmlTVAttr.Text = "Schedules Direct XMLTV Attributes";
+            // 
+            // cbDisplayNameMode
+            // 
+            this.cbDisplayNameMode.FormattingEnabled = true;
+            this.cbDisplayNameMode.Items.AddRange(new object[] {
+            "Same as channel-id.",
+            "Station ID",
+            "Station Name",
+            "Station Afiliate",
+            "Station Callsign"});
+            this.cbDisplayNameMode.Location = new System.Drawing.Point(157, 111);
+            this.cbDisplayNameMode.Name = "cbDisplayNameMode";
+            this.cbDisplayNameMode.Size = new System.Drawing.Size(205, 21);
+            this.cbDisplayNameMode.TabIndex = 14;
+            this.cbDisplayNameMode.SelectedIndexChanged += new System.EventHandler(this.cbDisplayNameMode_SelectedIndexChanged);
+            // 
+            // lblChannelDisplayName
+            // 
+            this.lblChannelDisplayName.AutoSize = true;
+            this.lblChannelDisplayName.Location = new System.Drawing.Point(6, 114);
+            this.lblChannelDisplayName.Name = "lblChannelDisplayName";
+            this.lblChannelDisplayName.Size = new System.Drawing.Size(145, 13);
+            this.lblChannelDisplayName.TabIndex = 13;
+            this.lblChannelDisplayName.Text = "Channel display-name source";
             // 
             // ckProgrammeID
             // 
@@ -1085,30 +1153,6 @@
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
-            // lblChannelDisplayName
-            // 
-            this.lblChannelDisplayName.AutoSize = true;
-            this.lblChannelDisplayName.Location = new System.Drawing.Point(6, 114);
-            this.lblChannelDisplayName.Name = "lblChannelDisplayName";
-            this.lblChannelDisplayName.Size = new System.Drawing.Size(145, 13);
-            this.lblChannelDisplayName.TabIndex = 13;
-            this.lblChannelDisplayName.Text = "Channel display-name source";
-            // 
-            // cbDisplayNameMode
-            // 
-            this.cbDisplayNameMode.FormattingEnabled = true;
-            this.cbDisplayNameMode.Items.AddRange(new object[] {
-            "Same as channel-id.",
-            "Station ID",
-            "Station Name",
-            "Station Afiliate",
-            "Station Callsign"});
-            this.cbDisplayNameMode.Location = new System.Drawing.Point(157, 111);
-            this.cbDisplayNameMode.Name = "cbDisplayNameMode";
-            this.cbDisplayNameMode.Size = new System.Drawing.Size(205, 21);
-            this.cbDisplayNameMode.TabIndex = 14;
-            this.cbDisplayNameMode.SelectedIndexChanged += new System.EventHandler(this.cbDisplayNameMode_SelectedIndexChanged);
-            // 
             // frmOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1137,6 +1181,8 @@
             this.gbAddedChannels.ResumeLayout(false);
             this.gbAvailableChannels.ResumeLayout(false);
             this.tpGeneral1.ResumeLayout(false);
+            this.gbXMLTVFile.ResumeLayout(false);
+            this.gbXMLTVFile.PerformLayout();
             this.gbRetrievalOptions.ResumeLayout(false);
             this.gbRetrievalOptions.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tkbProgrammePeriod)).EndInit();
@@ -1245,5 +1291,9 @@
         private System.Windows.Forms.Label lblScheduleItems;
         private System.Windows.Forms.ComboBox cbDisplayNameMode;
         private System.Windows.Forms.Label lblChannelDisplayName;
+        private System.Windows.Forms.GroupBox gbXMLTVFile;
+        private System.Windows.Forms.Button btnBrowseXmlTVFile;
+        private System.Windows.Forms.TextBox txtOutputXmlTVFile;
+        private System.Windows.Forms.Label lblOutputXmlTVFile;
     }
 }
