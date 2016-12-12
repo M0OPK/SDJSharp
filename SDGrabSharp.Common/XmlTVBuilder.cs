@@ -24,6 +24,14 @@ namespace SDGrabSharp.Common
             sd = sdJs ?? new SDJson(cache.tokenData != null ? cache.tokenData.token : string.Empty);
         }
 
+        public class ChannelBlock
+        {
+            public string lineUp;
+            public SDGetLineupResponse.SDLineupStation station;
+            public Config.XmlTVTranslation stationTranslation;
+            public bool isNew;
+        }
+
         public void AddChannels()
         {
             xmlTV = new XmlTV(null, "SDGrabSharp", "https://github.com/M0OPK/SDJSharp", "SchedulesDirect");
@@ -38,47 +46,62 @@ namespace SDGrabSharp.Common
             // Get unique list of lineups from translation matrix (e.g. ones we're interested in)
             var lineupList = config.TranslationMatrix.Select(line => line.Value.LineupID).Distinct();
 
+            // Build a full channel list (all lineups)
+            List<ChannelBlock> fullChannelList = new List<ChannelBlock>();
+            foreach (var lineup in lineupList)
+            {
+                fullChannelList.AddRange(
+                    (
+                            from channelTranslate in config.TranslationMatrix.Select(line => line.Value)
+                            join channel in cache.GetLineupData(sd, lineup).stations
+                                on new
+                                {
+                                    joinLineup = channelTranslate.LineupID,
+                                    joinChannel = channelTranslate.SDStationID
+                                }
+                                equals new
+                                {
+                                    joinLineup = lineup,
+                                    joinChannel = channel.stationID
+                                }
+                            where channelTranslate.isDeleted == false
+                            select new ChannelBlock()
+                            {
+                                lineUp = lineup,
+                                station = channel,
+                                stationTranslation = channelTranslate,
+                                isNew = false
+                            }
+                    ));
+            }
+
+            // Delete anything in the XML file not in this list
+            xmlTV.DeleteUnmatchingChannelNodes(fullChannelList.Select(line =>
+                GetChannelID(line.station, line.stationTranslation)).Distinct().ToArray());
+
             foreach (var lineup in lineupList)
             {
                 // Build channel list
-                var channelList =
-                    (
-                        from channelTranslate in config.TranslationMatrix.Select(line => line.Value)
-                        join channel in cache.GetLineupData(sd, lineup).stations
-                            on new
-                            {
-                                joinLineup = channelTranslate.LineupID,
-                                joinChannel = channelTranslate.SDStationID
-                            }
-                            equals new
-                            {
-                                joinLineup = lineup,
-                                joinChannel = channel.stationID
-                            }
-                        select new
-                        {
-                            channel,
-                            channelTranslate
-                        }
-                    );
+                var channelList = fullChannelList.Where(line => line.lineUp == lineup);
 
-                var existingList = xmlTV.FindMatchingChannelNodes(channelList.
-                    Select(line => GetChannelID(line.channel, line.channelTranslate)).Distinct().ToArray());
+                var existingNodeList = xmlTV.FindMatchingChannelNodes(channelList.Select(line => 
+                    GetChannelID(line.station, line.stationTranslation)).Distinct().ToArray());
 
-                if (existingList != null)
+                if (existingNodeList != null)
                 {
                     var detailedResults =
                         (
                             from chanList in channelList
-                            join existList in existingList
-                                on GetChannelID(chanList.channel, chanList.channelTranslate)
+                            join existList in existingNodeList
+                                on GetChannelID(chanList.station, chanList.stationTranslation)
                                 equals existList.Attributes["id"].Value into existListOuter
                             from fullList in existListOuter.DefaultIfEmpty()
-                            select new
+                            select new ChannelBlock()
                             {
                                 isNew = (fullList == null),
-                                channel = chanList.channel,
-                                channelTranslate = chanList.channelTranslate
+                                station = chanList.station,
+                                stationTranslation = chanList.stationTranslation,
+                                lineUp = lineup
                             }
                         );
 
@@ -89,11 +112,11 @@ namespace SDGrabSharp.Common
                         {
                             var displayName =
                                 new XmlTV.XmlLangText[] 
-                                { new XmlTV.XmlLangText(channel.channel.descriptionLanguage.FirstOrDefault() ?? "en",
-                                GetChannelName(channel.channel, channel.channelTranslate)) };
+                                { new XmlTV.XmlLangText(channel.station.descriptionLanguage.FirstOrDefault() ?? "en",
+                                GetChannelName(channel.station, channel.stationTranslation)) };
 
-                            xmlTV.ReplaceChannel(GetChannelID(channel.channel, channel.channelTranslate), displayName,
-                                null, channel.channel.logo != null ? channel.channel.logo.URL : null);
+                            xmlTV.ReplaceChannel(GetChannelID(channel.station, channel.stationTranslation), displayName,
+                                null, channel.station.logo != null ? channel.station.logo.URL : null);
                         }
 
                         // New ones now
@@ -101,11 +124,11 @@ namespace SDGrabSharp.Common
                         {
                             var displayName =
                                 new XmlTV.XmlLangText[]
-                                { new XmlTV.XmlLangText(channel.channel.descriptionLanguage.FirstOrDefault() ?? "en",
-                                GetChannelName(channel.channel, channel.channelTranslate)) };
+                                { new XmlTV.XmlLangText(channel.station.descriptionLanguage.FirstOrDefault() ?? "en",
+                                GetChannelName(channel.station, channel.stationTranslation)) };
 
-                            xmlTV.AddChannel(GetChannelID(channel.channel, channel.channelTranslate), displayName,
-                                null, channel.channel.logo != null ? channel.channel.logo.URL : null);
+                            xmlTV.AddChannel(GetChannelID(channel.station, channel.stationTranslation), displayName,
+                                null, channel.station.logo != null ? channel.station.logo.URL : null);
                         }
                     }
                 }

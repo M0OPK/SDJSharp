@@ -475,6 +475,22 @@ namespace XMLTV
                 ).AsEnumerable();
         }
 
+        public void DeleteUnmatchingChannelNodes(string[] searchItems)
+        {
+            var unMatchingItems =
+            (
+                from channel in xmlData.channelNodes.Cast<XmlNode>()
+                join searchItemTemp in searchItems
+                    on channel.Attributes["id"].Value equals searchItemTemp into searchItemOuter
+                from searchItem in searchItemOuter.DefaultIfEmpty()
+                where searchItem == null
+                select channel
+            );
+
+            foreach (var deleteItem in unMatchingItems)
+                xmlData.rootNode.RemoveChild(deleteItem);
+        }
+
         /// <summary>
         /// Save current data to an XMLTV format file
         /// </summary>
