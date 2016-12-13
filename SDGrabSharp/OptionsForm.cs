@@ -418,7 +418,6 @@ namespace SDGrabSharp.UI
         private void btnSave_Click(object sender, EventArgs e)
         {
             SaveConfig("SDGrabSharp.xml");
-            this.Close();
         }
 
         private void SaveConfig(string filename)
