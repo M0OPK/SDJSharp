@@ -475,7 +475,7 @@ namespace XMLTV
                 ).AsEnumerable();
         }
 
-        public void DeleteUnmatchingChannelNodes(string[] searchItems)
+        public void DeleteUnmatchingChannelNodes(string[] searchItems, bool includeProgrammes = true)
         {
             var unMatchingItems =
             (
@@ -487,8 +487,46 @@ namespace XMLTV
                 select channel
             );
 
+            // Remove programmes too if specified
+            if (includeProgrammes)
+            {
+                var unMatchingProgrammes =
+                (
+                    from programme in xmlData.programmeNodes.Cast<XmlNode>()
+                    join channel in unMatchingItems
+                        on programme.Attributes["channel"] != null ? programme.Attributes["channel"].Value : string.Empty
+                        equals channel.Attributes["id"].Value
+                    select programme
+                );
+
+                foreach (var deleteProgramme in unMatchingProgrammes)
+                    xmlData.rootNode.RemoveChild(deleteProgramme);
+            }
+
             foreach (var deleteItem in unMatchingItems)
                 xmlData.rootNode.RemoveChild(deleteItem);
+        }
+
+        public void DeleteProgrammesOutsideDateRange(DateTimeOffset startDate, DateTimeOffset endDate)
+        {
+            // Convert dates to string
+            string start = startDate.ToString("yyyyMMddHHmmss zzz").Replace(":", "");
+            string end = endDate.ToString("yyyyMMddHHmmss zzz").Replace(":", "");
+
+            // Create list of nodes outside of range
+            var programmeList =
+            (
+                from programme in xmlData.programmeNodes.Cast<XmlNode>()
+                where String.Compare(programme.Attributes["start"] != null ? 
+                      programme.Attributes["start"].Value : "19000101000000 +0000", start) < 0 ||
+                      String.Compare(programme.Attributes["start"] != null ? 
+                      programme.Attributes["start"].Value : "19000101000000 +0000", end) > 0
+                select programme
+            );
+
+            // Delete these nodes
+            foreach (var programme in programmeList)
+                xmlData.rootNode.RemoveChild(programme);
         }
 
         /// <summary>

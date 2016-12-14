@@ -119,7 +119,7 @@ namespace SDGrabSharp.Common
                                 null, channel.station.logo != null ? channel.station.logo.URL : null);
                         }
 
-                        // New ones now
+                        // Then add new ones
                         foreach (var channel in detailedResults.Where(line => line.isNew == true))
                         {
                             var displayName =
@@ -174,5 +174,16 @@ namespace SDGrabSharp.Common
             }
         }
 
+        // Template to create List of various array types with max size
+        private IEnumerable<T[]> splitArray<T>(T[] items, int nSize)
+        {
+            var origList = items.ToList();
+            var list = new List<T[]>();
+
+            for (int i = 0; i < origList.Count; i += nSize)
+                list.Add(origList.GetRange(i, Math.Min(nSize, origList.Count - i)).ToArray());
+
+            return list;
+        }
     }
 }
