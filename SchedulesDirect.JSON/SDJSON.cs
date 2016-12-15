@@ -72,6 +72,9 @@ namespace SchedulesDirect
             localErrors.Add(new SDJsonError(errorcode, errormessage, errorseverity, errordescription, errorsource));
         }
 
+        /// <summary>
+        /// Schedules Direct Error Structure
+        /// </summary>
         public class SDJsonError
         {
             public Exception exception;
@@ -141,13 +144,21 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDTokenResponse Login(string username, string password, bool isHash = false)
         {
-            string passHash = isHash ? password : hashPassword(password);
-            SDTokenResponse response = PostJSON<SDTokenResponse, SDTokenRequest>("token", new SDTokenRequest(username, passHash));
-            if (response == null || response.code != 0)
-                return null;
+            try
+            {
+                string passHash = isHash ? password : hashPassword(password);
+                SDTokenResponse response = PostJSON<SDTokenResponse, SDTokenRequest>("token", new SDTokenRequest(username, passHash));
+                if (response == null || response.code != 0)
+                    return null;
 
-            loginToken = response.token;
-            return response;
+                loginToken = response.token;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -156,10 +167,18 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDStatusResponse GetStatus()
         {
-            if (loginToken == string.Empty)
-                return null;
+            try
+            {
+                if (loginToken == string.Empty)
+                    return null;
 
-            return GetJSON<SDStatusResponse>("status", loginToken);
+                return GetJSON<SDStatusResponse>("status", loginToken);
+            }
+            catch(Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -169,10 +188,18 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDVersionResponse GetVersion(string clientname)
         {
-            if (clientname == string.Empty)
-                return null;
+            try
+            {
+                if (clientname == string.Empty)
+                    return null;
 
-            return GetJSON<SDVersionResponse>("token/" + clientname);
+                return GetJSON<SDVersionResponse>("token/" + clientname);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -181,7 +208,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDAvailableResponse> GetAvailable()
         {
-            return GetJSON<IEnumerable<SDAvailableResponse>>("available");
+            try
+            {
+                return GetJSON<IEnumerable<SDAvailableResponse>>("available");
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -190,33 +225,41 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDCountries GetCountries()
         {
-            dynamic result = GetDynamic(WebGet("available/countries"));
-            if (result == null)
-                return null;
-
-            SDCountries countries = new SDCountries();
-            foreach (string key in result.Keys)
+            try
             {
-                SDCountries.Continent thisContinent = new SDCountries.Continent();
-                thisContinent.continentname = key;
+                dynamic result = GetDynamic(WebGet("available/countries"));
+                if (result == null)
+                    return null;
 
-                foreach (dynamic country in result[key])
+                SDCountries countries = new SDCountries();
+                foreach (string key in result.Keys)
                 {
-                    if (country == null)
-                        continue;
+                    SDCountries.Continent thisContinent = new SDCountries.Continent();
+                    thisContinent.continentname = key;
 
-                    SDCountries.Country thisCountry = new SDCountries.Country();
-                    try { thisCountry.fullName = country["fullName"]; } catch { }
-                    try { thisCountry.shortName = country["shortName"]; } catch { }
-                    try { thisCountry.postalCodeExample = country["postalCodeExample"]; } catch { }
-                    try { thisCountry.postalCode = country["postalCode"]; } catch { }
-                    try { thisCountry.onePostalCode = country["onePostalCode"]; } catch { }
+                    foreach (dynamic country in result[key])
+                    {
+                        if (country == null)
+                            continue;
 
-                    thisContinent.countries.Add(thisCountry);
+                        SDCountries.Country thisCountry = new SDCountries.Country();
+                        try { thisCountry.fullName = country["fullName"]; } catch { }
+                        try { thisCountry.shortName = country["shortName"]; } catch { }
+                        try { thisCountry.postalCodeExample = country["postalCodeExample"]; } catch { }
+                        try { thisCountry.postalCode = country["postalCode"]; } catch { }
+                        try { thisCountry.onePostalCode = country["onePostalCode"]; } catch { }
+
+                        thisContinent.countries.Add(thisCountry);
+                    }
+                    countries.continents.Add(thisContinent);
                 }
-                countries.continents.Add(thisContinent);
+                return countries;
             }
-            return countries;
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -226,20 +269,28 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDTransmitter> GetTransmitters(string countrycode)
         {
-            dynamic result = GetDynamic(WebGet("transmitters/" + countrycode));
-            if (result == null)
-                return null;
-
-            List<SDTransmitter> txList = new List<SDTransmitter>();
-            foreach (string key in result.Keys)
+            try
             {
-                SDTransmitter thisTx = new SDTransmitter();
-                thisTx.transmitterArea = key;
-                thisTx.transmitterID = result[key];
-                txList.Add(thisTx);
-            }
+                dynamic result = GetDynamic(WebGet("transmitters/" + countrycode));
+                if (result == null)
+                    return null;
 
-            return txList.AsEnumerable();
+                List<SDTransmitter> txList = new List<SDTransmitter>();
+                foreach (string key in result.Keys)
+                {
+                    SDTransmitter thisTx = new SDTransmitter();
+                    thisTx.transmitterArea = key;
+                    thisTx.transmitterID = result[key];
+                    txList.Add(thisTx);
+                }
+
+                return txList.AsEnumerable();
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -250,7 +301,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDHeadendsResponse> GetHeadends(string country, string postcode)
         {
-            return GetJSON<IEnumerable<SDHeadendsResponse>>(string.Format("headends?country={0}&postalcode={1}", country, postcode), loginToken);
+            try
+            {
+                return GetJSON<IEnumerable<SDHeadendsResponse>>(string.Format("headends?country={0}&postalcode={1}", country, postcode), loginToken);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -260,12 +319,28 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDAddRemoveLineupResponse AddLineup(string lineupID)
         {
-            return PutJSON<SDAddRemoveLineupResponse>("lineups/" + lineupID, loginToken);
+            try
+            {
+                return PutJSON<SDAddRemoveLineupResponse>("lineups/" + lineupID, loginToken);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         public SDAddRemoveLineupResponse DeleteLineup(string lineupID)
         {
-            return DeleteJSON<SDAddRemoveLineupResponse>("lineups/" + lineupID, loginToken);
+            try
+            {
+                return DeleteJSON<SDAddRemoveLineupResponse>("lineups/" + lineupID, loginToken);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -274,7 +349,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDLineupsResponse GetLineups()
         {
-            return GetJSON<SDLineupsResponse>("lineups", loginToken);
+            try
+            {
+                return GetJSON<SDLineupsResponse>("lineups", loginToken);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -285,15 +368,23 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDGetLineupResponse GetLineup(string lineup, bool verbose = false)
         {
-            WebHeaderCollection headers = null;
-
-            if (verbose)
+            try
             {
-                headers = new WebHeaderCollection();
-                headers.Add("verboseMap: true");
-            }
+                WebHeaderCollection headers = null;
 
-            return GetJSON<SDGetLineupResponse>("lineups/" + lineup, loginToken, headers);
+                if (verbose)
+                {
+                    headers = new WebHeaderCollection();
+                    headers.Add("verboseMap: true");
+                }
+
+                return GetJSON<SDGetLineupResponse>("lineups/" + lineup, loginToken, headers);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -303,7 +394,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDProgramResponse> GetPrograms(string[] programs)
         {
-            return PostJSON<IEnumerable<SDProgramResponse>, string[]>("programs", programs, loginToken);
+            try
+            {
+                return PostJSON<IEnumerable<SDProgramResponse>, string[]>("programs", programs, loginToken);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -313,25 +412,33 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDDescriptionResponse> GetDescriptions(string[] programs)
         {
-            dynamic result = GetDynamic(WebPost("metadata/description", CreateJSONstring<string[]>(programs), loginToken));
-
-            if (result == null)
-                return null;
-
-            var programData = new List<SDDescriptionResponse>();
-            foreach (string key in result.Keys)
+            try
             {
-                var thisProgram = new SDDescriptionResponse();
-                thisProgram.episodeID = key;
-                dynamic temp = result[key];
-                //thisProgram.episodeDescription = (SDDescriptionResponse.SDProgramDescription)result[key];
-                try { thisProgram.episodeDescription.code = temp["code"]; } catch { };
-                try { thisProgram.episodeDescription.description100 = temp["description100"]; } catch { };
-                try { thisProgram.episodeDescription.description1000 = temp["description1000"]; } catch { };
-                programData.Add(thisProgram);
-            }
+                dynamic result = GetDynamic(WebPost("metadata/description", CreateJSONstring<string[]>(programs), loginToken));
 
-            return programData.AsEnumerable();
+                if (result == null)
+                    return null;
+
+                var programData = new List<SDDescriptionResponse>();
+                foreach (string key in result.Keys)
+                {
+                    var thisProgram = new SDDescriptionResponse();
+                    thisProgram.episodeID = key;
+                    dynamic temp = result[key];
+                    //thisProgram.episodeDescription = (SDDescriptionResponse.SDProgramDescription)result[key];
+                    try { thisProgram.episodeDescription.code = temp["code"]; } catch { };
+                    try { thisProgram.episodeDescription.description100 = temp["description100"]; } catch { };
+                    try { thisProgram.episodeDescription.description1000 = temp["description1000"]; } catch { };
+                    programData.Add(thisProgram);
+                }
+
+                return programData.AsEnumerable();
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -341,7 +448,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDScheduleResponse> GetSchedules(IEnumerable<SDScheduleRequest> request)
         {
-            return PostJSON<IEnumerable<SDScheduleResponse>, IEnumerable<SDScheduleRequest>>("schedules", request, loginToken);
+            try
+            {
+                return PostJSON<IEnumerable<SDScheduleResponse>, IEnumerable<SDScheduleRequest>>("schedules", request, loginToken);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -351,38 +466,46 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDMD5Response> GetMD5(IEnumerable<SDMD5Request> request)
         {
-            dynamic result = GetDynamic(WebPost("schedules/md5", CreateJSONstring<IEnumerable<SDMD5Request>>(request), loginToken));
-
-            if (result == null)
-                return null;
-
-            var md5Data = new List<SDMD5Response>();
-            foreach (string resultKey in result.Keys)
+            try
             {
-                var thisResponse = new SDMD5Response();
-                thisResponse.stationID = resultKey;
+                dynamic result = GetDynamic(WebPost("schedules/md5", CreateJSONstring<IEnumerable<SDMD5Request>>(request), loginToken));
 
-                dynamic dates = result[resultKey];
+                if (result == null)
+                    return null;
 
-                List<SDMD5Response.SDMD5Day> daysTemp = new List<SDMD5Response.SDMD5Day>();
-                foreach (string dateKey in dates.Keys)
+                var md5Data = new List<SDMD5Response>();
+                foreach (string resultKey in result.Keys)
                 {
-                    SDMD5Response.SDMD5Day thisDay = new SDMD5Response.SDMD5Day();
-                    thisDay.date = dateKey;
-                    try { thisDay.md5data.code = dates[dateKey]["code"]; } catch { };
-                    try { thisDay.md5data.message = dates[dateKey]["message"]; } catch { };
-                    DateTime testDate;
-                    if (DateTime.TryParse(dates[dateKey]["lastModified"], null, DateTimeStyles.RoundtripKind, out testDate))
-                        thisDay.md5data.lastModified = testDate;
+                    var thisResponse = new SDMD5Response();
+                    thisResponse.stationID = resultKey;
 
-                    try { thisDay.md5data.md5 = dates[dateKey]["md5"]; } catch { };
-                    daysTemp.Add(thisDay);
+                    dynamic dates = result[resultKey];
+
+                    List<SDMD5Response.SDMD5Day> daysTemp = new List<SDMD5Response.SDMD5Day>();
+                    foreach (string dateKey in dates.Keys)
+                    {
+                        SDMD5Response.SDMD5Day thisDay = new SDMD5Response.SDMD5Day();
+                        thisDay.date = dateKey;
+                        try { thisDay.md5data.code = dates[dateKey]["code"]; } catch { };
+                        try { thisDay.md5data.message = dates[dateKey]["message"]; } catch { };
+                        DateTime testDate;
+                        if (DateTime.TryParse(dates[dateKey]["lastModified"], null, DateTimeStyles.RoundtripKind, out testDate))
+                            thisDay.md5data.lastModified = testDate;
+
+                        try { thisDay.md5data.md5 = dates[dateKey]["md5"]; } catch { };
+                        daysTemp.Add(thisDay);
+                    }
+                    thisResponse.md5day = daysTemp.ToArray();
+                    md5Data.Add(thisResponse);
                 }
-                thisResponse.md5day = daysTemp.ToArray();
-                md5Data.Add(thisResponse);
-            }
 
-            return md5Data.AsEnumerable();
+                return md5Data.AsEnumerable();
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -392,7 +515,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDDeleteResponse DeleteMessage(string messageID)
         {
-            return DeleteJSON<SDDeleteResponse>("messages/" + messageID, loginToken);
+            try
+            {
+                return DeleteJSON<SDDeleteResponse>("messages/" + messageID, loginToken);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -402,7 +533,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public SDStillRunningResponse GetStillRunning(string programID)
         {
-            return GetJSON<SDStillRunningResponse>("metadata/stillRunning/" + programID, loginToken);
+            try
+            {
+                return GetJSON<SDStillRunningResponse>("metadata/stillRunning/" + programID, loginToken);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -412,7 +551,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDProgramMetadataResponse> GetProgramMetadata(string[] programs)
         {
-            return PostJSON<IEnumerable<SDProgramMetadataResponse>, string[]>("metadata/programs/", programs);
+            try
+            {
+                return PostJSON<IEnumerable<SDProgramMetadataResponse>, string[]>("metadata/programs/", programs);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -422,7 +569,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDImageData> GetProgramRootMetadata(string rootId)
         {
-            return GetJSON<IEnumerable<SDImageData>>("metadata/programs/" + rootId);
+            try
+            {
+                return GetJSON<IEnumerable<SDImageData>>("metadata/programs/" + rootId);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         /// <summary>
@@ -432,7 +587,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public IEnumerable<SDImageData> GetCelebrityMetadata(string celebrityID)
         {
-            return GetJSON<IEnumerable<SDImageData>>("metadata/celebrity/" + celebrityID);
+            try
+            {
+                return GetJSON<IEnumerable<SDImageData>>("metadata/celebrity/" + celebrityID);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
         }
 
         // For cases where we can't create a known object type
@@ -587,7 +750,7 @@ namespace SchedulesDirect
         }
 
         // Create web request for specified action and URL
-        HttpWebRequest WebAction(string url, string action = "GET", string token = "", WebHeaderCollection headers = null)
+        private HttpWebRequest WebAction(string url, string action = "GET", string token = "", WebHeaderCollection headers = null)
         {
             var webRequest = (HttpWebRequest)WebRequest.Create(url);
             webRequest.Method = action;
