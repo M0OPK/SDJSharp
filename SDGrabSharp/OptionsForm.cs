@@ -1371,5 +1371,14 @@ namespace SDGrabSharp.UI
                 txtOutputXmlTVFile.Text = dialog.FileName;
 
         }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            // Reload old config, if cancelling
+            if (System.IO.File.Exists("SDGrabSharp.xml"))
+                config.Load("SDGrabSharp.xml");
+
+            this.Close();
+        }
     }
 }

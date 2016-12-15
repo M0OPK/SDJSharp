@@ -55,8 +55,13 @@ namespace SDGrabSharp.UI
 
         private void toolStripMenuItemRun_Click(object sender, EventArgs e)
         {
+            Cursor.Current = Cursors.WaitCursor;
             var builder = new XmlTVBuilder(config, cache, null);
-            builder.AddChannels();
+            var channelInfo = builder.AddChannels();
+            builder.AddProgrammes(channelInfo);
+
+            builder.SaveXmlTV();
+            Cursor.Current = Cursors.Default;
         }
     }
 }

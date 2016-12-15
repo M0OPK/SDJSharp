@@ -130,7 +130,7 @@ namespace SchedulesDirect
 
         public bool LoggedIn
         {
-            get { return loginToken != string.Empty; }
+            get { return loginToken != null && loginToken != string.Empty; }
         }
 
         /// <summary>

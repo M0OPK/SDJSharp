@@ -118,6 +118,26 @@ namespace XMLTV
             }
         }
 
+        public XmlNode GetChannel(string stationID)
+        {
+            return xmlData.channelNodes.Cast<XmlNode>().Where(line => line.Attributes["id"].Value == stationID).FirstOrDefault();
+        }
+
+        public XmlNodeList GetChannelNodes()
+        {
+            return xmlData.channelNodes;
+        }
+
+        public XmlNodeList GetProgrammeNodes()
+        {
+            return xmlData.programmeNodes;
+        }
+
+        public XmlDocument GetDocument()
+        {
+            return xmlData.rootDocument;
+        }
+
         /// <summary>
         /// Add a single channel to the current dataset
         /// </summary>
@@ -154,27 +174,27 @@ namespace XMLTV
             return false;
         }
 
-        public bool ReplaceChannel(string channelID, XmlLangText[] displayName, string url = null, string iconUrl = null,
+        public XmlNode ReplaceChannel(string channelID, XmlLangText[] displayName, string url = null, string iconUrl = null,
                                    IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
         {
             try
             {
                 XmlNode existingChannel = FindFirstChannel(channelID);
                 if (existingChannel == null)
-                    return false;
+                    return null;
 
                 XmlElement channelNode = buildChannelNode(channelID, displayName, url, iconUrl, extraattributes, extranodes, true);
                 if (channelNode == null)
-                    return false;
+                    return null;
 
                 xmlData.rootNode.ReplaceChild(channelNode, existingChannel);
-                return true;
+                return channelNode;
             }
             catch (Exception ex)
             {
                 addError(ex);
             }
-            return false;
+            return null;
         }
 
         private XmlElement buildChannelNode(string channelID, XmlLangText[] displayName, string url = null, string iconUrl = null,
@@ -230,14 +250,14 @@ namespace XMLTV
                 if (extraattributes != null)
                 {
                     foreach (XmlAttribute extra in extraattributes)
-                        channelNode.Attributes.Append(extra);
+                        channelNode.Attributes.Append((XmlAttribute)extra.Clone());
                 }
 
                 // Any extra nodes
                 if (extranodes != null)
                 {
                     foreach (XmlNode extra in extranodes)
-                        channelNode.AppendChild(extra);
+                        channelNode.AppendChild(extra.Clone());
                 }
                 return channelNode;
             }
