@@ -173,7 +173,10 @@ namespace SDGrabSharp.UI
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            doLogin(txtLogin.Text, txtPassword.Text);
+            if (txtPassword.Text == passwordHashEntry)
+                doLogin(txtLogin.Text, config.SDPasswordHash, true);
+            else
+                doLogin(txtLogin.Text, txtPassword.Text, false);
         }
 
         private void doLogin(string username, string password, bool isHash = false)
@@ -187,6 +190,9 @@ namespace SDGrabSharp.UI
                     cache.tokenData = loginResponse;
                     onLoggedIn();
                 }
+
+                if (sdJS.HasErrors)
+                    reportErrors();
             }
 
         }
@@ -244,29 +250,64 @@ namespace SDGrabSharp.UI
 
         private void onLoggedIn()
         {
-            doStatus();
+            if (!doStatus())
+            {
+                loggedIn = false;
+                updateControls(loggedIn);
+                return;
+            }
+
             showCountries();
             updateControls(loggedIn);
         }
 
-        private void doStatus()
+        private bool doStatus()
         {
-            lvAccountLineups.Items.Clear();
+            sdJS.ClearErrors();
             var statusResponse = sdJS.GetStatus();
 
-            if (statusResponse.lineups != null)
+            // Try to resolve invalid token state
+            if (sdJS.HasErrors)
             {
-                foreach (var lineup in statusResponse.lineups)
+                var forbiddenError = sdJS.GetLastError();
+                if (forbiddenError.isException && forbiddenError.message.Contains("(403)"))
                 {
-                    var item = new ListViewItem();
-                    item.Text = lineup.lineup;
-                    item.SubItems.Add(lineup.modified.GetValueOrDefault().Date.ToShortDateString());
-                    lvAccountLineups.Items.Add(item);
+                    loggedIn = false;
+                    if (config.SDUsername != string.Empty && config.SDPasswordHash != string.Empty)
+                    {
+                        doLogin(config.SDUsername, config.SDPasswordHash, true);
+                        if (loggedIn)
+                            statusResponse = sdJS.GetStatus();
+                    }
                 }
-
-                updateLineupsStatus(statusResponse.lineups.Count(), statusResponse.account.maxLineups, changesRemain);
             }
 
+            if (loggedIn)
+            {
+                if (statusResponse != null && statusResponse.lineups != null)
+                {
+                    // Remove translations for lineups that don't exist
+                    validateTranslate(localTranslate, statusResponse.lineups.Select(line => line.lineup).ToArray());
+
+                    lvAccountLineups.Items.Clear();
+                    foreach (var lineup in statusResponse.lineups)
+                    {
+                        var item = new ListViewItem();
+                        item.Text = lineup.lineup;
+                        item.SubItems.Add(lineup.modified.GetValueOrDefault().Date.ToShortDateString());
+                        lvAccountLineups.Items.Add(item);
+                    }
+
+                    updateLineupsStatus(statusResponse.lineups.Count(), statusResponse.account.maxLineups, changesRemain);
+                    sdJS.ClearErrors();
+                    return true;
+                }
+            }
+
+            if (sdJS.HasErrors)
+                reportErrors();
+
+            return false;
         }
 
         private void showCountries()
@@ -396,10 +437,16 @@ namespace SDGrabSharp.UI
         {
             if (lvAccountLineups.SelectedItems.Count == 1)
             {
-                var response = sdJS.DeleteLineup(lvAccountLineups.SelectedItems[0].SubItems[0].Text);
+                string lineupID = lvAccountLineups.SelectedItems[0].SubItems[0].Text;
+                var response = sdJS.DeleteLineup(lineupID);
                 if (response != null && response.code == 0)
                 {
                     changesRemain = int.Parse(response.changesRemaining);
+
+                    // Delete all translations for this lineup
+                    var lineupItems = localTranslate.Where(line => line.Value.LineupID == lineupID);
+                    foreach (var lineupItem in lineupItems)
+                        localTranslate.Remove(lineupItem.Key);
                 }
 
                 doStatus();
@@ -1379,6 +1426,27 @@ namespace SDGrabSharp.UI
                 config.Load("SDGrabSharp.xml");
 
             this.Close();
+        }
+
+        private void validateTranslate(Dictionary<string, Config.XmlTVTranslation> translateData, string[] lineupList)
+        {
+            var removeList = translateData.Where(line => !lineupList.Any(lineup => lineup == line.Value.LineupID));
+            foreach (var lineup in removeList)
+                translateData.Remove(lineup.Key);
+        }
+
+        private void reportErrors()
+        {
+            var exceptions = sdJS.GetRawErrors();
+            string errors = string.Empty;
+            foreach (var ex in exceptions)
+            {
+                errors += ex.message + "\r\n";
+            }
+            sdJS.ClearErrors();
+
+            if (errors != string.Empty)
+                MessageBox.Show(this, errors, "SDJSON Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

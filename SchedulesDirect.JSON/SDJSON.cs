@@ -42,6 +42,17 @@ namespace SchedulesDirect
         }
 
         /// <summary>
+        /// Return true if there are errors to report
+        /// </summary>
+        public bool HasErrors
+        {
+            get
+            {
+                return (localErrors.Count > 0);
+            }
+        }
+
+        /// <summary>
         /// Retrieve the most recent reported error. If specified pop (remove) after returning
         /// </summary>
         /// <param name="pop"></param>
