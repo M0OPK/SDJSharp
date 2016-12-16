@@ -39,6 +39,7 @@
             this.toolStripMenuItemOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsProgress = new System.Windows.Forms.ToolStripProgressBar();
             this.statusMain.SuspendLayout();
             this.menuMain.SuspendLayout();
             this.SuspendLayout();
@@ -46,7 +47,8 @@
             // statusMain
             // 
             this.statusMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsStatus});
+            this.tsStatus,
+            this.tsProgress});
             this.statusMain.Location = new System.Drawing.Point(0, 326);
             this.statusMain.Name = "statusMain";
             this.statusMain.Size = new System.Drawing.Size(438, 22);
@@ -55,8 +57,10 @@
             // 
             // tsStatus
             // 
+            this.tsStatus.AutoSize = false;
             this.tsStatus.Name = "tsStatus";
-            this.tsStatus.Size = new System.Drawing.Size(0, 17);
+            this.tsStatus.Size = new System.Drawing.Size(270, 17);
+            this.tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // menuMain
             // 
@@ -106,7 +110,7 @@
             this.toolStripMenuItemTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemOptions});
             this.toolStripMenuItemTools.Name = "toolStripMenuItemTools";
-            this.toolStripMenuItemTools.Size = new System.Drawing.Size(48, 20);
+            this.toolStripMenuItemTools.Size = new System.Drawing.Size(47, 20);
             this.toolStripMenuItemTools.Text = "Tools";
             // 
             // toolStripMenuItemOptions
@@ -130,6 +134,12 @@
             this.toolStripMenuItemAbout.Name = "toolStripMenuItemAbout";
             this.toolStripMenuItemAbout.Size = new System.Drawing.Size(107, 22);
             this.toolStripMenuItemAbout.Text = "About";
+            // 
+            // tsProgress
+            // 
+            this.tsProgress.AutoSize = false;
+            this.tsProgress.Name = "tsProgress";
+            this.tsProgress.Size = new System.Drawing.Size(150, 16);
             // 
             // frmMain
             // 
@@ -163,6 +173,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemHelp;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAbout;
         private System.Windows.Forms.ToolStripStatusLabel tsStatus;
+        private System.Windows.Forms.ToolStripProgressBar tsProgress;
     }
 }
 

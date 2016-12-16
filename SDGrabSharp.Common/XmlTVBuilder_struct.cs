@@ -20,6 +20,19 @@ namespace SDGrabSharp.Common
             public bool isNew;
         }
 
+        public class StatusUpdate
+        {
+            public int CurrentChannel;
+            public int TotalChannels;
+            public int CurrentProgramme;
+            public int TotalProgrammes;
+            public string currentChannelID;
+            public string currentChannelName;
+            public string currentProgrammeID;
+            public string currentProgrammeTitle;
+            public string statusMessage;
+        }
+
         public class RescheduleQueue<T>
         {
             public List<RescheduleQueueItem<T>> queueItems;

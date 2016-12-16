@@ -12,9 +12,12 @@ namespace SDGrabSharp.Common
 {
     public partial class XmlTVBuilder
     {
+        public event EventHandler StatusUpdateReady;
         private Config config;
         private DataCache cache;
         private XmlTV xmlTV;
+        public StatusUpdate statusData;
+        bool updateWaiting;
         SDJson sd;
 
         public XmlTVBuilder(Config inputConfig, DataCache inputCache, SDJson sdJs = null)
@@ -24,10 +27,31 @@ namespace SDGrabSharp.Common
             // If were supplied an instance, use it, else try to make one with the token in cache data if found, 
             // else no token and we'll login later
             sd = sdJs ?? new SDJson(cache.tokenData != null ? cache.tokenData.token : string.Empty);
+            statusData = new StatusUpdate();
+        }
+
+        private void UpdateStatus()
+        {
+            if (updateWaiting)
+                return;
+
+            EventHandler updateHandler = StatusUpdateReady;
+            if (updateHandler != null)
+                updateHandler.BeginInvoke(this, EventArgs.Empty, null, null);
+
+            updateWaiting = true;
+        }
+
+        public void ResetUpdateStatus()
+        {
+            updateWaiting = false;
         }
 
         public IEnumerable<ChannelBlock> AddChannels()
         {
+            statusData.statusMessage = "Preparing Channel List";
+            UpdateStatus();
+
             xmlTV = new XmlTV(null, "SDGrabSharp", "https://github.com/M0OPK/SDJSharp", "SchedulesDirect");
 
             if (System.IO.File.Exists(config.XmlTVFileName))
@@ -70,6 +94,9 @@ namespace SDGrabSharp.Common
                     ));
             }
 
+            statusData.statusMessage = "Removing unmatched channels";
+            UpdateStatus();
+
             // Delete anything in the XML file not in this list
             xmlTV.DeleteUnmatchingChannelNodes(fullChannelList.Select(line =>
                 GetChannelID(line.station, line.stationTranslation)).Distinct().ToArray());
@@ -93,6 +120,8 @@ namespace SDGrabSharp.Common
             foreach (var md5Node in md5NodesToRemove)
                 md5Node.ParentNode.RemoveChild(md5Node);
 
+            statusData.statusMessage = "Building channel list";
+            UpdateStatus();
             foreach (var lineup in lineupList)
             {
                 // Build channel list
@@ -124,6 +153,11 @@ namespace SDGrabSharp.Common
                     {
                         returnList.AddRange(detailedResults);
                         // Replace existing first
+                        int currentChannel = 0;
+                        statusData.TotalChannels = detailedResults.Count();
+                        statusData.CurrentChannel = 0;
+                        statusData.statusMessage = "Replacing existing channels";
+                        UpdateStatus();
                         foreach (var channel in detailedResults.Where(line => line.isNew == false))
                         {
                             var displayName =
@@ -140,9 +174,15 @@ namespace SDGrabSharp.Common
 
                             if (newChannel != null)
                                 channel.stationNode = newChannel;
+
+                            statusData.CurrentChannel++;
+                            statusData.currentChannelID = channel.station.stationID;
+                            statusData.currentChannelName = GetChannelID(channel.station, channel.stationTranslation);
+                            UpdateStatus();
                         }
 
                         // Then add new ones
+                        statusData.statusMessage = "Adding new channels";
                         foreach (var channel in detailedResults.Where(line => line.isNew == true))
                         {
                             var displayName =
@@ -152,7 +192,17 @@ namespace SDGrabSharp.Common
 
                             xmlTV.AddChannel(GetChannelID(channel.station, channel.stationTranslation), displayName,
                                 null, channel.station.logo != null ? channel.station.logo.URL : null, null);
+
+                            statusData.CurrentChannel++;
+                            statusData.currentChannelID = channel.station.stationID;
+                            statusData.currentChannelName = GetChannelID(channel.station, channel.stationTranslation);
+                            UpdateStatus();
                         }
+
+                        statusData.CurrentChannel = 0;
+                        statusData.TotalChannels = 0;
+                        statusData.currentChannelID = "";
+                        statusData.currentChannelName = "";
                     }
                 }
             }
@@ -163,6 +213,8 @@ namespace SDGrabSharp.Common
 
         public void AddProgrammes(IEnumerable<ChannelBlock> channelData)
         {
+            statusData.statusMessage = "Collecting program data";
+            UpdateStatus();
             // Split channel list
             var updatedList = channelData.Where(line => !line.isNew);
             var addedList = channelData.Where(line => line.isNew);
@@ -229,6 +281,8 @@ namespace SDGrabSharp.Common
                     scheduleReq.Add(new SDScheduleRequest(updateItem.station.stationID, schedDates.AsEnumerable()));
             }
 
+            statusData.statusMessage = "Retrieving MD5 data";
+            UpdateStatus();
             // Actually retrieve MD5 list
             var splitMD5 = splitArray(md5Req.ToArray(), config.ScheduleRetrievalItems);
             List<SDMD5Response> md5Master = new List<SDMD5Response>();
@@ -280,6 +334,9 @@ namespace SDGrabSharp.Common
             // Create program ID list
             List<string> programmeIdList = new List<string>();
 
+            statusData.statusMessage = "Retrieving programs";
+            UpdateStatus();
+
             while (scheduleQueue.Count > 0)
             {
                 if (!scheduleQueue.ItemsReady)
@@ -302,6 +359,12 @@ namespace SDGrabSharp.Common
                     }
                 }
 
+                statusData.CurrentChannel = 0;
+                statusData.TotalChannels = 0;
+                statusData.TotalProgrammes = schedMaster.Count();
+                statusData.CurrentProgramme = 0;
+                statusData.statusMessage = "Updating schedule";
+                UpdateStatus();
                 foreach (var schedule in schedMaster)
                 {
                     if (schedule.code == SDErrors.SCHEDULE_QUEUED)
@@ -352,13 +415,18 @@ namespace SDGrabSharp.Common
                             if (program.airDateTime == null)
                                 continue;
 
+                            statusData.currentProgrammeID = program.programID;
+                            statusData.CurrentProgramme++;
+                            UpdateStatus();
+
+
                             DateTimeOffset startTime = new DateTimeOffset(program.airDateTime.Value);
                             DateTimeOffset endTime = startTime.AddSeconds(program.duration);
 
                             var thisProgrammeNode = programmeNodes.
                                 Where(line => line.Attributes["sd-programmeid"] != null && line.Attributes["sd-programmeid"].Value == program.programID
                                    && line.Attributes["start"].Value == xmlTV.DateToString(startTime)
-                                   && line.Attributes["channel"].Value == schedule.stationID).FirstOrDefault();
+                                   && line.Attributes["channel"].Value == GetChannelID(channelBlock.station, channelBlock.stationTranslation)).FirstOrDefault();
 
                             if (thisProgrammeNode == null)
                             {
@@ -383,6 +451,21 @@ namespace SDGrabSharp.Common
 
                             if (thisProgrammeNode.Attributes["sd-md5"].Value == program.md5)
                                 continue;
+
+                            if (endTime != null)
+                            {
+                                List<XmlAttribute> attribs = new List<XmlAttribute>();
+                                var atProgId = rootDoc.CreateAttribute("sd-programmeid");
+                                atProgId.Value = program.programID;
+                                attribs.Add(atProgId);
+
+                                var atMD5 = rootDoc.CreateAttribute("sd-md5");
+                                atMD5.Value = program.md5;
+                                attribs.Add(atMD5);
+
+                                xmlTV.ReplaceProgramme(xmlTV.DateToString(startTime), xmlTV.DateToString(endTime),
+                                                    GetChannelID(channelBlock.station, channelBlock.stationTranslation), null, null, null, null, attribs);
+                            }
 
                             programmeIdList.Add(program.programID);
                         }
@@ -421,6 +504,11 @@ namespace SDGrabSharp.Common
 
                     var programmeNodes = xmlTV.GetProgrammeNodes().Cast<XmlNode>();
                     var rootDoc = xmlTV.GetDocument();
+
+                    statusData.statusMessage = "Updating programs";
+                    statusData.TotalProgrammes = masterProgrammeList.Count;
+                    statusData.CurrentProgramme = 0;
+                    statusData.currentProgrammeID = "";
                     foreach (var programme in masterProgrammeList)
                     {
                         // Remove this programme
@@ -440,6 +528,12 @@ namespace SDGrabSharp.Common
                             continue;
                         }
 
+                        statusData.CurrentProgramme++;
+                        statusData.currentProgrammeID = programme.programID;
+                        if (programme.titles != null && programme.titles.FirstOrDefault() != null && programme.titles.FirstOrDefault().title120 != null)
+                            statusData.currentProgrammeTitle = programme.titles.FirstOrDefault().title120;
+                        UpdateStatus();
+
                         // Get all programme nodes for this programme ID (there can be multiple)
                         var thisProgrammeNodes = programmeNodes.
                             Where(line => line.Attributes["sd-programmeid"].Value == programme.programID);
@@ -451,7 +545,18 @@ namespace SDGrabSharp.Common
                         {
                             string lang = "en";
 
-                            if (programme.descriptions != null && programme.descriptions.description1000 != null && programme.descriptions.description1000.FirstOrDefault().descriptionLanguage != null)
+                            // First delete all older info nodes
+                            var removeList = new List<XmlNode>();
+                            removeList.AddRange(thisProgrammeNode.SelectNodes("title").Cast<XmlNode>());
+                            removeList.AddRange(thisProgrammeNode.SelectNodes("sub-title").Cast<XmlNode>());
+                            removeList.AddRange(thisProgrammeNode.SelectNodes("desc").Cast<XmlNode>());
+                            removeList.AddRange(thisProgrammeNode.SelectNodes("category").Cast<XmlNode>());
+
+                            foreach (var removeNode in removeList)
+                                thisProgrammeNode.RemoveChild(removeNode);
+
+                            if (programme.descriptions != null && programme.descriptions.description1000 != null 
+                             && programme.descriptions.description1000.FirstOrDefault().descriptionLanguage != null)
                                 lang = fixLang(programme.descriptions.description1000.FirstOrDefault().descriptionLanguage);
 
                             if (programme.titles != null && programme.titles.FirstOrDefault().title120 != null)
@@ -470,7 +575,8 @@ namespace SDGrabSharp.Common
                                 thisProgrammeNode.AppendChild(subtitleNode);
                             }
 
-                            if (programme.descriptions != null && programme.descriptions.description1000 != null && programme.descriptions.description1000.FirstOrDefault().description != null)
+                            if (programme.descriptions != null && programme.descriptions.description1000 != null
+                                && programme.descriptions.description1000.FirstOrDefault().description != null)
                             {
                                 XmlElement descriptionNode = rootDoc.CreateElement("desc");
                                 descriptionNode.SetAttribute("lang", lang);
@@ -492,6 +598,8 @@ namespace SDGrabSharp.Common
                     }
                 }
             }
+            statusData.statusMessage = "Ready";
+            UpdateStatus();
         }
 
         // Return scheduleplus configured date range as enumerable

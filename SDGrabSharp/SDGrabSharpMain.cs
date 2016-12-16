@@ -6,7 +6,9 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
+using System.Windows.Input;
 using SDGrabSharp.Common;
 using SDGrabSharp.Resources;
 
@@ -55,13 +57,65 @@ namespace SDGrabSharp.UI
 
         private void toolStripMenuItemRun_Click(object sender, EventArgs e)
         {
-            Cursor.Current = Cursors.WaitCursor;
+            this.Cursor = Cursors.WaitCursor;
+            menuMain.Enabled = false;
             var builder = new XmlTVBuilder(config, cache, null);
+            builder.StatusUpdateReady += handle_BuilderUpdates;
+            var updateThread = new Thread(() => doCreateXmlTV(builder));
+            updateThread.Start();
+        }
+
+        private void doCreateXmlTV(XmlTVBuilder builder)
+        {
             var channelInfo = builder.AddChannels();
             builder.AddProgrammes(channelInfo);
 
             builder.SaveXmlTV();
-            Cursor.Current = Cursors.Default;
+            this.Invoke((MethodInvoker)(() =>
+            {
+                builderComplete(builder.statusData);
+            }));
+        }
+
+        private void handle_BuilderUpdates(object sender, EventArgs ev)
+        {
+            var xmlObj = (XmlTVBuilder)sender;
+            XmlTVBuilder.StatusUpdate status = xmlObj.statusData;
+            this.Invoke((MethodInvoker)(() =>
+            {
+                updateUI(status);
+                xmlObj.ResetUpdateStatus();
+            }));
+        }
+
+        private void updateUI(XmlTVBuilder.StatusUpdate status)
+        {
+            if (status.statusMessage != null)
+                tsStatus.Text = status.statusMessage;
+
+            if (status.CurrentChannel != 0 && status.TotalChannels != 0)
+            {
+                tsProgress.Maximum = status.TotalChannels;
+                tsProgress.Value = status.CurrentChannel < status.TotalChannels ? status.CurrentChannel : status.TotalChannels;
+            }
+            else if(status.CurrentProgramme != 0 && status.TotalProgrammes != 0)
+            {
+                tsProgress.Maximum = status.TotalProgrammes;
+                tsProgress.Value = status.CurrentProgramme < status.TotalProgrammes ? status.CurrentProgramme : status.TotalProgrammes;
+            }
+            else
+            {
+                tsProgress.Maximum = 0;
+                tsProgress.Value = 0;
+            }
+            Application.DoEvents();
+        }
+
+        private void builderComplete(XmlTVBuilder.StatusUpdate status)
+        {
+            updateUI(status);
+            this.Cursor = Cursors.Default;
+            menuMain.Enabled = true;
         }
     }
 }
