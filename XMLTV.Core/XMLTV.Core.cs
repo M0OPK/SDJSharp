@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Globalization;
 
 namespace XMLTV
 {
@@ -529,24 +530,44 @@ namespace XMLTV
 
         public void DeleteProgrammesOutsideDateRange(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            // Convert dates to string
-            string start = startDate.ToString("yyyyMMddHHmmss zzz").Replace(":", "");
-            string end = endDate.ToString("yyyyMMddHHmmss zzz").Replace(":", "");
-
-            // Create list of nodes outside of range
+            // Create list of nodes outside of range (using local time as cutoff points)
             var programmeList =
             (
                 from programme in xmlData.programmeNodes.Cast<XmlNode>()
-                where String.Compare(programme.Attributes["start"] != null ? 
-                      programme.Attributes["start"].Value : "19000101000000 +0000", start) < 0 ||
-                      String.Compare(programme.Attributes["start"] != null ? 
-                      programme.Attributes["start"].Value : "19000101000000 +0000", end) > 0
+                where (programme.Attributes["start"] != null && 
+                      StringToDate(programme.Attributes["start"].Value).LocalDateTime.Date < startDate) ||
+                      (programme.Attributes["start"] != null && 
+                      StringToDate(programme.Attributes["start"].Value).LocalDateTime.Date > endDate)
                 select programme
             );
 
             // Delete these nodes
             foreach (var programme in programmeList)
                 xmlData.rootNode.RemoveChild(programme);
+        }
+
+        public string DateToString(DateTimeOffset inDate, bool utc = false)
+        {
+            try
+            {
+                if (!utc)
+                    return inDate.ToString("yyyyMMddHHmmss zzzz").Replace(":", "");
+                else
+                    return inDate.UtcDateTime.ToString("yyyyMMddHHmmss zzzz").Replace(":", "");
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public DateTimeOffset StringToDate(string inDate)
+        {
+            DateTimeOffset temp;
+            if (DateTimeOffset.TryParseExact(inDate, "yyyyMMddHHmmss zzzz", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out temp))
+                return temp;
+
+            return DateTimeOffset.ParseExact("19000101", "yyyyMMdd", CultureInfo.InstalledUICulture);
         }
 
         /// <summary>

@@ -74,6 +74,25 @@ namespace SDGrabSharp.Common
             xmlTV.DeleteUnmatchingChannelNodes(fullChannelList.Select(line =>
                 GetChannelID(line.station, line.stationTranslation)).Distinct().ToArray());
 
+            // Get date range from config
+            DateTime dateMin = DateTime.Today.Date;
+            DateTime dateMax = dateMin.AddDays(config.ProgrammeRetrieveRangeDays);
+
+            if (config.ProgrammeRetrieveYesterday)
+                dateMin = dateMin.AddDays(-1.0f);
+
+            // Delete any channel md5 entries outside date range
+            List<XmlNode> md5NodesToRemove = new List<XmlNode>();
+            foreach (var channelNode in xmlTV.GetChannelNodes().Cast<XmlNode>())
+            {
+                var md5Nodes = channelNode.SelectNodes("sd-md5").Cast<XmlNode>().
+                    Where(line => line.Attributes["date"] != null && (xmlTV.StringToDate(line.Attributes["date"].Value) < dateMin || xmlTV.StringToDate(line.Attributes["date"].Value) > dateMax));
+                md5NodesToRemove.AddRange(md5Nodes);
+            }
+
+            foreach (var md5Node in md5NodesToRemove)
+                md5Node.ParentNode.RemoveChild(md5Node);
+
             foreach (var lineup in lineupList)
             {
                 // Build channel list
@@ -149,6 +168,16 @@ namespace SDGrabSharp.Common
             var addedList = channelData.Where(line => line.isNew);
             var fullUpdateList = new List<ChannelBlock>();
             fullUpdateList.AddRange(addedList);
+
+            // Get date range from config
+            DateTime dateMin = DateTime.Today.Date;
+            DateTime dateMax = dateMin.AddDays(config.ProgrammeRetrieveRangeDays);
+
+            if (config.ProgrammeRetrieveYesterday)
+                dateMin = dateMin.AddDays(-1.0f);
+
+            // Delete any existing program nodes outside this range
+            xmlTV.DeleteProgrammesOutsideDateRange(dateMin, dateMax);
 
             // Extract MD5 info from updated list
             var md5List = updatedList.Select(line =>
@@ -244,150 +273,220 @@ namespace SDGrabSharp.Common
             foreach (var thisItem in fullUpdateList)
                 scheduleReq.Add(new SDScheduleRequest(thisItem.station.stationID, allDates));
 
-            var splitSched = splitArray(scheduleReq.ToArray(), config.ScheduleRetrievalItems);
-
-            List<SDScheduleResponse> schedMaster = new List<SDScheduleResponse>();
-            foreach (var thisSched in splitSched)
-            {
-                var thisResponse = sd.GetSchedules(thisSched.AsEnumerable());
-                if (thisResponse != null)
-                    schedMaster.AddRange(thisResponse);
-            }
+            // Schedule all items
+            var scheduleQueue = new RescheduleQueue<SDScheduleRequest>();
+            scheduleQueue.AddRange(DateTime.UtcNow, scheduleReq);
 
             // Create program ID list
             List<string> programmeIdList = new List<string>();
 
-            // @Todo: Make this into a queue that is popped. So we can push deferred updates to retry
-            foreach (var schedule in schedMaster)
+            while (scheduleQueue.Count > 0)
             {
-                if (schedule.code == SDErrors.SCHEDULE_QUEUED)
+                if (!scheduleQueue.ItemsReady)
                 {
-                    // Handle this
+                    // Update status here to show we're waiting
+                    System.Threading.Thread.Sleep(scheduleQueue.DelayTime);
                     continue;
                 }
 
-                if (schedule.code == SDErrors.OK)
+                // Get ready items (right now it'll be all of them)
+                var splitSched = splitArray(scheduleQueue.GetReadyItems().ToArray(), config.ScheduleRetrievalItems);
+
+                List<SDScheduleResponse> schedMaster = new List<SDScheduleResponse>();
+                foreach (var thisSched in splitSched)
                 {
-                    // First, update/set channel MD5
-                    var channelBlock = channelData.Where(line => line.station.stationID == schedule.stationID).FirstOrDefault();
-                    var channelNode = xmlTV.GetChannel(GetChannelID(channelBlock.station, channelBlock.stationTranslation));
-                    var existingNode = channelNode.SelectNodes("sd-md5").Cast<XmlNode>().Where(line => line.Attributes["date"].Value == schedule.metadata.startDate).FirstOrDefault();
-                    if (existingNode != null)
-                        existingNode.InnerText = schedule.metadata.md5;
-                    else
+                    var thisResponse = sd.GetSchedules(thisSched.AsEnumerable());
+                    if (thisResponse != null)
                     {
-                        var newNode = channelNode.OwnerDocument.CreateElement("sd-md5");
-                        newNode.SetAttribute("date", schedule.metadata.startDate);
-                        newNode.InnerText = schedule.metadata.md5;
-                        channelNode.AppendChild(newNode);
+                        schedMaster.AddRange(thisResponse);
+                    }
+                }
+
+                foreach (var schedule in schedMaster)
+                {
+                    if (schedule.code == SDErrors.SCHEDULE_QUEUED)
+                    {
+                        // Get original request, remove from queue
+                        var originRequest = scheduleQueue.GetReadyItems().Where(line => line.stationID == schedule.stationID).FirstOrDefault();
+                        scheduleQueue.RemoveItem(originRequest);
+
+                        // Add once more, with retry time
+                        scheduleQueue.AddItem(schedule.retryTime ?? DateTime.UtcNow, originRequest);
+                        continue;
                     }
 
-                    var programmeNodes = xmlTV.GetProgrammeNodes().Cast<XmlNode>();
-                    // Create shell node
-                    var rootDoc = xmlTV.GetDocument();
-
-                    foreach (var program in schedule.programs)
+                    if (schedule.code == SDErrors.OK)
                     {
-                        if (program.airDateTime == null)
-                            continue;
+                        // Get original request, remove from queue
+                        var originRequest = scheduleQueue.GetReadyItems().Where(line => line.stationID == schedule.stationID).FirstOrDefault();
+                        scheduleQueue.RemoveItem(originRequest);
 
-                        DateTimeOffset startTime = new DateTimeOffset(program.airDateTime.Value);
-                        DateTimeOffset endTime = startTime.AddSeconds(program.duration);
+                        // Remove this specific date from request
+                        var dateList = originRequest.date.Where(thisdate => thisdate != schedule.metadata.startDate).ToArray();
+                        originRequest.date = dateList;
 
-                        var thisProgrammeNode = programmeNodes.
-                            Where(line => line.Attributes["sd-programmeid"] != null && line.Attributes["sd-programmeid"].Value == program.programID 
-                               && line.Attributes["start"].Value == startTime.ToString("yyyyMMddHHmmss zzz").Replace(":", "")
-                               && line.Attributes["channel"].Value == schedule.stationID).FirstOrDefault();
+                        // If there are any dates left, reschedule
+                        if (dateList.Length > 0)
+                            scheduleQueue.AddItem(DateTime.UtcNow, originRequest);
 
-                        if (thisProgrammeNode == null)
+                        // First, update/set channel MD5
+                        var channelBlock = channelData.Where(line => line.station.stationID == schedule.stationID).FirstOrDefault();
+                        var channelNode = xmlTV.GetChannel(GetChannelID(channelBlock.station, channelBlock.stationTranslation));
+                        var existingNode = channelNode.SelectNodes("sd-md5").Cast<XmlNode>().Where(line => line.Attributes["date"].Value == schedule.metadata.startDate).FirstOrDefault();
+                        if (existingNode != null)
+                            existingNode.InnerText = schedule.metadata.md5;
+                        else
                         {
-                            programmeIdList.Add(program.programID);
-
-                            if (endTime != null)
-                            {
-                                List<XmlAttribute> attribs = new List<XmlAttribute>();
-                                var atProgId = rootDoc.CreateAttribute("sd-programmeid");
-                                atProgId.Value = program.programID;
-                                attribs.Add(atProgId);
-
-                                var atMD5 = rootDoc.CreateAttribute("sd-md5");
-                                atMD5.Value = program.md5;
-                                attribs.Add(atMD5);
-
-                                xmlTV.AddProgramme(startTime.ToString("yyyyMMddHHmmss zzz").Replace(":", ""), endTime.ToString("yyyyMMddHHmmss zzz").Replace(":", ""),
-                                                    GetChannelID(channelBlock.station, channelBlock.stationTranslation), null, null, null, null, attribs);
-                            }
-                            continue;
+                            var newNode = channelNode.OwnerDocument.CreateElement("sd-md5");
+                            newNode.SetAttribute("date", schedule.metadata.startDate);
+                            newNode.InnerText = schedule.metadata.md5;
+                            channelNode.AppendChild(newNode);
                         }
 
-                        if (thisProgrammeNode.Attributes["sd-md5"].Value == program.md5)
-                            continue;
+                        var programmeNodes = xmlTV.GetProgrammeNodes().Cast<XmlNode>();
+                        // Create shell node
+                        var rootDoc = xmlTV.GetDocument();
 
-                        programmeIdList.Add(program.programID);
+                        foreach (var program in schedule.programs)
+                        {
+                            if (program.airDateTime == null)
+                                continue;
+
+                            DateTimeOffset startTime = new DateTimeOffset(program.airDateTime.Value);
+                            DateTimeOffset endTime = startTime.AddSeconds(program.duration);
+
+                            var thisProgrammeNode = programmeNodes.
+                                Where(line => line.Attributes["sd-programmeid"] != null && line.Attributes["sd-programmeid"].Value == program.programID
+                                   && line.Attributes["start"].Value == xmlTV.DateToString(startTime)
+                                   && line.Attributes["channel"].Value == schedule.stationID).FirstOrDefault();
+
+                            if (thisProgrammeNode == null)
+                            {
+                                programmeIdList.Add(program.programID);
+
+                                if (endTime != null)
+                                {
+                                    List<XmlAttribute> attribs = new List<XmlAttribute>();
+                                    var atProgId = rootDoc.CreateAttribute("sd-programmeid");
+                                    atProgId.Value = program.programID;
+                                    attribs.Add(atProgId);
+
+                                    var atMD5 = rootDoc.CreateAttribute("sd-md5");
+                                    atMD5.Value = program.md5;
+                                    attribs.Add(atMD5);
+
+                                    xmlTV.AddProgramme(xmlTV.DateToString(startTime), xmlTV.DateToString(endTime),
+                                                        GetChannelID(channelBlock.station, channelBlock.stationTranslation), null, null, null, null, attribs);
+                                }
+                                continue;
+                            }
+
+                            if (thisProgrammeNode.Attributes["sd-md5"].Value == program.md5)
+                                continue;
+
+                            programmeIdList.Add(program.programID);
+                        }
                     }
                 }
             }
 
             if (programmeIdList.Count > 0)
             {
-                var programmeResponse = sd.GetPrograms(programmeIdList.ToArray());
+                var programmeSchedule = new RescheduleQueue<string>();
 
-                var programmeNodes = xmlTV.GetProgrammeNodes().Cast<XmlNode>();
-                var rootDoc = xmlTV.GetDocument();
-                foreach (var programme in programmeResponse)
+                // First, schedule all programs 
+                programmeSchedule.AddRange(DateTime.UtcNow, programmeIdList);
+
+                while (programmeSchedule.Count > 0)
                 {
-                    if (programme.code != SDErrors.OK)
+                    // If nothing ready now, then wait until next delay time
+                    if (!programmeSchedule.ItemsReady)
                     {
-                        // Handle any erorrs
+                        System.Threading.Thread.Sleep(programmeSchedule.DelayTime);
                         continue;
                     }
 
-                    // Get all programme nodes for this programme ID (there can be multiple)
-                    var thisProgrammeNodes = programmeNodes.
-                        Where(line => line.Attributes["sd-programmeid"].Value == programme.programID);
-                    if (thisProgrammeNodes == null)
-                        continue;
+                    // Split list
+                    var splitProgrammes = splitArray<string>(programmeSchedule.GetReadyItems().ToArray(), config.ScheduleRetrievalItems);
+                    var masterProgrammeList = new List<SDProgramResponse>();
 
-                    // Update each matching node
-                    foreach (var thisProgrammeNode in thisProgrammeNodes)
+                    // Collect all responses into a master list
+                    foreach (var programme in splitProgrammes)
                     {
-                        string lang = "en";
+                        var programmeResponse = sd.GetPrograms(programmeIdList.ToArray());
 
-                        if (programme.descriptions != null && programme.descriptions.description1000 != null && programme.descriptions.description1000.FirstOrDefault().descriptionLanguage != null)
-                            lang = fixLang(programme.descriptions.description1000.FirstOrDefault().descriptionLanguage);
+                        if (programmeResponse != null)
+                            masterProgrammeList.AddRange(programmeResponse);
+                    }
 
-                        if (programme.titles != null && programme.titles.FirstOrDefault().title120 != null)
+                    var programmeNodes = xmlTV.GetProgrammeNodes().Cast<XmlNode>();
+                    var rootDoc = xmlTV.GetDocument();
+                    foreach (var programme in masterProgrammeList)
+                    {
+                        // Remove this programme
+                        programmeSchedule.RemoveItem(programme.programID);
+
+                        // Handle re-queue of request
+                        if (programme.code == SDErrors.PROGRAMID_QUEUED)
                         {
-                            XmlElement titleNode = rootDoc.CreateElement("title");
-                            titleNode.SetAttribute("lang", lang);
-                            titleNode.InnerText = programme.titles.FirstOrDefault().title120;
-                            thisProgrammeNode.AppendChild(titleNode);
+                            // Reschedule this one
+                            programmeSchedule.AddItem(DateTime.UtcNow.AddSeconds(10), programme.programID);
+                            continue;
                         }
 
-                        if (programme.episodeTitle150 != null)
+                        if (programme.code != SDErrors.OK)
                         {
-                            XmlElement subtitleNode = rootDoc.CreateElement("sub-title");
-                            subtitleNode.SetAttribute("lang", lang);
-                            subtitleNode.InnerText = programme.episodeTitle150;
-                            thisProgrammeNode.AppendChild(subtitleNode);
+                            // Handle any errors
+                            continue;
                         }
 
-                        if (programme.descriptions != null && programme.descriptions.description1000 != null && programme.descriptions.description1000.FirstOrDefault().description != null)
-                        {
-                            XmlElement descriptionNode = rootDoc.CreateElement("desc");
-                            descriptionNode.SetAttribute("lang", lang);
-                            descriptionNode.InnerText = programme.descriptions.description1000.FirstOrDefault().description;
-                            thisProgrammeNode.AppendChild(descriptionNode);
-                        }
+                        // Get all programme nodes for this programme ID (there can be multiple)
+                        var thisProgrammeNodes = programmeNodes.
+                            Where(line => line.Attributes["sd-programmeid"].Value == programme.programID);
+                        if (thisProgrammeNodes == null)
+                            continue;
 
-                        if (programme.genres != null)
+                        // Update each matching node
+                        foreach (var thisProgrammeNode in thisProgrammeNodes)
                         {
-                            foreach (var genre in programme.genres)
+                            string lang = "en";
+
+                            if (programme.descriptions != null && programme.descriptions.description1000 != null && programme.descriptions.description1000.FirstOrDefault().descriptionLanguage != null)
+                                lang = fixLang(programme.descriptions.description1000.FirstOrDefault().descriptionLanguage);
+
+                            if (programme.titles != null && programme.titles.FirstOrDefault().title120 != null)
                             {
-                                XmlElement categoryNode = rootDoc.CreateElement("category");
-                                categoryNode.SetAttribute("lang", lang);
-                                categoryNode.InnerText = genre;
-                                thisProgrammeNode.AppendChild(categoryNode);
+                                XmlElement titleNode = rootDoc.CreateElement("title");
+                                titleNode.SetAttribute("lang", lang);
+                                titleNode.InnerText = programme.titles.FirstOrDefault().title120;
+                                thisProgrammeNode.AppendChild(titleNode);
+                            }
+
+                            if (programme.episodeTitle150 != null)
+                            {
+                                XmlElement subtitleNode = rootDoc.CreateElement("sub-title");
+                                subtitleNode.SetAttribute("lang", lang);
+                                subtitleNode.InnerText = programme.episodeTitle150;
+                                thisProgrammeNode.AppendChild(subtitleNode);
+                            }
+
+                            if (programme.descriptions != null && programme.descriptions.description1000 != null && programme.descriptions.description1000.FirstOrDefault().description != null)
+                            {
+                                XmlElement descriptionNode = rootDoc.CreateElement("desc");
+                                descriptionNode.SetAttribute("lang", lang);
+                                descriptionNode.InnerText = programme.descriptions.description1000.FirstOrDefault().description;
+                                thisProgrammeNode.AppendChild(descriptionNode);
+                            }
+
+                            if (programme.genres != null)
+                            {
+                                foreach (var genre in programme.genres)
+                                {
+                                    XmlElement categoryNode = rootDoc.CreateElement("category");
+                                    categoryNode.SetAttribute("lang", lang);
+                                    categoryNode.InnerText = genre;
+                                    thisProgrammeNode.AppendChild(categoryNode);
+                                }
                             }
                         }
                     }
