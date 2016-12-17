@@ -7,8 +7,8 @@
     <ProjectGuid>{99251793-3B8D-4D35-98AA-D8F5D103A8E4}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SDGrabSharp</RootNamespace>
-    <AssemblyName>SDGrabSharp</AssemblyName>
+    <RootNamespace>SDGrabSharp.UI</RootNamespace>
+    <AssemblyName>SDGrabSharp.UI</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -120,6 +120,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="SDGrabSharpMain.resx">
       <DependentUpon>SDGrabSharpMain.cs</DependentUpon>
@@ -138,7 +139,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="SDGrabSharp.UI_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -10,7 +10,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Input;
 using SDGrabSharp.Common;
-using SDGrabSharp.Resources;
+using SDGrabSharp.UI.Resources;
 
 namespace SDGrabSharp.UI
 {
@@ -79,10 +79,10 @@ namespace SDGrabSharp.UI
 
         private void handle_BuilderUpdates(object sender, EventArgs ev)
         {
-            var xmlObj = (XmlTVBuilder)sender;
-            XmlTVBuilder.StatusUpdate status = xmlObj.statusData;
-            this.Invoke((MethodInvoker)(() =>
+            this.BeginInvoke((MethodInvoker)(() =>
             {
+                var xmlObj = (XmlTVBuilder)sender;
+                XmlTVBuilder.StatusUpdate status = xmlObj.statusData;
                 updateUI(status);
                 xmlObj.ResetUpdateStatus();
             }));
@@ -115,6 +115,7 @@ namespace SDGrabSharp.UI
         {
             updateUI(status);
             this.Cursor = Cursors.Default;
+            tsStatus.Text = Strings.tsStatusDefaultText;
             menuMain.Enabled = true;
         }
     }

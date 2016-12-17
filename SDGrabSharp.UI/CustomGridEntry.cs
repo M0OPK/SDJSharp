@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SDGrabSharp.Common;
 using SchedulesDirect;
-using SDGrabSharp.Resources;
+using SDGrabSharp.UI.Resources;
 
 namespace SDGrabSharp.UI
 {
@@ -33,11 +33,23 @@ namespace SDGrabSharp.UI
 
             foreach (var item in dataLocalTranslate.Select(line => line.Value).Where(line => line.FieldMode == Config.XmlTVTranslation.TranslateField.Custom))
             {
+                string channelNum = string.Empty;
+                string logicalChannelNum = string.Empty;
                 var thisData = datacache.GetLineupData(sdJS, item.LineupID).stations.
                     Where(line => line.stationID == item.SDStationID).FirstOrDefault();
                 if (thisData == null)
                     continue;
-                string[] thisLine = new string[] { item.LineupID, item.SDStationID, thisData.name, item.CustomTranslate };
+
+                var thisMap = datacache.GetLineupData(sdJS, item.LineupID).map.
+                    Where(line => line.stationID == item.SDStationID).FirstOrDefault();
+
+                if (thisMap != null)
+                {
+                    channelNum = thisMap.channel;
+                    logicalChannelNum = thisMap.logicalChannelNumber;
+                }
+
+                string[] thisLine = new string[] { item.LineupID, item.SDStationID, channelNum, logicalChannelNum, thisData.name, item.CustomTranslate };
                 dgCustomEntry.Rows.Add(thisLine);
             }
 
@@ -77,7 +89,7 @@ namespace SDGrabSharp.UI
 
                 if (thisLine != null)
                 {
-                    thisLine.CustomTranslate = (string)row.Cells[3].Value;
+                    thisLine.CustomTranslate = (string)row.Cells[5].Value;
                     thisLine.displayNameHelper = thisLine.CustomTranslate;
                 }
             }

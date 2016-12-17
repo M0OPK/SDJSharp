@@ -35,6 +35,8 @@
             this.dgCustomEntry = new System.Windows.Forms.DataGridView();
             this.CustomEntryLineup = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CustomEntryStationID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ChanNum = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LogicChanNum = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CustomEntryName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CustomEntryCustomName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gbControl.SuspendLayout();
@@ -95,6 +97,8 @@
             this.dgCustomEntry.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.CustomEntryLineup,
             this.CustomEntryStationID,
+            this.ChanNum,
+            this.LogicChanNum,
             this.CustomEntryName,
             this.CustomEntryCustomName});
             this.dgCustomEntry.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -105,17 +109,31 @@
             // 
             // CustomEntryLineup
             // 
-            this.CustomEntryLineup.FillWeight = 18F;
+            this.CustomEntryLineup.FillWeight = 10F;
             this.CustomEntryLineup.HeaderText = "Lineup";
             this.CustomEntryLineup.Name = "CustomEntryLineup";
             this.CustomEntryLineup.ReadOnly = true;
             // 
             // CustomEntryStationID
             // 
-            this.CustomEntryStationID.FillWeight = 12F;
+            this.CustomEntryStationID.FillWeight = 5F;
             this.CustomEntryStationID.HeaderText = "Station ID";
             this.CustomEntryStationID.Name = "CustomEntryStationID";
             this.CustomEntryStationID.ReadOnly = true;
+            // 
+            // ChanNum
+            // 
+            this.ChanNum.FillWeight = 5F;
+            this.ChanNum.HeaderText = "Channel No";
+            this.ChanNum.Name = "ChanNum";
+            this.ChanNum.ReadOnly = true;
+            // 
+            // LogicChanNum
+            // 
+            this.LogicChanNum.FillWeight = 5F;
+            this.LogicChanNum.HeaderText = "Logical Chan";
+            this.LogicChanNum.Name = "LogicChanNum";
+            this.LogicChanNum.ReadOnly = true;
             // 
             // CustomEntryName
             // 
@@ -126,7 +144,7 @@
             // 
             // CustomEntryCustomName
             // 
-            this.CustomEntryCustomName.FillWeight = 35F;
+            this.CustomEntryCustomName.FillWeight = 40F;
             this.CustomEntryCustomName.HeaderText = "Custom Name";
             this.CustomEntryCustomName.Name = "CustomEntryCustomName";
             // 
@@ -154,6 +172,8 @@
         private System.Windows.Forms.DataGridView dgCustomEntry;
         private System.Windows.Forms.DataGridViewTextBoxColumn CustomEntryLineup;
         private System.Windows.Forms.DataGridViewTextBoxColumn CustomEntryStationID;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ChanNum;
+        private System.Windows.Forms.DataGridViewTextBoxColumn LogicChanNum;
         private System.Windows.Forms.DataGridViewTextBoxColumn CustomEntryName;
         private System.Windows.Forms.DataGridViewTextBoxColumn CustomEntryCustomName;
     }

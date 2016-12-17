@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SchedulesDirect;
 using SDGrabSharp.Common;
-using SDGrabSharp.Resources;
+using SDGrabSharp.UI.Resources;
 
 namespace SDGrabSharp.UI
 {
@@ -586,7 +586,7 @@ namespace SDGrabSharp.UI
             }
         }
 
-        private void showAvailableChannels()
+        private void showAvailableChannels(string filter = "")
         {
             if (cbLineup.SelectedText == null || (string)cbLineup.SelectedItem == string.Empty)
                 return;
@@ -603,15 +603,18 @@ namespace SDGrabSharp.UI
             {
                 ChannelLocationInfo thisInfo = new ChannelLocationInfo(originalPosition, (string)cbLineup.SelectedItem, station.stationID, false);
 
-                // Only add if not in added list
-                ListViewItem item = new ListViewItem();
-                item.Text = station.stationID;
-                string key = string.Format("{0},{1}", (string)cbLineup.SelectedItem, station.stationID);
-                if (!localTranslate.ContainsKey(key) || localTranslate[key].isDeleted)
+                if (filter == string.Empty || station.name.ToLower().Contains(filter.ToLower()))
                 {
-                    item.SubItems.Add(station.name);
-                    lvAvailableChans.Items.Add(item);
-                    thisInfo.isAvailable = true;
+                    // Only add if not in added list
+                    ListViewItem item = new ListViewItem();
+                    item.Text = station.stationID;
+                    string key = string.Format("{0},{1}", (string)cbLineup.SelectedItem, station.stationID);
+                    if (!localTranslate.ContainsKey(key) || localTranslate[key].isDeleted)
+                    {
+                        item.SubItems.Add(station.name);
+                        lvAvailableChans.Items.Add(item);
+                        thisInfo.isAvailable = true;
+                    }
                 }
                 locationInfo.Add(thisInfo);
                 originalPosition++;
@@ -690,6 +693,14 @@ namespace SDGrabSharp.UI
                 txtName.Text = stationInfo.name;
                 txtAffiliate.Text = stationInfo.affiliate;
                 txtCallsign.Text = stationInfo.callsign;
+            }
+
+            var mapInfo = cache.GetLineupData(sdJS, lineupID).map.Where(map => map.stationID == stationID).FirstOrDefault();
+
+            if (mapInfo != null)
+            {
+                txtLogicalChannel.Text = mapInfo.logicalChannelNumber;
+                txtChannelNum.Text = mapInfo.channel;
             }
 
             // Extra for added list
@@ -1447,6 +1458,11 @@ namespace SDGrabSharp.UI
 
             if (errors != string.Empty)
                 MessageBox.Show(this, errors, "SDJSON Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void txtChannelFilter_TextChanged(object sender, EventArgs e)
+        {
+            showAvailableChannels(txtChannelFilter.Text);
         }
     }
 }

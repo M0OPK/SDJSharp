@@ -13,6 +13,7 @@ namespace SDGrabSharp.Common
     public partial class XmlTVBuilder
     {
         public event EventHandler StatusUpdateReady;
+        public event EventHandler StatusUpdateReadyAsync;
         private Config config;
         private DataCache cache;
         private XmlTV xmlTV;
@@ -37,7 +38,11 @@ namespace SDGrabSharp.Common
 
             EventHandler updateHandler = StatusUpdateReady;
             if (updateHandler != null)
-                updateHandler.BeginInvoke(this, EventArgs.Empty, null, null);
+                updateHandler.Invoke(this, EventArgs.Empty);
+
+            EventHandler updateHandlerAsync = StatusUpdateReadyAsync;
+            if (updateHandlerAsync != null)
+                updateHandlerAsync.BeginInvoke(this, EventArgs.Empty, null, null);
 
             updateWaiting = true;
         }
@@ -307,12 +312,34 @@ namespace SDGrabSharp.Common
                     }
                     else
                     {
-                        var thisDateItem = thisItem.stationNode.SelectNodes("sd-md5").Cast<XmlNode>().Where(node => node.Attributes["date"].Value == thisDate.date).FirstOrDefault();
+                        var thisDateItem = thisItem.stationNode.SelectNodes("sd-md5").Cast<XmlNode>().
+                            Where(node => node.Attributes["date"] != null && node.Attributes["date"].Value == thisDate.date).FirstOrDefault();
                         if (thisDateItem.InnerText != thisDate.md5data.md5)
                             addItem = true;
                     }
                     if (addItem)
+                    {
                         schedDates.Add(DateTime.ParseExact(thisDate.date, "yyyy-MM-dd", CultureInfo.InvariantCulture));
+
+                        // Also replace/add any existing node for this MD5
+                        var channelNode = xmlTV.GetChannel(GetChannelID(thisItem.station, thisItem.stationTranslation));
+                        if (channelNode != null)
+                        {
+                            var md5Node = channelNode.SelectNodes("sd-md5").Cast<XmlNode>().
+                                Where(node => node.Attributes["date"] != null && node.Attributes["date"].Value == thisDate.date).FirstOrDefault();
+
+                            // Replace if exists
+                            if (md5Node != null)
+                                md5Node.InnerText = thisDate.md5data.md5;
+                            else
+                            {
+                                md5Node = xmlTV.GetDocument().CreateElement("sd-md5");
+                                ((XmlElement)md5Node).SetAttribute("date", thisDate.date);
+                                md5Node.InnerText = thisDate.md5data.md5;
+                                channelNode.AppendChild(md5Node);
+                            }
+                        }
+                    }
                 }
                 // If we have some schedules to lookup
                 if (schedDates.Count > 0)
@@ -598,7 +625,6 @@ namespace SDGrabSharp.Common
                     }
                 }
             }
-            statusData.statusMessage = "Ready";
             UpdateStatus();
         }
 

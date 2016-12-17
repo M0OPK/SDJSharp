@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SDGrabSharp.Resources {
+namespace SDGrabSharp.UI.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace SDGrabSharp.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SDGrabSharp.Resources.Strings", typeof(Strings).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SDGrabSharp.UI.Resources.Strings", typeof(Strings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -565,7 +565,7 @@ namespace SDGrabSharp.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Schedules Direct XMLTV Attributes.
+        ///   Looks up a localized string similar to Schedules Direct XMLTV Attributes (NYI).
         /// </summary>
         internal static string gbXmlTVAttr {
             get {

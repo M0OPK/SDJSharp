@@ -283,7 +283,7 @@
     <value>Stations</value>
   </data>
   <data name="gbXmlTVAttr" xml:space="preserve">
-    <value>Schedules Direct XMLTV Attributes</value>
+    <value>Schedules Direct XMLTV Attributes (NYI)</value>
   </data>
   <data name="grpLocation" xml:space="preserve">
     <value>Location Selection</value>

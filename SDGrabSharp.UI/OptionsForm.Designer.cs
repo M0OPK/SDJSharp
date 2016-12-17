@@ -124,6 +124,12 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
+            this.txtChannelFilter = new System.Windows.Forms.TextBox();
+            this.gbChannelFilter = new System.Windows.Forms.GroupBox();
+            this.txtLogicalChannel = new System.Windows.Forms.TextBox();
+            this.txtChannelNum = new System.Windows.Forms.TextBox();
+            this.lblChannelNum = new System.Windows.Forms.Label();
+            this.lblLogicalChannel = new System.Windows.Forms.Label();
             this.tcConfig.SuspendLayout();
             this.tpSD1.SuspendLayout();
             this.gbStations.SuspendLayout();
@@ -145,6 +151,7 @@
             this.gbXmlTVAttr.SuspendLayout();
             this.gbPersistentCache.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.gbChannelFilter.SuspendLayout();
             this.SuspendLayout();
             // 
             // tcConfig
@@ -178,9 +185,9 @@
             // 
             this.gbStations.Controls.Add(this.btnStationCacheClear);
             this.gbStations.Controls.Add(this.lvStations);
-            this.gbStations.Location = new System.Drawing.Point(537, 137);
+            this.gbStations.Location = new System.Drawing.Point(535, 137);
             this.gbStations.Name = "gbStations";
-            this.gbStations.Size = new System.Drawing.Size(323, 332);
+            this.gbStations.Size = new System.Drawing.Size(331, 332);
             this.gbStations.TabIndex = 4;
             this.gbStations.TabStop = false;
             this.gbStations.Text = "Stations";
@@ -205,7 +212,7 @@
             this.lvStations.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.lvStations.Location = new System.Drawing.Point(6, 15);
             this.lvStations.Name = "lvStations";
-            this.lvStations.Size = new System.Drawing.Size(310, 282);
+            this.lvStations.Size = new System.Drawing.Size(319, 282);
             this.lvStations.TabIndex = 0;
             this.lvStations.UseCompatibleStateImageBehavior = false;
             this.lvStations.View = System.Windows.Forms.View.Details;
@@ -225,7 +232,7 @@
             this.gbHeadends.Controls.Add(this.btnHeadendCacheClear);
             this.gbHeadends.Controls.Add(this.btnLineupAdd);
             this.gbHeadends.Controls.Add(this.tvHeadends);
-            this.gbHeadends.Location = new System.Drawing.Point(273, 137);
+            this.gbHeadends.Location = new System.Drawing.Point(271, 137);
             this.gbHeadends.Name = "gbHeadends";
             this.gbHeadends.Size = new System.Drawing.Size(258, 332);
             this.gbHeadends.TabIndex = 3;
@@ -465,6 +472,7 @@
             // 
             // gbStationMap
             // 
+            this.gbStationMap.Controls.Add(this.gbChannelFilter);
             this.gbStationMap.Controls.Add(this.gbChannelIDMap);
             this.gbStationMap.Controls.Add(this.gbAddedChannels);
             this.gbStationMap.Controls.Add(this.gbAvailableChannels);
@@ -483,6 +491,10 @@
             // 
             // gbChannelIDMap
             // 
+            this.gbChannelIDMap.Controls.Add(this.lblLogicalChannel);
+            this.gbChannelIDMap.Controls.Add(this.lblChannelNum);
+            this.gbChannelIDMap.Controls.Add(this.txtChannelNum);
+            this.gbChannelIDMap.Controls.Add(this.txtLogicalChannel);
             this.gbChannelIDMap.Controls.Add(this.btnCustomGrid);
             this.gbChannelIDMap.Controls.Add(this.txtStationID);
             this.gbChannelIDMap.Controls.Add(this.txtName);
@@ -496,14 +508,14 @@
             this.gbChannelIDMap.Controls.Add(this.rdAffiliate);
             this.gbChannelIDMap.Location = new System.Drawing.Point(615, 46);
             this.gbChannelIDMap.Name = "gbChannelIDMap";
-            this.gbChannelIDMap.Size = new System.Drawing.Size(237, 167);
+            this.gbChannelIDMap.Size = new System.Drawing.Size(237, 233);
             this.gbChannelIDMap.TabIndex = 28;
             this.gbChannelIDMap.TabStop = false;
             this.gbChannelIDMap.Text = "XMLTV Channel ID Map";
             // 
             // btnCustomGrid
             // 
-            this.btnCustomGrid.Location = new System.Drawing.Point(3, 134);
+            this.btnCustomGrid.Location = new System.Drawing.Point(6, 204);
             this.btnCustomGrid.Name = "btnCustomGrid";
             this.btnCustomGrid.Size = new System.Drawing.Size(75, 23);
             this.btnCustomGrid.TabIndex = 25;
@@ -934,6 +946,7 @@
             // 
             // cbDisplayNameMode
             // 
+            this.cbDisplayNameMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbDisplayNameMode.FormattingEnabled = true;
             this.cbDisplayNameMode.Items.AddRange(new object[] {
             "Same as channel-id.",
@@ -972,6 +985,7 @@
             // ckShowType
             // 
             this.ckShowType.AutoSize = true;
+            this.ckShowType.Enabled = false;
             this.ckShowType.Location = new System.Drawing.Point(214, 65);
             this.ckShowType.Name = "ckShowType";
             this.ckShowType.Size = new System.Drawing.Size(141, 17);
@@ -983,6 +997,7 @@
             // ckStationAfiliate
             // 
             this.ckStationAfiliate.AutoSize = true;
+            this.ckStationAfiliate.Enabled = false;
             this.ckStationAfiliate.Location = new System.Drawing.Point(214, 42);
             this.ckStationAfiliate.Name = "ckStationAfiliate";
             this.ckStationAfiliate.Size = new System.Drawing.Size(136, 17);
@@ -994,6 +1009,7 @@
             // ckStationCallsign
             // 
             this.ckStationCallsign.AutoSize = true;
+            this.ckStationCallsign.Enabled = false;
             this.ckStationCallsign.Location = new System.Drawing.Point(214, 88);
             this.ckStationCallsign.Name = "ckStationCallsign";
             this.ckStationCallsign.Size = new System.Drawing.Size(138, 17);
@@ -1005,6 +1021,7 @@
             // ckStationName
             // 
             this.ckStationName.AutoSize = true;
+            this.ckStationName.Enabled = false;
             this.ckStationName.Location = new System.Drawing.Point(6, 88);
             this.ckStationName.Name = "ckStationName";
             this.ckStationName.Size = new System.Drawing.Size(130, 17);
@@ -1016,6 +1033,7 @@
             // ckStationID
             // 
             this.ckStationID.AutoSize = true;
+            this.ckStationID.Enabled = false;
             this.ckStationID.Location = new System.Drawing.Point(6, 65);
             this.ckStationID.Name = "ckStationID";
             this.ckStationID.Size = new System.Drawing.Size(113, 17);
@@ -1027,6 +1045,7 @@
             // ckLogicalChannelNo
             // 
             this.ckLogicalChannelNo.AutoSize = true;
+            this.ckLogicalChannelNo.Enabled = false;
             this.ckLogicalChannelNo.Location = new System.Drawing.Point(6, 42);
             this.ckLogicalChannelNo.Name = "ckLogicalChannelNo";
             this.ckLogicalChannelNo.Size = new System.Drawing.Size(172, 17);
@@ -1154,6 +1173,56 @@
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
+            // txtChannelFilter
+            // 
+            this.txtChannelFilter.Location = new System.Drawing.Point(6, 19);
+            this.txtChannelFilter.Name = "txtChannelFilter";
+            this.txtChannelFilter.Size = new System.Drawing.Size(225, 20);
+            this.txtChannelFilter.TabIndex = 29;
+            this.txtChannelFilter.TextChanged += new System.EventHandler(this.txtChannelFilter_TextChanged);
+            // 
+            // gbChannelFilter
+            // 
+            this.gbChannelFilter.Controls.Add(this.txtChannelFilter);
+            this.gbChannelFilter.Location = new System.Drawing.Point(615, 285);
+            this.gbChannelFilter.Name = "gbChannelFilter";
+            this.gbChannelFilter.Size = new System.Drawing.Size(237, 48);
+            this.gbChannelFilter.TabIndex = 30;
+            this.gbChannelFilter.TabStop = false;
+            this.gbChannelFilter.Text = "Available Channel Filter";
+            // 
+            // txtLogicalChannel
+            // 
+            this.txtLogicalChannel.Location = new System.Drawing.Point(112, 162);
+            this.txtLogicalChannel.Name = "txtLogicalChannel";
+            this.txtLogicalChannel.Size = new System.Drawing.Size(119, 20);
+            this.txtLogicalChannel.TabIndex = 26;
+            // 
+            // txtChannelNum
+            // 
+            this.txtChannelNum.Location = new System.Drawing.Point(112, 136);
+            this.txtChannelNum.Name = "txtChannelNum";
+            this.txtChannelNum.Size = new System.Drawing.Size(119, 20);
+            this.txtChannelNum.TabIndex = 27;
+            // 
+            // lblChannelNum
+            // 
+            this.lblChannelNum.AutoSize = true;
+            this.lblChannelNum.Location = new System.Drawing.Point(6, 139);
+            this.lblChannelNum.Name = "lblChannelNum";
+            this.lblChannelNum.Size = new System.Drawing.Size(63, 13);
+            this.lblChannelNum.TabIndex = 28;
+            this.lblChannelNum.Text = "Channel No";
+            // 
+            // lblLogicalChannel
+            // 
+            this.lblLogicalChannel.AutoSize = true;
+            this.lblLogicalChannel.Location = new System.Drawing.Point(6, 165);
+            this.lblLogicalChannel.Name = "lblLogicalChannel";
+            this.lblLogicalChannel.Size = new System.Drawing.Size(100, 13);
+            this.lblLogicalChannel.TabIndex = 29;
+            this.lblLogicalChannel.Text = "Logical Channel No";
+            // 
             // frmOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1194,6 +1263,8 @@
             this.gbPersistentCache.ResumeLayout(false);
             this.gbPersistentCache.PerformLayout();
             this.panel1.ResumeLayout(false);
+            this.gbChannelFilter.ResumeLayout(false);
+            this.gbChannelFilter.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1296,5 +1367,11 @@
         private System.Windows.Forms.Button btnBrowseXmlTVFile;
         private System.Windows.Forms.TextBox txtOutputXmlTVFile;
         private System.Windows.Forms.Label lblOutputXmlTVFile;
+        private System.Windows.Forms.GroupBox gbChannelFilter;
+        private System.Windows.Forms.TextBox txtChannelFilter;
+        private System.Windows.Forms.TextBox txtLogicalChannel;
+        private System.Windows.Forms.Label lblLogicalChannel;
+        private System.Windows.Forms.Label lblChannelNum;
+        private System.Windows.Forms.TextBox txtChannelNum;
     }
 }
