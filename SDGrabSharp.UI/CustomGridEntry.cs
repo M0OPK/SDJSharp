@@ -95,5 +95,10 @@ namespace SDGrabSharp.UI
             }
             this.Close();
         }
+
+        private void dgCustomEntry_CellEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            dgCustomEntry.BeginEdit(true);
+        }
     }
 }

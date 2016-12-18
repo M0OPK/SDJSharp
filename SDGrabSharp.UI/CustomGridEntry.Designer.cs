@@ -106,6 +106,7 @@
             this.dgCustomEntry.Name = "dgCustomEntry";
             this.dgCustomEntry.Size = new System.Drawing.Size(786, 335);
             this.dgCustomEntry.TabIndex = 1;
+            this.dgCustomEntry.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgCustomEntry_CellEnter);
             // 
             // CustomEntryLineup
             // 

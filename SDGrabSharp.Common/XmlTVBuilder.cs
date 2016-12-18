@@ -516,14 +516,14 @@ namespace SDGrabSharp.Common
                         continue;
                     }
 
-                    // Split list
-                    var splitProgrammes = splitArray<string>(programmeSchedule.GetReadyItems().ToArray(), config.ScheduleRetrievalItems);
+                    // Split list (only unique items)
+                    var splitProgrammes = splitArray<string>(programmeSchedule.GetReadyItems().Distinct().ToArray(), config.ScheduleRetrievalItems);
                     var masterProgrammeList = new List<SDProgramResponse>();
 
                     // Collect all responses into a master list
                     foreach (var programme in splitProgrammes)
                     {
-                        var programmeResponse = sd.GetPrograms(programmeIdList.ToArray());
+                        var programmeResponse = sd.GetPrograms(programme);
 
                         if (programmeResponse != null)
                             masterProgrammeList.AddRange(programmeResponse);
