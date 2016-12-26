@@ -58,34 +58,17 @@ namespace SDGrabSharp.UI
         private void toolStripMenuItemRun_Click(object sender, EventArgs e)
         {
             this.Cursor = Cursors.WaitCursor;
+            var builder = new XmlTVBuilder(config, cache, null);
+            builder.RunProcess();
+            this.Cursor = Cursors.Default;
+            builder = null;
+
+            /*this.Cursor = Cursors.WaitCursor;
             menuMain.Enabled = false;
             var builder = new XmlTVBuilder(config, cache, null);
             builder.StatusUpdateReady += handle_BuilderUpdates;
             var updateThread = new Thread(() => doCreateXmlTV(builder));
-            updateThread.Start();
-        }
-
-        private void doCreateXmlTV(XmlTVBuilder builder)
-        {
-            var channelInfo = builder.AddChannels();
-            builder.AddProgrammes(channelInfo);
-
-            builder.SaveXmlTV();
-            this.Invoke((MethodInvoker)(() =>
-            {
-                builderComplete(builder.statusData);
-            }));
-        }
-
-        private void handle_BuilderUpdates(object sender, EventArgs ev)
-        {
-            this.BeginInvoke((MethodInvoker)(() =>
-            {
-                var xmlObj = (XmlTVBuilder)sender;
-                XmlTVBuilder.StatusUpdate status = xmlObj.statusData;
-                updateUI(status);
-                xmlObj.ResetUpdateStatus();
-            }));
+            updateThread.Start(); */
         }
 
         private void updateUI(XmlTVBuilder.StatusUpdate status)

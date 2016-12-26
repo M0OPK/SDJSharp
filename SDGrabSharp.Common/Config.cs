@@ -228,7 +228,7 @@ namespace SDGrabSharp.Common
                         translateItem.CustomTranslate = translateNode.Attributes["custom-translate"].Value;
                     translateItem.isDeleted = false;
 
-                    TranslationMatrix.Add(string.Format("{0},{1}", translateItem.LineupID, translateItem.SDStationID), translateItem);
+                    TranslationMatrix.Add(translateItem.SDStationID, translateItem);
                 }
             }
 

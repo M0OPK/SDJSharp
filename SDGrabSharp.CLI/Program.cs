@@ -39,18 +39,19 @@ namespace SDGrabSharp.CLI
                 LoadConfig();
 
             // Initialize XMLTV builder
-            builder = new XmlTVBuilder(config, cache);
+            /*builder = new XmlTVBuilder(config, cache);
             builder.StatusUpdateReadyAsync += handle_BuilderUpdates;
             lastStatusUpdate = string.Empty;
             lastChannel = string.Empty;
             lastProgram = string.Empty;
+            builder.LoadXmlTV(config.XmlTVFileName);
             var channels = builder.AddChannels();
             builder.AddProgrammes(channels);
             builder.SaveXmlTV();
 
             if (needcr)
                 Console.WriteLine("");
-            Console.WriteLine(Strings.ProcessComplete);
+            Console.WriteLine(Strings.ProcessComplete);*/
             Environment.Exit(0);
         }
 

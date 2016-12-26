@@ -9,6 +9,17 @@ namespace XMLTV
 {
     public partial class XmlTV
     {
+        public class Channel
+        {
+            public XmlNode ChanelNode;
+            public SortedDictionary<DateTime, XmlNode> programmeNodes;
+
+            public Channel()
+            {
+                programmeNodes = new SortedDictionary<DateTime, XmlNode>();
+            }
+        }
+
         /// <summary>
         /// Structure and helper properties for XMLTV File holder
         /// </summary>
@@ -16,25 +27,74 @@ namespace XMLTV
         {
             public XmlDocument rootDocument;
             public XmlNode rootNode;
-            public XmlNodeList channelNodes
+            public Dictionary<string, Channel> channelData;
+
+            public IEnumerable<XmlNode> channelNodes
+            {
+                get
+                {
+                    return channelData.Select(channel => channel.Value.ChanelNode);
+                }
+            }
+
+            public IEnumerable<XmlNode> programmeNodes(string channel)
+            {
+                if (channelData.ContainsKey(channel))
+                    return channelData[channel].programmeNodes.Values;
+
+                return null;
+            }
+            /*public XmlNodeList channelNodes
             {
                 get
                 {
                     return rootNode.SelectNodes("channel");
                 }
-            }
-            public XmlNodeList programmeNodes
+            }*/
+            public IEnumerable<XmlNode> programmeNodes()
             {
-                get
-                {
-                    return rootNode.SelectNodes("programme");
-                }
+                List<XmlNode> masterChannelList = new List<XmlNode>();
+
+                foreach (var channelId in channelData.Keys)
+                    masterChannelList.AddRange(programmeNodes(channelId));
+
+                return masterChannelList;
             }
 
             public XmlTVData(XmlDocument doc)
             {
                 rootDocument = doc;
+                channelData = new Dictionary<string, Channel>();
                 rootNode = doc.SelectSingleNode("//tv");
+
+                // Build internal dictionary for channels
+                foreach (XmlNode channelNode in rootNode.SelectNodes("channel"))
+                {
+                    rootNode.RemoveChild(channelNode);
+                    if (channelNode.Attributes["id"] == null)
+                        continue;
+
+                    var thisChannel = new Channel();
+                    thisChannel.ChanelNode = channelNode;
+                    channelData.Add(channelNode.Attributes["id"].Value, thisChannel);
+                }
+
+                // Build internal dictionary for programmes
+                foreach (XmlNode programmeNode in rootNode.SelectNodes("programme"))
+                {
+                    rootNode.RemoveChild(programmeNode);
+                    if (programmeNode.Attributes["start"] == null || programmeNode.Attributes["channel"] == null)
+                        continue;
+
+                    // Find channelnode
+                    string channelId = programmeNode.Attributes["channel"].Value;
+                    if (channelData.ContainsKey(channelId))
+                    {
+                        // Add programme
+                        var start = XMLTV.XmlTV.StringToDate(programmeNode.Attributes["start"].Value).UtcDateTime;
+                        channelData[channelId].programmeNodes.Add(start, programmeNode);
+                    }
+                }
             }
         }
 
@@ -100,7 +160,6 @@ namespace XMLTV
         public class ProgrammeSearch
         {
             public string Start;
-            public string Stop;
             public string Channel;
         }
 

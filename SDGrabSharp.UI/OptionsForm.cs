@@ -444,7 +444,7 @@ namespace SDGrabSharp.UI
                     changesRemain = int.Parse(response.changesRemaining);
 
                     // Delete all translations for this lineup
-                    var lineupItems = localTranslate.Where(line => line.Value.LineupID == lineupID);
+                    var lineupItems = localTranslate.Where(line => line.Value.LineupID == lineupID).ToArray();
                     foreach (var lineupItem in lineupItems)
                         localTranslate.Remove(lineupItem.Key);
                 }
@@ -552,7 +552,7 @@ namespace SDGrabSharp.UI
 
             foreach (var addedItem in addedList)
             {
-                var localItem = localTranslate[string.Format("{0},{1}", addedItem.LineupID, addedItem.SDStationID)];
+                var localItem = localTranslate[addedItem.SDStationID];
                 if (localItem.displayNameHelper == null || localItem.displayNameHelper == string.Empty)
                 {
                     var station = cache.GetLineupData(sdJS, localItem.LineupID).stations.Where(thisstation => thisstation.stationID == localItem.SDStationID).FirstOrDefault();
@@ -608,8 +608,7 @@ namespace SDGrabSharp.UI
                     // Only add if not in added list
                     ListViewItem item = new ListViewItem();
                     item.Text = station.stationID;
-                    string key = string.Format("{0},{1}", (string)cbLineup.SelectedItem, station.stationID);
-                    if (!localTranslate.ContainsKey(key) || localTranslate[key].isDeleted)
+                    if (!localTranslate.ContainsKey(station.stationID) || localTranslate[station.stationID].isDeleted)
                     {
                         item.SubItems.Add(station.name);
                         lvAvailableChans.Items.Add(item);
@@ -644,7 +643,7 @@ namespace SDGrabSharp.UI
         private void setChannelMode(string lineupID, string stationID, Config.XmlTVTranslation.TranslateField mode)
         {
             Config.XmlTVTranslation localItem = null;
-            try { localItem = localTranslate[string.Format("{0},{1}", lineupID, stationID)]; } catch { };
+            try { localItem = localTranslate[stationID]; } catch { };
             if (localItem == null)
                 return;
 
@@ -707,7 +706,7 @@ namespace SDGrabSharp.UI
             if (addedMode)
             {
                 Config.XmlTVTranslation localItem = null;
-                try { localItem = localTranslate[string.Format("{0},{1}", lineupID, stationID)]; } catch { };
+                try { localItem = localTranslate[stationID]; } catch { };
                 if (localItem == null)
                     return null;
 
@@ -843,7 +842,7 @@ namespace SDGrabSharp.UI
 
             // First see if a deleted version exists
             Config.XmlTVTranslation localItem = null;
-            try { localItem = localTranslate[key]; } catch { };
+            try { localItem = localTranslate[item.Text]; } catch { };
 
             // Undelete if so
             if (localItem != null)
@@ -1107,7 +1106,7 @@ namespace SDGrabSharp.UI
         private void removeAddedChannel(ListViewItem chan)
         {
             lvAddedChans.Items.Remove(chan);
-            string translateKey = string.Format("{0},{1}", (string)chan.Tag, chan.Text);
+            string translateKey = chan.Text;
 
             // Only add to left list, if selected lineup matches
             if ((string)cbLineup.SelectedItem == (string)chan.Tag)
@@ -1165,7 +1164,7 @@ namespace SDGrabSharp.UI
         {
             lvAvailableChans.Items.Remove(chan);
 
-            string translateKey = string.Format("{0},{1}", lineup, chan.Text);
+            string translateKey = chan.Text;
 
             // Only add to left list, if selected lineup matches
             if ((string)cbLineup.SelectedItem == lineup)
@@ -1441,7 +1440,7 @@ namespace SDGrabSharp.UI
 
         private void validateTranslate(Dictionary<string, Config.XmlTVTranslation> translateData, string[] lineupList)
         {
-            var removeList = translateData.Where(line => !lineupList.Any(lineup => lineup == line.Value.LineupID));
+            var removeList = translateData.Where(line => !lineupList.Any(lineup => lineup == line.Value.LineupID)).ToArray();
             foreach (var lineup in removeList)
                 translateData.Remove(lineup.Key);
         }
