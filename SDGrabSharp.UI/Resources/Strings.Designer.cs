@@ -205,6 +205,51 @@ namespace SDGrabSharp.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Same as channel-id.
+        /// </summary>
+        internal static string cbDisplayNameMode_SameAsId {
+            get {
+                return ResourceManager.GetString("cbDisplayNameMode_SameAsId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Station Afiliate.
+        /// </summary>
+        internal static string cbDisplayNameMode_StationAfiliate {
+            get {
+                return ResourceManager.GetString("cbDisplayNameMode_StationAfiliate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Station Callsign.
+        /// </summary>
+        internal static string cbDisplayNameMode_StationCallsign {
+            get {
+                return ResourceManager.GetString("cbDisplayNameMode_StationCallsign", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Station ID.
+        /// </summary>
+        internal static string cbDisplayNameMode_StationID {
+            get {
+                return ResourceManager.GetString("cbDisplayNameMode_StationID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Station Name.
+        /// </summary>
+        internal static string cbDisplayNameMode_StationName {
+            get {
+                return ResourceManager.GetString("cbDisplayNameMode_StationName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ID.
         /// </summary>
         internal static string chAddedID {
@@ -475,6 +520,15 @@ namespace SDGrabSharp.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Activity Log.
+        /// </summary>
+        internal static string gbActivityLog {
+            get {
+                return ResourceManager.GetString("gbActivityLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Added Channels.
         /// </summary>
         internal static string gbAddedChannels {
@@ -489,6 +543,15 @@ namespace SDGrabSharp.UI.Resources {
         internal static string gbAvailableChannels {
             get {
                 return ResourceManager.GetString("gbAvailableChannels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Available Channel Filter.
+        /// </summary>
+        internal static string gbChannelFilter {
+            get {
+                return ResourceManager.GetString("gbChannelFilter", resourceCulture);
             }
         }
         
@@ -592,6 +655,15 @@ namespace SDGrabSharp.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SDJSON Error.
+        /// </summary>
+        internal static string JSON_ErrorBox_Title {
+            get {
+                return ResourceManager.GetString("JSON_ErrorBox_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cache Filename.
         /// </summary>
         internal static string lbCacheFilename {
@@ -619,11 +691,29 @@ namespace SDGrabSharp.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Channel No.
+        /// </summary>
+        internal static string lblChannelNum {
+            get {
+                return ResourceManager.GetString("lblChannelNum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Lineup.
         /// </summary>
         internal static string lblLineup {
             get {
                 return ResourceManager.GetString("lblLineup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logical Channel No.
+        /// </summary>
+        internal static string lblLogicalChannel {
+            get {
+                return ResourceManager.GetString("lblLogicalChannel", resourceCulture);
             }
         }
         
@@ -813,6 +903,15 @@ namespace SDGrabSharp.UI.Resources {
         internal static string toolStripMenuItemHelp {
             get {
                 return ResourceManager.GetString("toolStripMenuItemHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Load Configuration.
+        /// </summary>
+        internal static string toolStripMenuItemLoadConfig {
+            get {
+                return ResourceManager.GetString("toolStripMenuItemLoadConfig", resourceCulture);
             }
         }
         

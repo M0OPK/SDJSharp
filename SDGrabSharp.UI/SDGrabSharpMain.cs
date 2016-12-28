@@ -30,12 +30,14 @@ namespace SDGrabSharp.UI
         private void Localize()
         {
             toolStripMenuItemFile.Text = Strings.toolStripMenuItemFile;
+            toolStripMenuItemLoadConfig.Text = Strings.toolStripMenuItemLoadConfig;
             toolStripMenuItemRun.Text = Strings.toolStripMenuItemRun;
             toolStripMenuItemExit.Text = Strings.toolStripMenuItemExit;
             toolStripMenuItemTools.Text = Strings.toolStripMenuItemTools;
             toolStripMenuItemOptions.Text = Strings.toolStripMenuItemOptions;
             toolStripMenuItemHelp.Text = Strings.toolStripMenuItemHelp;
             toolStripMenuItemAbout.Text = Strings.toolStripMenuItemAbout;
+            gbActivityLog.Text = Strings.gbActivityLog;
             this.Text = string.Format(Strings.frmMainTitle, typeof(SDGrabSharp.UI.Program).Assembly.GetName().Version);
         }
 
@@ -64,13 +66,6 @@ namespace SDGrabSharp.UI
             builder.RunProcess();
             this.Cursor = Cursors.Default;
             builder = null;
-
-            /*this.Cursor = Cursors.WaitCursor;
-            menuMain.Enabled = false;
-            var builder = new XmlTVBuilder(config, cache, null);
-            builder.StatusUpdateReady += handle_BuilderUpdates;
-            var updateThread = new Thread(() => doCreateXmlTV(builder));
-            updateThread.Start(); */
         }
 
         private void updateActivityLog(object sender, XmlTVBuilder.ActivityLogEventArgs args)

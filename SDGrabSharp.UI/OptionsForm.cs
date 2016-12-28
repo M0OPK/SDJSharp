@@ -52,7 +52,8 @@ namespace SDGrabSharp.UI
 
             // Setup tooltips
             ToolTip optionsTooltip = new ToolTip();
-            optionsTooltip.SetToolTip(btnLogin, "Logs into Schedules direct. Required for most functions");
+            // @Todo tooltips
+            //optionsTooltip.SetToolTip(btnLogin, "Logs into Schedules direct. Required for most functions");
 
             config = dataconfig;
             cache = datacache;
@@ -155,6 +156,15 @@ namespace SDGrabSharp.UI
             gbXMLTVFile.Text = Strings.gbXMLTVFile;
             lblOutputXmlTVFile.Text = Strings.lblOutputXmlTVFile;
             btnBrowseXmlTVFile.Text = Strings.btnBrowseXmlTVFile;
+            lblChannelNum.Text = Strings.lblChannelNum;
+            lblLogicalChannel.Text = Strings.lblLogicalChannel;
+            gbChannelFilter.Text = Strings.gbChannelFilter;
+            cbDisplayNameMode.Items.Clear();
+            cbDisplayNameMode.Items.Add(Strings.cbDisplayNameMode_SameAsId);
+            cbDisplayNameMode.Items.Add(Strings.cbDisplayNameMode_StationID);
+            cbDisplayNameMode.Items.Add(Strings.cbDisplayNameMode_StationName);
+            cbDisplayNameMode.Items.Add(Strings.cbDisplayNameMode_StationAfiliate);
+            cbDisplayNameMode.Items.Add(Strings.cbDisplayNameMode_StationCallsign);
         }
 
         private void checkAlwaysAsk_CheckedChanged(object sender, EventArgs e)
@@ -1456,7 +1466,7 @@ namespace SDGrabSharp.UI
             sdJS.ClearErrors();
 
             if (errors != string.Empty)
-                MessageBox.Show(this, errors, "SDJSON Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, errors, Strings.JSON_ErrorBox_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void txtChannelFilter_TextChanged(object sender, EventArgs e)

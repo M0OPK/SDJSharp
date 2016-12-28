@@ -393,4 +393,37 @@
   <data name="SaveXmlTvFileDialog" xml:space="preserve">
     <value>Select save location for XMLTV guide file</value>
   </data>
+  <data name="cbDisplayNameMode_SameAsId" xml:space="preserve">
+    <value>Same as channel-id</value>
+  </data>
+  <data name="cbDisplayNameMode_StationAfiliate" xml:space="preserve">
+    <value>Station Afiliate</value>
+  </data>
+  <data name="cbDisplayNameMode_StationCallsign" xml:space="preserve">
+    <value>Station Callsign</value>
+  </data>
+  <data name="cbDisplayNameMode_StationID" xml:space="preserve">
+    <value>Station ID</value>
+  </data>
+  <data name="cbDisplayNameMode_StationName" xml:space="preserve">
+    <value>Station Name</value>
+  </data>
+  <data name="gbActivityLog" xml:space="preserve">
+    <value>Activity Log</value>
+  </data>
+  <data name="gbChannelFilter" xml:space="preserve">
+    <value>Available Channel Filter</value>
+  </data>
+  <data name="JSON_ErrorBox_Title" xml:space="preserve">
+    <value>SDJSON Error</value>
+  </data>
+  <data name="lblChannelNum" xml:space="preserve">
+    <value>Channel No</value>
+  </data>
+  <data name="lblLogicalChannel" xml:space="preserve">
+    <value>Logical Channel No</value>
+  </data>
+  <data name="toolStripMenuItemLoadConfig" xml:space="preserve">
+    <value>Load Configuration</value>
+  </data>
 </root>

@@ -90,28 +90,28 @@
             this.toolStripMenuItemRun,
             this.toolStripMenuItemExit});
             this.toolStripMenuItemFile.Name = "toolStripMenuItemFile";
-            this.toolStripMenuItemFile.Size = new System.Drawing.Size(37, 20);
-            this.toolStripMenuItemFile.Text = "File";
+            this.toolStripMenuItemFile.Size = new System.Drawing.Size(64, 20);
+            this.toolStripMenuItemFile.Text = "File (NT)";
             // 
             // toolStripMenuItemLoadConfig
             // 
             this.toolStripMenuItemLoadConfig.Name = "toolStripMenuItemLoadConfig";
-            this.toolStripMenuItemLoadConfig.Size = new System.Drawing.Size(177, 22);
-            this.toolStripMenuItemLoadConfig.Text = "Load Configuration";
+            this.toolStripMenuItemLoadConfig.Size = new System.Drawing.Size(204, 22);
+            this.toolStripMenuItemLoadConfig.Text = "Load Configuration (NT)";
             this.toolStripMenuItemLoadConfig.Click += new System.EventHandler(this.toolStripMenuItemLoadConfig_Click);
             // 
             // toolStripMenuItemRun
             // 
             this.toolStripMenuItemRun.Name = "toolStripMenuItemRun";
-            this.toolStripMenuItemRun.Size = new System.Drawing.Size(177, 22);
-            this.toolStripMenuItemRun.Text = "Run";
+            this.toolStripMenuItemRun.Size = new System.Drawing.Size(204, 22);
+            this.toolStripMenuItemRun.Text = "Run (NT)";
             this.toolStripMenuItemRun.Click += new System.EventHandler(this.toolStripMenuItemRun_Click);
             // 
             // toolStripMenuItemExit
             // 
             this.toolStripMenuItemExit.Name = "toolStripMenuItemExit";
-            this.toolStripMenuItemExit.Size = new System.Drawing.Size(177, 22);
-            this.toolStripMenuItemExit.Text = "Exit";
+            this.toolStripMenuItemExit.Size = new System.Drawing.Size(204, 22);
+            this.toolStripMenuItemExit.Text = "Exit NT)";
             this.toolStripMenuItemExit.Click += new System.EventHandler(this.toolStripMenuItemExit_Click);
             // 
             // toolStripMenuItemTools
@@ -119,14 +119,14 @@
             this.toolStripMenuItemTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemOptions});
             this.toolStripMenuItemTools.Name = "toolStripMenuItemTools";
-            this.toolStripMenuItemTools.Size = new System.Drawing.Size(48, 20);
-            this.toolStripMenuItemTools.Text = "Tools";
+            this.toolStripMenuItemTools.Size = new System.Drawing.Size(75, 20);
+            this.toolStripMenuItemTools.Text = "Tools (NT)";
             // 
             // toolStripMenuItemOptions
             // 
             this.toolStripMenuItemOptions.Name = "toolStripMenuItemOptions";
-            this.toolStripMenuItemOptions.Size = new System.Drawing.Size(116, 22);
-            this.toolStripMenuItemOptions.Text = "Options";
+            this.toolStripMenuItemOptions.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemOptions.Text = "Options (NT)";
             this.toolStripMenuItemOptions.Click += new System.EventHandler(this.toolStripMenuItemOptions_Click);
             // 
             // toolStripMenuItemHelp
@@ -135,14 +135,14 @@
             this.toolStripMenuItemHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemAbout});
             this.toolStripMenuItemHelp.Name = "toolStripMenuItemHelp";
-            this.toolStripMenuItemHelp.Size = new System.Drawing.Size(44, 20);
-            this.toolStripMenuItemHelp.Text = "Help";
+            this.toolStripMenuItemHelp.Size = new System.Drawing.Size(71, 20);
+            this.toolStripMenuItemHelp.Text = "Help (NT)";
             // 
             // toolStripMenuItemAbout
             // 
             this.toolStripMenuItemAbout.Name = "toolStripMenuItemAbout";
-            this.toolStripMenuItemAbout.Size = new System.Drawing.Size(107, 22);
-            this.toolStripMenuItemAbout.Text = "About";
+            this.toolStripMenuItemAbout.Size = new System.Drawing.Size(164, 22);
+            this.toolStripMenuItemAbout.Text = "About (NYI) (NT)";
             // 
             // gbActivityLog
             // 
@@ -175,7 +175,7 @@
             this.Controls.Add(this.menuMain);
             this.MainMenuStrip = this.menuMain;
             this.Name = "frmMain";
-            this.Text = "SDGrabSharp";
+            this.Text = "SDGrabSharp (NT)";
             this.statusMain.ResumeLayout(false);
             this.statusMain.PerformLayout();
             this.menuMain.ResumeLayout(false);
