@@ -309,5 +309,10 @@ namespace SDGrabSharp.Common
                 }
             }
         }
+        public class ActivityLogEventArgs : EventArgs
+        {
+            public string ActivityText;
+        }
     }
+
 }

@@ -15,6 +15,7 @@ namespace SDGrabSharp.Common
     {
         public event EventHandler StatusUpdateReady;
         public event EventHandler StatusUpdateReadyAsync;
+        public event EventHandler<ActivityLogEventArgs> ActivityLogUpdate;
         static EventWaitHandle evSDRequestReady;
         static EventWaitHandle evSDResponseReady;
         static bool _requestStop;
@@ -85,12 +86,15 @@ namespace SDGrabSharp.Common
 
         public void RunProcess()
         {
+            ActivityLog("Starting");
             statusData.statusMessage = "Logging in";
             UpdateStatus();
 
             // Ensure this instance is logged in
             if (!sd.LoggedIn)
                 sd.Login(config.SDUsername, config.SDPasswordHash, true);
+
+            ActivityLog("Logged in");
 
             // Initialize queues
             requestQueue = new SDRequestQueue(config);
@@ -115,12 +119,16 @@ namespace SDGrabSharp.Common
                         SDStationLookup.Add(sdStation.stationID, sdStation);
                 }
             }
+            ActivityLog("Station lookup created");
 
             // Load existing XMLTV file
             LoadXmlTV(config.XmlTVFileName);
 
+            ActivityLog("Existing XML loaded");
+
             // Add/update channel nodes
             doChannels();
+            ActivityLog("Added channel nodes");
 
             List<SDScheduleRequest> scheduleRequestList = new List<SDScheduleRequest>();
             List<SDMD5Request> md5RequestList = new List<SDMD5Request>();
@@ -133,6 +141,8 @@ namespace SDGrabSharp.Common
                 var channelNode = channel.Value;
                 if (channelNode.Attributes["id"] == null)
                     continue;
+
+                ActivityLog(string.Format("Working on channel {0}", channel.Value.Attributes["id"].Value));
 
                 string stationId = channel.Key;
 
@@ -172,6 +182,9 @@ namespace SDGrabSharp.Common
             md5RequestList.Clear();
             scheduleRequestList.Clear();
             evSDRequestReady.Set();
+
+            ActivityLog("Processing MD5 responses");
+            int md5Count = 0;
             
             // Keep processing MD5 responses while there are queued requests 
             while (requestQueue.items.Where(line => line.sdRequestType == SDRequestQueue.RequestType.SDRequestMD5).FirstOrDefault() != null
@@ -204,6 +217,7 @@ namespace SDGrabSharp.Common
                     {
                         if (thisResponse.md5Response.md5day != null)
                         {
+                            md5Count++;
                             // Check each MD5 against XML result
                             var thisChanDate = new List<DateTime>();
                             foreach(var thisMD5 in thisResponse.md5Response.md5day)
@@ -235,6 +249,11 @@ namespace SDGrabSharp.Common
                     }
                 }
             }
+            ActivityLog(string.Format("Processed {0} MD5 responses", md5Count.ToString()));
+
+            ActivityLog("Processing schedule responses");
+            int scheduleCount = 0;
+            int programCount = 0;
 
             // Done with MD5 responses, now time to process any schedule responses
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -267,6 +286,7 @@ namespace SDGrabSharp.Common
                     // Process each response in this queue item
                     foreach (var thisResponse in result.Where(line => line.scheduleResponse.code == SDErrors.OK))
                     {
+                        scheduleCount++;
                         // First update/add any MD5 dates for this schedule
                         channelUpdateAddMD5(thisResponse.scheduleResponse.stationID,
                                             thisResponse.scheduleResponse.metadata.startDate,
@@ -275,6 +295,7 @@ namespace SDGrabSharp.Common
                         // Process programs in this schedule
                         foreach (var program in thisResponse.scheduleResponse.programs)
                         {
+                            programCount++;
                             DateTimeOffset startTime = new DateTimeOffset(program.airDateTime.Value);
                             DateTimeOffset endTime = startTime.AddSeconds(program.duration);
 
@@ -342,6 +363,11 @@ namespace SDGrabSharp.Common
                 }
             }
 
+            ActivityLog(string.Format("Processed {0} schedules with {1} programs", scheduleCount.ToString(), programCount.ToString()));
+
+            ActivityLog("Processing program responses");
+            programCount = 0;
+
             // Done with schedule nodes
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             // Keep processing Program responses while there are queued requests 
@@ -373,8 +399,10 @@ namespace SDGrabSharp.Common
                     // Process each response in this queue item
                     foreach (var thisResponse in result.Where(line => line.programmeResponse.code == SDErrors.OK))
                     {
+                        programCount++;
                         // Add this program to the local cache
-                        programmeItemByProgrammeID.Add(thisResponse.programmeResponse.programID, thisResponse.programmeResponse);
+                        if (!programmeItemByProgrammeID.ContainsKey(thisResponse.programmeResponse.programID))
+                            programmeItemByProgrammeID.Add(thisResponse.programmeResponse.programID, thisResponse.programmeResponse);
 
                         var thisProgramme = thisResponse.programmeResponse;
 
@@ -411,8 +439,12 @@ namespace SDGrabSharp.Common
                     }
                 }
             }
+            ActivityLog(string.Format("Processed {0} program responses", programCount.ToString()));
+            ActivityLog("Finished all activities, stopping threads");
             StopThreads();
+            ActivityLog("Threads stopped, saving XML file");
             xmlTV.SaveXmlTV(config.XmlTVFileName);
+            ActivityLog("File saved, all complete");
         }
 
         private void updateKeys()
@@ -772,6 +804,8 @@ namespace SDGrabSharp.Common
         private void renameChannelNodes(IEnumerable<ChannelBlock> fullChannelList)
         {
             // Rename channels if the station ID matches, but id/name doesn't
+
+            // Phase 1 - rename to station ID
             foreach (var blockItem in fullChannelList)
             {
                 if (!channelByStationID.ContainsKey(blockItem.station.stationID))
@@ -783,10 +817,26 @@ namespace SDGrabSharp.Common
                  && channelNode.Attributes["id"].Value != GetChannelID(blockItem.station.stationID))
                 {
                     // First check for renamed nodes
-                    xmlTV.renameChannel(string.Format("{0}_rename", channelNode.Attributes["id"].Value), GetChannelID(blockItem.station.stationID));
+                    //xmlTV.renameChannel(string.Format("{0}_rename", channelNode.Attributes["id"].Value), GetChannelID(blockItem.station.stationID));
 
                     // And try normal
-                    xmlTV.renameChannel(channelNode.Attributes["id"].Value, GetChannelID(blockItem.station.stationID));
+                    //xmlTV.renameChannel(channelNode.Attributes["id"].Value, GetChannelID(blockItem.station.stationID));
+                    xmlTV.renameChannel(channelNode.Attributes["id"].Value, blockItem.station.stationID);
+                }
+            }
+
+            // Phase 2 - rename to station ID
+            foreach (var blockItem in fullChannelList)
+            {
+                if (!channelByStationID.ContainsKey(blockItem.station.stationID))
+                    continue;
+
+                // Check/rename channel IDs
+                var channelNode = channelByStationID[blockItem.station.stationID];
+                if (channelNode.Attributes["id"] != null
+                 && channelNode.Attributes["id"].Value == blockItem.station.stationID)
+                {
+                    xmlTV.renameChannel(blockItem.station.stationID, GetChannelID(blockItem.station.stationID));
                 }
 
                 // Check/rename display name
@@ -794,6 +844,7 @@ namespace SDGrabSharp.Common
                 if (displayNode != null && displayNode.InnerText != GetChannelName(blockItem.station.stationID))
                     displayNode.InnerText = GetChannelName(blockItem.station.stationID);
             }
+
         }
 
         private string[] channelMD5List(string stationId)
@@ -893,8 +944,8 @@ namespace SDGrabSharp.Common
 
             var md5SelectedNodes = md5Nodes.Cast<XmlNode>().
                 Where(line => line.Attributes["date"] != null &&
-                    (XmlTV.StringToDate(line.Attributes["date"].Value) < minDate ||
-                     XmlTV.StringToDate(line.Attributes["date"].Value) > maxDate)).ToArray();
+                    (XmlTV.StringToDate(line.Attributes["date"].Value, true).Date < minDate.Date ||
+                     XmlTV.StringToDate(line.Attributes["date"].Value, true).Date > maxDate.Date)).ToArray();
 
             foreach (var md5Node in md5SelectedNodes)
                 thisNode.RemoveChild(md5Node);
@@ -1212,6 +1263,15 @@ namespace SDGrabSharp.Common
                 list.Add(origList.GetRange(i, Math.Min(nSize, origList.Count - i)).ToArray());
 
             return list;
+        }
+
+        private void ActivityLog(string text)
+        {
+            EventHandler<XmlTVBuilder.ActivityLogEventArgs> logHandler = ActivityLogUpdate;
+            var args = new ActivityLogEventArgs();
+            args.ActivityText = string.Format("{0}: {1}", DateTime.Now.ToString("HH:mm:ss.ffffff"), text);
+            if (logHandler != null)
+                logHandler.Invoke(this, args);
         }
 
         /* ****************************

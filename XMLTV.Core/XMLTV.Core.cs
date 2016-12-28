@@ -135,10 +135,14 @@ namespace XMLTV
             return xmlData.programmeNodes(channelID);
         }
 
-        public void renameChannel(string oldChannelId, string newChannelId)
+        public bool renameChannel(string oldChannelId, string newChannelId)
         {
             if (!xmlData.channelData.ContainsKey(oldChannelId))
-                return;
+                return false;
+
+            // Fail if destination already exists
+            if (xmlData.channelData.ContainsKey(newChannelId))
+                return false;
 
             // First get all programmes for this channelblock, and the channel data too
             var channelData = xmlData.channelData[oldChannelId];
@@ -159,13 +163,14 @@ namespace XMLTV
             xmlData.channelData.Remove(oldChannelId);
 
             // Rename any clashed destination too
-            if (xmlData.channelData.ContainsKey(newChannelId))
+            /*if (xmlData.channelData.ContainsKey(newChannelId))
             {
                 var tempChannelData = xmlData.channelData[newChannelId];
                 xmlData.channelData.Remove(newChannelId);
                 xmlData.channelData.Add(string.Format("{0}_rename", newChannelId), tempChannelData);
-            }
+            }*/
             xmlData.channelData.Add(newChannelId, channelData);
+            return true;
         }
 
         public IEnumerable<XmlNode> GetProgrammeNodes()
@@ -575,8 +580,15 @@ namespace XMLTV
             }
         }
 
-        public static DateTimeOffset StringToDate(string inDate)
+        public static DateTimeOffset StringToDate(string inDate, bool dateOnly = false)
         {
+            if (dateOnly)
+            {
+                DateTime tempDate;
+                if (DateTime.TryParseExact(inDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out tempDate))
+                    return tempDate;
+            }
+
             DateTimeOffset temp;
             if (DateTimeOffset.TryParseExact(inDate, "yyyyMMddHHmmss zzzz", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out temp))
                 return temp;

@@ -30,6 +30,7 @@
         {
             this.statusMain = new System.Windows.Forms.StatusStrip();
             this.tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tsProgress = new System.Windows.Forms.ToolStripProgressBar();
             this.menuMain = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItemFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemLoadConfig = new System.Windows.Forms.ToolStripMenuItem();
@@ -39,9 +40,11 @@
             this.toolStripMenuItemOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsProgress = new System.Windows.Forms.ToolStripProgressBar();
+            this.gbActivityLog = new System.Windows.Forms.GroupBox();
+            this.rtActivityLog = new System.Windows.Forms.RichTextBox();
             this.statusMain.SuspendLayout();
             this.menuMain.SuspendLayout();
+            this.gbActivityLog.SuspendLayout();
             this.SuspendLayout();
             // 
             // statusMain
@@ -49,9 +52,9 @@
             this.statusMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsStatus,
             this.tsProgress});
-            this.statusMain.Location = new System.Drawing.Point(0, 326);
+            this.statusMain.Location = new System.Drawing.Point(0, 431);
             this.statusMain.Name = "statusMain";
-            this.statusMain.Size = new System.Drawing.Size(438, 22);
+            this.statusMain.Size = new System.Drawing.Size(801, 22);
             this.statusMain.TabIndex = 0;
             this.statusMain.Text = "statusStrip1";
             // 
@@ -62,6 +65,12 @@
             this.tsStatus.Size = new System.Drawing.Size(270, 17);
             this.tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // tsProgress
+            // 
+            this.tsProgress.AutoSize = false;
+            this.tsProgress.Name = "tsProgress";
+            this.tsProgress.Size = new System.Drawing.Size(150, 16);
+            // 
             // menuMain
             // 
             this.menuMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -70,7 +79,7 @@
             this.toolStripMenuItemHelp});
             this.menuMain.Location = new System.Drawing.Point(0, 0);
             this.menuMain.Name = "menuMain";
-            this.menuMain.Size = new System.Drawing.Size(438, 24);
+            this.menuMain.Size = new System.Drawing.Size(801, 24);
             this.menuMain.TabIndex = 1;
             this.menuMain.Text = "MainMenuStrip";
             // 
@@ -110,7 +119,7 @@
             this.toolStripMenuItemTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemOptions});
             this.toolStripMenuItemTools.Name = "toolStripMenuItemTools";
-            this.toolStripMenuItemTools.Size = new System.Drawing.Size(47, 20);
+            this.toolStripMenuItemTools.Size = new System.Drawing.Size(48, 20);
             this.toolStripMenuItemTools.Text = "Tools";
             // 
             // toolStripMenuItemOptions
@@ -135,17 +144,33 @@
             this.toolStripMenuItemAbout.Size = new System.Drawing.Size(107, 22);
             this.toolStripMenuItemAbout.Text = "About";
             // 
-            // tsProgress
+            // gbActivityLog
             // 
-            this.tsProgress.AutoSize = false;
-            this.tsProgress.Name = "tsProgress";
-            this.tsProgress.Size = new System.Drawing.Size(150, 16);
+            this.gbActivityLog.Controls.Add(this.rtActivityLog);
+            this.gbActivityLog.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.gbActivityLog.Location = new System.Drawing.Point(0, 288);
+            this.gbActivityLog.Name = "gbActivityLog";
+            this.gbActivityLog.Size = new System.Drawing.Size(801, 143);
+            this.gbActivityLog.TabIndex = 2;
+            this.gbActivityLog.TabStop = false;
+            this.gbActivityLog.Text = "Activity Log (NT)";
+            // 
+            // rtActivityLog
+            // 
+            this.rtActivityLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtActivityLog.Location = new System.Drawing.Point(3, 16);
+            this.rtActivityLog.Name = "rtActivityLog";
+            this.rtActivityLog.ReadOnly = true;
+            this.rtActivityLog.Size = new System.Drawing.Size(795, 124);
+            this.rtActivityLog.TabIndex = 0;
+            this.rtActivityLog.Text = "";
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(438, 348);
+            this.ClientSize = new System.Drawing.Size(801, 453);
+            this.Controls.Add(this.gbActivityLog);
             this.Controls.Add(this.statusMain);
             this.Controls.Add(this.menuMain);
             this.MainMenuStrip = this.menuMain;
@@ -155,6 +180,7 @@
             this.statusMain.PerformLayout();
             this.menuMain.ResumeLayout(false);
             this.menuMain.PerformLayout();
+            this.gbActivityLog.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -174,6 +200,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAbout;
         private System.Windows.Forms.ToolStripStatusLabel tsStatus;
         private System.Windows.Forms.ToolStripProgressBar tsProgress;
+        private System.Windows.Forms.GroupBox gbActivityLog;
+        private System.Windows.Forms.RichTextBox rtActivityLog;
     }
 }
 

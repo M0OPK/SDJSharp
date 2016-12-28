@@ -57,8 +57,10 @@ namespace SDGrabSharp.UI
 
         private void toolStripMenuItemRun_Click(object sender, EventArgs e)
         {
+            rtActivityLog.Clear();
             this.Cursor = Cursors.WaitCursor;
             var builder = new XmlTVBuilder(config, cache, null);
+            builder.ActivityLogUpdate += updateActivityLog;
             builder.RunProcess();
             this.Cursor = Cursors.Default;
             builder = null;
@@ -69,6 +71,14 @@ namespace SDGrabSharp.UI
             builder.StatusUpdateReady += handle_BuilderUpdates;
             var updateThread = new Thread(() => doCreateXmlTV(builder));
             updateThread.Start(); */
+        }
+
+        private void updateActivityLog(object sender, XmlTVBuilder.ActivityLogEventArgs args)
+        {
+            rtActivityLog.Text += string.Format("{0}\r\n", args.ActivityText);
+            rtActivityLog.SelectionStart = rtActivityLog.Text.Length;
+            rtActivityLog.ScrollToCaret();
+            Application.DoEvents();
         }
 
         private void updateUI(XmlTVBuilder.StatusUpdate status)
