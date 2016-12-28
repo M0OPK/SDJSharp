@@ -14,10 +14,8 @@ namespace SDGrabSharp.CLI
         private static Config config;
         private static DataCache cache;
         private static XmlTVBuilder builder;
-        private static string lastStatusUpdate;
-        private static string lastChannel;
-        private static string lastProgram;
         private static bool needcr;
+        private static int lastPercent;
 
         static void Main(string[] args)
         {
@@ -39,20 +37,23 @@ namespace SDGrabSharp.CLI
                 LoadConfig();
 
             // Initialize XMLTV builder
-            /*builder = new XmlTVBuilder(config, cache);
-            builder.StatusUpdateReadyAsync += handle_BuilderUpdates;
-            lastStatusUpdate = string.Empty;
-            lastChannel = string.Empty;
-            lastProgram = string.Empty;
-            builder.LoadXmlTV(config.XmlTVFileName);
-            var channels = builder.AddChannels();
-            builder.AddProgrammes(channels);
-            builder.SaveXmlTV();
+            builder = new XmlTVBuilder(config, cache);
+            builder.ActivityLogUpdate += updateActivityLog;
+            needcr = false;
+            lastPercent = 0;
+            builder.RunProcess();
 
             if (needcr)
                 Console.WriteLine("");
-            Console.WriteLine(Strings.ProcessComplete);*/
+            Console.WriteLine(Strings.ProcessComplete);
             Environment.Exit(0);
+        }
+        private static void updateActivityLog(object sender, XmlTVBuilder.ActivityLogEventArgs args)
+        {
+            if (needcr)
+                Console.WriteLine(string.Empty);
+            Console.WriteLine(args.ActivityText);
+            needcr = false;
         }
 
         private static void LoadConfig(string filename = null)
