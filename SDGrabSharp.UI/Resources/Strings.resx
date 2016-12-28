@@ -426,4 +426,7 @@
   <data name="toolStripMenuItemLoadConfig" xml:space="preserve">
     <value>Load Configuration</value>
   </data>
+  <data name="gbProgress" xml:space="preserve">
+    <value>Process Report</value>
+  </data>
 </root>

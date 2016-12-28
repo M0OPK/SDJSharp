@@ -42,6 +42,7 @@
             this.toolStripMenuItemAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.gbActivityLog = new System.Windows.Forms.GroupBox();
             this.rtActivityLog = new System.Windows.Forms.RichTextBox();
+            this.gbProgress = new System.Windows.Forms.GroupBox();
             this.statusMain.SuspendLayout();
             this.menuMain.SuspendLayout();
             this.gbActivityLog.SuspendLayout();
@@ -52,9 +53,9 @@
             this.statusMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsStatus,
             this.tsProgress});
-            this.statusMain.Location = new System.Drawing.Point(0, 431);
+            this.statusMain.Location = new System.Drawing.Point(0, 465);
             this.statusMain.Name = "statusMain";
-            this.statusMain.Size = new System.Drawing.Size(801, 22);
+            this.statusMain.Size = new System.Drawing.Size(808, 22);
             this.statusMain.TabIndex = 0;
             this.statusMain.Text = "statusStrip1";
             // 
@@ -79,7 +80,7 @@
             this.toolStripMenuItemHelp});
             this.menuMain.Location = new System.Drawing.Point(0, 0);
             this.menuMain.Name = "menuMain";
-            this.menuMain.Size = new System.Drawing.Size(801, 24);
+            this.menuMain.Size = new System.Drawing.Size(808, 24);
             this.menuMain.TabIndex = 1;
             this.menuMain.Text = "MainMenuStrip";
             // 
@@ -125,7 +126,7 @@
             // toolStripMenuItemOptions
             // 
             this.toolStripMenuItemOptions.Name = "toolStripMenuItemOptions";
-            this.toolStripMenuItemOptions.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItemOptions.Size = new System.Drawing.Size(143, 22);
             this.toolStripMenuItemOptions.Text = "Options (NT)";
             this.toolStripMenuItemOptions.Click += new System.EventHandler(this.toolStripMenuItemOptions_Click);
             // 
@@ -147,10 +148,9 @@
             // gbActivityLog
             // 
             this.gbActivityLog.Controls.Add(this.rtActivityLog);
-            this.gbActivityLog.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.gbActivityLog.Location = new System.Drawing.Point(0, 288);
+            this.gbActivityLog.Location = new System.Drawing.Point(0, 318);
             this.gbActivityLog.Name = "gbActivityLog";
-            this.gbActivityLog.Size = new System.Drawing.Size(801, 143);
+            this.gbActivityLog.Size = new System.Drawing.Size(808, 144);
             this.gbActivityLog.TabIndex = 2;
             this.gbActivityLog.TabStop = false;
             this.gbActivityLog.Text = "Activity Log (NT)";
@@ -161,18 +161,31 @@
             this.rtActivityLog.Location = new System.Drawing.Point(3, 16);
             this.rtActivityLog.Name = "rtActivityLog";
             this.rtActivityLog.ReadOnly = true;
-            this.rtActivityLog.Size = new System.Drawing.Size(795, 124);
+            this.rtActivityLog.Size = new System.Drawing.Size(802, 125);
             this.rtActivityLog.TabIndex = 0;
             this.rtActivityLog.Text = "";
+            // 
+            // gbProgress
+            // 
+            this.gbProgress.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.gbProgress.Dock = System.Windows.Forms.DockStyle.Top;
+            this.gbProgress.Location = new System.Drawing.Point(0, 24);
+            this.gbProgress.Name = "gbProgress";
+            this.gbProgress.Size = new System.Drawing.Size(808, 291);
+            this.gbProgress.TabIndex = 3;
+            this.gbProgress.TabStop = false;
+            this.gbProgress.Text = "Progress Report (NT)";
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(801, 453);
+            this.ClientSize = new System.Drawing.Size(808, 487);
+            this.Controls.Add(this.gbProgress);
             this.Controls.Add(this.gbActivityLog);
             this.Controls.Add(this.statusMain);
             this.Controls.Add(this.menuMain);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuMain;
             this.Name = "frmMain";
             this.Text = "SDGrabSharp (NT)";
@@ -202,6 +215,7 @@
         private System.Windows.Forms.ToolStripProgressBar tsProgress;
         private System.Windows.Forms.GroupBox gbActivityLog;
         private System.Windows.Forms.RichTextBox rtActivityLog;
+        private System.Windows.Forms.GroupBox gbProgress;
     }
 }
 

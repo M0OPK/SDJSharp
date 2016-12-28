@@ -601,6 +601,15 @@ namespace SDGrabSharp.UI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Process Report.
+        /// </summary>
+        internal static string gbProgress {
+            get {
+                return ResourceManager.GetString("gbProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Programme Retrieval Options.
         /// </summary>
         internal static string gbRetrievalOptions {

@@ -537,7 +537,7 @@ namespace XMLTV
                 nodeList.AddRange
                 (
                     from programme in channelInfo.Value.programmeNodes
-                    where programme.Key < startDate.UtcDateTime || programme.Key > endDate.UtcDateTime
+                    where programme.Key.Date < startDate.LocalDateTime.Date || programme.Key.Date > endDate.LocalDateTime.Date
                     select programme.Value
                 );
             }
@@ -552,7 +552,7 @@ namespace XMLTV
                 var programmeList =
                 (
                     from programme in channelInfo.Value.programmeNodes
-                    where programme.Key < startDate.UtcDateTime || programme.Key > endDate.UtcDateTime
+                    where programme.Key.Date < startDate.LocalDateTime.Date || programme.Key.Date > endDate.LocalDateTime.Date
                     select programme.Key
                 ).ToArray();
 

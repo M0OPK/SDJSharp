@@ -38,6 +38,7 @@ namespace SDGrabSharp.UI
             toolStripMenuItemHelp.Text = Strings.toolStripMenuItemHelp;
             toolStripMenuItemAbout.Text = Strings.toolStripMenuItemAbout;
             gbActivityLog.Text = Strings.gbActivityLog;
+            gbProgress.Text = Strings.gbProgress;
             this.Text = string.Format(Strings.frmMainTitle, typeof(SDGrabSharp.UI.Program).Assembly.GetName().Version);
         }
 
@@ -72,7 +73,7 @@ namespace SDGrabSharp.UI
         {
             rtActivityLog.Text += string.Format("{0}\r\n", args.ActivityText);
             rtActivityLog.SelectionStart = rtActivityLog.Text.Length;
-            rtActivityLog.ScrollToCaret();
+            //rtActivityLog.ScrollToCaret();
             Application.DoEvents();
         }
 

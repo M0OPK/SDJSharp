@@ -25,6 +25,8 @@ namespace SDGrabSharp.Common
         public StatusUpdate statusData;
         bool updateWaiting;
         SDJson sd;
+        private static ReaderWriterLockSlim reqLock;
+        private static ReaderWriterLockSlim respLock;
 
         private SDRequestQueue requestQueue;
         private SDResponseQueue responseQueue;
@@ -54,6 +56,9 @@ namespace SDGrabSharp.Common
             // Prime event signals
             evSDRequestReady = new AutoResetEvent(false);
             evSDResponseReady = new AutoResetEvent(false);
+
+            reqLock = new ReaderWriterLockSlim();
+            respLock = new ReaderWriterLockSlim();
             _requestStop = false;
         }
 
@@ -82,6 +87,56 @@ namespace SDGrabSharp.Common
                 }
             }
             return false;
+        }
+
+        private bool checkHasItems(SDRequestQueue.RequestType requestType, SDResponseQueue.ResponseType responseType, bool readyItems = false)
+        {
+            // Check if queue has items (used in where loops) with appropriate reader locking
+            if (readyItems)
+            {
+                bool responseQueueReadyItems = false;
+                try
+                {
+                    respLock.EnterReadLock();
+                    responseQueueReadyItems = (responseQueue.items.
+                        Where(line => line.sdResponseType == responseType).FirstOrDefault() != null);
+                }
+                finally
+                {
+                    respLock.ExitReadLock();
+                }
+                return responseQueueReadyItems;
+            }
+            else
+            {
+                bool hasRequestItem = false;
+                try
+                {
+                    reqLock.EnterReadLock();
+                    hasRequestItem = (requestQueue.items.Where(line => line.sdRequestType == requestType).FirstOrDefault() != null);
+                }
+                finally
+                {
+                    reqLock.ExitReadLock();
+                }
+                if (hasRequestItem)
+                    return true;
+
+                bool hasResponseItem = false;
+                try
+                {
+                    respLock.EnterReadLock();
+                    hasResponseItem = (responseQueue.items.Where(line => line.sdResponseType == responseType).FirstOrDefault() != null);
+                }
+                finally
+                {
+                    respLock.ExitReadLock();
+                }
+                if (hasResponseItem)
+                    return true;
+
+                return false;
+            }
         }
 
         public void RunProcess()
@@ -128,6 +183,17 @@ namespace SDGrabSharp.Common
 
             // Add/update channel nodes
             doChannels();
+
+            // Get date range from config
+            DateTime dateMin = DateTime.Today.Date;
+            DateTime dateMax = dateMin.AddDays(config.ProgrammeRetrieveRangeDays);
+
+            if (config.ProgrammeRetrieveYesterday)
+                dateMin = dateMin.AddDays(-1.0f);
+
+            // Remove programmes outside of range
+            deleteProgrammesOutsideDateRange(dateMin, dateMax);
+
             ActivityLog("Added channel nodes");
 
             List<SDScheduleRequest> scheduleRequestList = new List<SDScheduleRequest>();
@@ -174,39 +240,56 @@ namespace SDGrabSharp.Common
             }
 
             // Queue all the md5 requests, and the initial batch of schedule requests.
-            lock (requestQueue)
+            try
             {
+                reqLock.EnterWriteLock();
                 requestQueue.AddRequest(md5RequestList);
                 requestQueue.AddRequest(scheduleRequestList);
             }
+            finally
+            {
+                reqLock.ExitWriteLock();
+            }
+
             md5RequestList.Clear();
             scheduleRequestList.Clear();
             evSDRequestReady.Set();
 
             ActivityLog("Processing MD5 responses");
             int md5Count = 0;
-            
+
             // Keep processing MD5 responses while there are queued requests 
-            while (requestQueue.items.Where(line => line.sdRequestType == SDRequestQueue.RequestType.SDRequestMD5).FirstOrDefault() != null
-                || responseQueue.items.Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseMD5).FirstOrDefault() != null
+            while (checkHasItems(SDRequestQueue.RequestType.SDRequestMD5, SDResponseQueue.ResponseType.SDResponseMD5, false)
                 || currentRequestOperation == SDRequestQueue.RequestType.SDRequestMD5)
             {
                 // Wait to be triggered (scan anyway every second)
                 evSDResponseReady.WaitOne(1000);
 
                 // Process all MD5 responses
-                while (responseQueue.items.
-                    Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseMD5).FirstOrDefault() != null)
+                while (checkHasItems(SDRequestQueue.RequestType.SDRequestMD5, SDResponseQueue.ResponseType.SDResponseMD5, true))
                 {
                     IEnumerable<SDResponseQueue.MD5ResultPair> result = null;
                     
                     // pop top item
-                    lock (responseQueue)
+                    try
                     {
+                        respLock.EnterUpgradeableReadLock();
                         var tempResult = responseQueue.items.
                             Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseMD5).FirstOrDefault();
                         result = tempResult.md5Response;
-                        responseQueue.items.Remove(tempResult);
+                        try
+                        {
+                            respLock.EnterWriteLock();
+                            responseQueue.items.Remove(tempResult);
+                        }
+                        finally
+                        {
+                            respLock.ExitWriteLock();
+                        }
+                    }
+                    finally
+                    {
+                        respLock.ExitUpgradeableReadLock();
                     }
 
                     if (result == null)
@@ -240,10 +323,16 @@ namespace SDGrabSharp.Common
                     // If the request list isn't empty, add these requests to the queue
                     if (scheduleRequestList.Count() != 0)
                     {
-                        lock (requestQueue)
+                        try
                         {
+                            reqLock.EnterWriteLock();
                             requestQueue.AddRequest(scheduleRequestList);
                         }
+                        finally
+                        {
+                            reqLock.ExitWriteLock();
+                        }
+
                         scheduleRequestList.Clear();
                         evSDRequestReady.Set();
                     }
@@ -258,26 +347,37 @@ namespace SDGrabSharp.Common
             // Done with MD5 responses, now time to process any schedule responses
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             // Keep processing Schedule responses while there are queued requests 
-            while (requestQueue.items.Where(line => line.sdRequestType == SDRequestQueue.RequestType.SDRequestSchedule).FirstOrDefault() != null
-                || responseQueue.items.Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseSchedule).FirstOrDefault() != null
+            while (checkHasItems(SDRequestQueue.RequestType.SDRequestSchedule, SDResponseQueue.ResponseType.SDResponseSchedule, false)
                 || currentRequestOperation == SDRequestQueue.RequestType.SDRequestSchedule)
             {
                 // Wait to be triggered (1 second max)
                 evSDResponseReady.WaitOne(1000);
 
                 // Process all MD5 responses
-                while (responseQueue.items.
-                    Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseSchedule).FirstOrDefault() != null)
+                while (checkHasItems(SDRequestQueue.RequestType.SDRequestSchedule, SDResponseQueue.ResponseType.SDResponseSchedule, true))
                 {
                     IEnumerable<SDResponseQueue.ScheduleResultPair> result = null;
 
                     // pop top item
-                    lock (responseQueue)
+                    try
                     {
+                        respLock.EnterUpgradeableReadLock();
                         var tempResult = responseQueue.items.
                             Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseSchedule).FirstOrDefault();
                         result = tempResult.scheduleResponse;
-                        responseQueue.items.Remove(tempResult);
+                        try
+                        {
+                            respLock.EnterWriteLock();
+                            responseQueue.items.Remove(tempResult);
+                        }
+                        finally
+                        {
+                            respLock.ExitWriteLock();
+                        }
+                    }
+                    finally
+                    {
+                        respLock.ExitUpgradeableReadLock();
                     }
 
                     if (result == null)
@@ -353,11 +453,16 @@ namespace SDGrabSharp.Common
                         }
 
                         // Queue all distinct program id's for this station
-                        lock (requestQueue)
+                        try
                         {
+                            reqLock.EnterWriteLock();
                             requestQueue.AddRequest(programmeRequestList.Distinct().ToArray(), 
                                                     thisResponse.scheduleResponse.stationID);
                             programmeRequestList.Clear();
+                        }
+                        finally
+                        {
+                            reqLock.ExitWriteLock();
                         }
                     }
                 }
@@ -371,26 +476,37 @@ namespace SDGrabSharp.Common
             // Done with schedule nodes
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             // Keep processing Program responses while there are queued requests 
-            while (requestQueue.items.Where(line => line.sdRequestType == SDRequestQueue.RequestType.SDRequestProgram).FirstOrDefault() != null
-                || responseQueue.items.Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseProgram).FirstOrDefault() != null
+            while (checkHasItems(SDRequestQueue.RequestType.SDRequestProgram, SDResponseQueue.ResponseType.SDResponseProgram, false)
                 || currentRequestOperation == SDRequestQueue.RequestType.SDRequestProgram)
             {
                 // Wait to be triggered (1 second max)
                 evSDResponseReady.WaitOne(1000);
 
                 // Process all program responses
-                while (responseQueue.items.
-                    Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseProgram).FirstOrDefault() != null)
+                while (checkHasItems(SDRequestQueue.RequestType.SDRequestProgram, SDResponseQueue.ResponseType.SDResponseProgram, true))
                 {
                     IEnumerable<SDResponseQueue.ProgrammeResultPair> result = null;
 
                     // pop top item
-                    lock (responseQueue)
+                    try
                     {
+                        respLock.EnterUpgradeableReadLock();
                         var tempResult = responseQueue.items.
                             Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseProgram).FirstOrDefault();
                         result = tempResult.programmeResponse;
-                        responseQueue.items.Remove(tempResult);
+                        try
+                        {
+                            respLock.EnterWriteLock();
+                            responseQueue.items.Remove(tempResult);
+                        }
+                        finally
+                        {
+                            respLock.ExitWriteLock();
+                        }
+                    }
+                    finally
+                    {
+                        respLock.ExitUpgradeableReadLock();
                     }
 
                     if (result == null)
@@ -538,14 +654,27 @@ namespace SDGrabSharp.Common
                 {
                     // Process One queue item
                     SDRequestQueue.SDRequestQueueItem thisItem;
-                    lock (requestQueue)
+                    try
                     {
+                        reqLock.EnterUpgradeableReadLock();
                         var thisOrigItem = requestQueue.items.
                             Where(line => line.retryTimeUtc <= DateTime.UtcNow).
                             OrderBy(line => line.priority).ThenBy(line => line.retryTimeUtc).FirstOrDefault();
                         thisItem = (SDRequestQueue.SDRequestQueueItem)thisOrigItem.Clone();
                         currentRequestOperation = thisItem.sdRequestType;
-                        requestQueue.items.Remove(thisOrigItem);
+                        try
+                        {
+                            reqLock.EnterWriteLock();
+                            requestQueue.items.Remove(thisOrigItem);
+                        }
+                        finally
+                        {
+                            reqLock.ExitWriteLock();
+                        }
+                    }
+                    finally
+                    {
+                        reqLock.ExitUpgradeableReadLock();
                     }
 
                     if (thisItem.sdRequestType == SDRequestQueue.RequestType.SDRequestMD5)
@@ -563,11 +692,16 @@ namespace SDGrabSharp.Common
                                     select new SDResponseQueue.MD5ResultPair(origRequest, thisResponse)
                                 );
 
-                            lock (responseQueue)
+                            try
                             {
+                                respLock.EnterWriteLock();
                                 responseQueue.AddResponse(resultList, thisItem.stationContext);
-                                evSDResponseReady.Set();
                             }
+                            finally
+                            {
+                                respLock.ExitWriteLock();
+                            }
+                            evSDResponseReady.Set();
                         }
                     }
                     else if (thisItem.sdRequestType == SDRequestQueue.RequestType.SDRequestSchedule)
@@ -612,18 +746,29 @@ namespace SDGrabSharp.Common
                                 // Requeue any retries found with the longest retrytime encountered
                                 if (retryList.Count() > 0)
                                 {
-                                    lock (requestQueue)
+                                    try
                                     {
+                                        reqLock.EnterWriteLock();
                                         requestQueue.AddRequest(retryList, thisItem.stationContext, retryTime);
+                                    }
+                                    finally
+                                    {
+                                        reqLock.ExitWriteLock();
                                     }
                                 }
                             }
 
-                            lock (responseQueue)
+                            try
                             {
+                                respLock.EnterWriteLock();
                                 responseQueue.AddResponse(resultList, thisItem.stationContext);
-                                evSDResponseReady.Set();
                             }
+                            finally
+                            {
+                                respLock.ExitWriteLock();
+                            }
+                            evSDResponseReady.Set();
+
                         }
                     }
                     else if (thisItem.sdRequestType == SDRequestQueue.RequestType.SDRequestProgram)
@@ -664,19 +809,28 @@ namespace SDGrabSharp.Common
                                 // Requeue any retries found with the longest retrytime encountered
                                 if (retryList.Count() > 0)
                                 {
-                                    lock (requestQueue)
+                                    try
                                     {
+                                        reqLock.EnterWriteLock();
                                         requestQueue.AddRequest(retryList.ToArray(), thisItem.stationContext, retryTime);
                                     }
+                                    finally
+                                    {
+                                        reqLock.ExitWriteLock();
+                                    }
                                 }
-
                             }
 
-                            lock (responseQueue)
+                            try
                             {
+                                respLock.EnterWriteLock();
                                 responseQueue.AddResponse(resultList, thisItem.stationContext);
-                                evSDResponseReady.Set();
                             }
+                            finally
+                            {
+                                respLock.ExitWriteLock();
+                            }
+                            evSDResponseReady.Set();
                         }
                     }
                     currentRequestOperation = SDRequestQueue.RequestType.SDReqeustNone;
