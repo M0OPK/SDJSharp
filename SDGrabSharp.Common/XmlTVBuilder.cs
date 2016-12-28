@@ -13,8 +13,7 @@ namespace SDGrabSharp.Common
 {
     public partial class XmlTVBuilder
     {
-        public event EventHandler StatusUpdateReady;
-        public event EventHandler StatusUpdateReadyAsync;
+        public event EventHandler<StatusUpdateArgs> StatusUpdate;
         public event EventHandler<ActivityLogEventArgs> ActivityLogUpdate;
         static EventWaitHandle evSDRequestReady;
         static EventWaitHandle evSDResponseReady;
@@ -22,8 +21,6 @@ namespace SDGrabSharp.Common
         private Config config;
         private DataCache cache;
         private XmlTV xmlTV;
-        public StatusUpdate statusData;
-        bool updateWaiting;
         SDJson sd;
         private static ReaderWriterLockSlim reqLock;
         private static ReaderWriterLockSlim respLock;
@@ -51,7 +48,6 @@ namespace SDGrabSharp.Common
             // If were supplied an instance, use it, else try to make one with the token in cache data if found, 
             // else no token and we'll login later
             sd = sdJs ?? new SDJson(cache.tokenData != null ? cache.tokenData.token : string.Empty);
-            statusData = new StatusUpdate();
 
             // Prime event signals
             evSDRequestReady = new AutoResetEvent(false);
@@ -142,8 +138,6 @@ namespace SDGrabSharp.Common
         public void RunProcess()
         {
             ActivityLog("Starting");
-            statusData.statusMessage = "Logging in";
-            UpdateStatus();
 
             // Ensure this instance is logged in
             if (!sd.LoggedIn)
@@ -175,12 +169,14 @@ namespace SDGrabSharp.Common
                 }
             }
             ActivityLog("Station lookup created");
+            SendStatusUpdate("Loading existing XML");
 
             // Load existing XMLTV file
             LoadXmlTV(config.XmlTVFileName);
 
             ActivityLog("Existing XML loaded");
 
+            SendStatusUpdate("Adding/updating channel nodes");
             // Add/update channel nodes
             doChannels();
 
@@ -200,6 +196,9 @@ namespace SDGrabSharp.Common
             List<SDMD5Request> md5RequestList = new List<SDMD5Request>();
             List<string> programmeRequestList = new List<string>();
 
+            int md5RequestsSent = 0;
+            int scheduleRequestsSent = 0;
+            int programRequestsSent = 0;
             // Process MD5 requests per channel
             foreach (var channel in channelByStationID)
             {
@@ -250,11 +249,14 @@ namespace SDGrabSharp.Common
             {
                 reqLock.ExitWriteLock();
             }
+            md5RequestsSent += md5RequestList.Count();
+            scheduleRequestsSent += scheduleRequestList.Count();
 
             md5RequestList.Clear();
             scheduleRequestList.Clear();
             evSDRequestReady.Set();
 
+            SendStatusUpdate("Checking/Updating MD5 values");
             ActivityLog("Processing MD5 responses");
             int md5Count = 0;
 
@@ -275,7 +277,8 @@ namespace SDGrabSharp.Common
                     {
                         respLock.EnterUpgradeableReadLock();
                         var tempResult = responseQueue.items.
-                            Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseMD5).FirstOrDefault();
+                            Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseMD5).
+                            FirstOrDefault();                            
                         result = tempResult.md5Response;
                         try
                         {
@@ -301,6 +304,8 @@ namespace SDGrabSharp.Common
                         if (thisResponse.md5Response.md5day != null)
                         {
                             md5Count++;
+                            SendStatusUpdate(null, Math.Min(md5Count, md5RequestsSent) , md5RequestsSent);
+
                             // Check each MD5 against XML result
                             var thisChanDate = new List<DateTime>();
                             foreach(var thisMD5 in thisResponse.md5Response.md5day)
@@ -333,6 +338,7 @@ namespace SDGrabSharp.Common
                             reqLock.ExitWriteLock();
                         }
 
+                        scheduleRequestsSent += scheduleRequestList.Count();
                         scheduleRequestList.Clear();
                         evSDRequestReady.Set();
                     }
@@ -344,6 +350,7 @@ namespace SDGrabSharp.Common
             int scheduleCount = 0;
             int programCount = 0;
 
+            SendStatusUpdate("Updating/Adding schedule data");
             // Done with MD5 responses, now time to process any schedule responses
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             // Keep processing Schedule responses while there are queued requests 
@@ -363,7 +370,8 @@ namespace SDGrabSharp.Common
                     {
                         respLock.EnterUpgradeableReadLock();
                         var tempResult = responseQueue.items.
-                            Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseSchedule).FirstOrDefault();
+                            Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseSchedule).
+                            FirstOrDefault();
                         result = tempResult.scheduleResponse;
                         try
                         {
@@ -387,6 +395,7 @@ namespace SDGrabSharp.Common
                     foreach (var thisResponse in result.Where(line => line.scheduleResponse.code == SDErrors.OK))
                     {
                         scheduleCount++;
+                        SendStatusUpdate(null, Math.Min(scheduleCount, scheduleRequestsSent), scheduleRequestsSent);
                         // First update/add any MD5 dates for this schedule
                         channelUpdateAddMD5(thisResponse.scheduleResponse.stationID,
                                             thisResponse.scheduleResponse.metadata.startDate,
@@ -458,12 +467,13 @@ namespace SDGrabSharp.Common
                             reqLock.EnterWriteLock();
                             requestQueue.AddRequest(programmeRequestList.Distinct().ToArray(), 
                                                     thisResponse.scheduleResponse.stationID);
-                            programmeRequestList.Clear();
                         }
                         finally
                         {
                             reqLock.ExitWriteLock();
                         }
+                        programRequestsSent += programmeRequestList.Count();
+                        programmeRequestList.Clear();
                     }
                 }
             }
@@ -473,6 +483,7 @@ namespace SDGrabSharp.Common
             ActivityLog("Processing program responses");
             programCount = 0;
 
+            SendStatusUpdate("Updating/Adding program items");
             // Done with schedule nodes
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             // Keep processing Program responses while there are queued requests 
@@ -516,6 +527,8 @@ namespace SDGrabSharp.Common
                     foreach (var thisResponse in result.Where(line => line.programmeResponse.code == SDErrors.OK))
                     {
                         programCount++;
+                        SendStatusUpdate(null, Math.Min(programCount, programRequestsSent), programRequestsSent);
+
                         // Add this program to the local cache
                         if (!programmeItemByProgrammeID.ContainsKey(thisResponse.programmeResponse.programID))
                             programmeItemByProgrammeID.Add(thisResponse.programmeResponse.programID, thisResponse.programmeResponse);
@@ -555,6 +568,7 @@ namespace SDGrabSharp.Common
                     }
                 }
             }
+            SendStatusUpdate("Cleaning up");
             ActivityLog(string.Format("Processed {0} program responses", programCount.ToString()));
             ActivityLog("Finished all activities, stopping threads");
             StopThreads();
@@ -1428,35 +1442,28 @@ namespace SDGrabSharp.Common
 
         private void ActivityLog(string text)
         {
-            EventHandler<XmlTVBuilder.ActivityLogEventArgs> logHandler = ActivityLogUpdate;
+            EventHandler<ActivityLogEventArgs> logHandler = ActivityLogUpdate;
             var args = new ActivityLogEventArgs();
             args.ActivityText = string.Format("{0}: {1}", DateTime.Now.ToString("HH:mm:ss.ffffff"), text);
             if (logHandler != null)
                 logHandler.Invoke(this, args);
         }
 
-        /* ****************************
-           Depracated, will be removed.
-           **************************** */
-        private void UpdateStatus()
+        private void SendStatusUpdate(string statusMessage = null, int progressMin = -1, int progressMax = -1,
+                                      string currenChannelID = null,  string currentChannelName = null,
+                                      string currentProgrammeID = null, string currentProgrammeName = null)
         {
-            if (updateWaiting)
-                return;
-
-            EventHandler updateHandler = StatusUpdateReady;
-            if (updateHandler != null)
-                updateHandler.Invoke(this, EventArgs.Empty);
-
-            EventHandler updateHandlerAsync = StatusUpdateReadyAsync;
-            if (updateHandlerAsync != null)
-                updateHandlerAsync.BeginInvoke(this, EventArgs.Empty, null, null);
-
-            updateWaiting = true;
-        }
-
-        public void ResetUpdateStatus()
-        {
-            updateWaiting = false;
+            var args = new StatusUpdateArgs();
+            args.progressValue = progressMin;
+            args.progressMax = progressMax;
+            args.statusMessage = statusMessage;
+            args.currentChannelID = currenChannelID;
+            args.currentChannelName = currentChannelName;
+            args.currentProgrammeID = currentProgrammeID;
+            args.currentProgrammeTitle = currentProgrammeName;
+            EventHandler<StatusUpdateArgs> statusHandler = StatusUpdate;
+            if (statusHandler != null)
+                statusHandler.Invoke(this, args);
         }
     }
 }

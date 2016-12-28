@@ -63,14 +63,14 @@
             // 
             this.tsStatus.AutoSize = false;
             this.tsStatus.Name = "tsStatus";
-            this.tsStatus.Size = new System.Drawing.Size(270, 17);
+            this.tsStatus.Size = new System.Drawing.Size(370, 17);
             this.tsStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tsProgress
             // 
             this.tsProgress.AutoSize = false;
             this.tsProgress.Name = "tsProgress";
-            this.tsProgress.Size = new System.Drawing.Size(150, 16);
+            this.tsProgress.Size = new System.Drawing.Size(380, 16);
             // 
             // menuMain
             // 
@@ -148,9 +148,9 @@
             // gbActivityLog
             // 
             this.gbActivityLog.Controls.Add(this.rtActivityLog);
-            this.gbActivityLog.Location = new System.Drawing.Point(0, 318);
+            this.gbActivityLog.Location = new System.Drawing.Point(0, 111);
             this.gbActivityLog.Name = "gbActivityLog";
-            this.gbActivityLog.Size = new System.Drawing.Size(808, 144);
+            this.gbActivityLog.Size = new System.Drawing.Size(808, 351);
             this.gbActivityLog.TabIndex = 2;
             this.gbActivityLog.TabStop = false;
             this.gbActivityLog.Text = "Activity Log (NT)";
@@ -161,7 +161,7 @@
             this.rtActivityLog.Location = new System.Drawing.Point(3, 16);
             this.rtActivityLog.Name = "rtActivityLog";
             this.rtActivityLog.ReadOnly = true;
-            this.rtActivityLog.Size = new System.Drawing.Size(802, 125);
+            this.rtActivityLog.Size = new System.Drawing.Size(802, 332);
             this.rtActivityLog.TabIndex = 0;
             this.rtActivityLog.Text = "";
             // 
@@ -171,7 +171,7 @@
             this.gbProgress.Dock = System.Windows.Forms.DockStyle.Top;
             this.gbProgress.Location = new System.Drawing.Point(0, 24);
             this.gbProgress.Name = "gbProgress";
-            this.gbProgress.Size = new System.Drawing.Size(808, 291);
+            this.gbProgress.Size = new System.Drawing.Size(808, 81);
             this.gbProgress.TabIndex = 3;
             this.gbProgress.TabStop = false;
             this.gbProgress.Text = "Progress Report (NT)";

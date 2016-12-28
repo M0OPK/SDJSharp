@@ -20,19 +20,6 @@ namespace SDGrabSharp.Common
             public bool isNew;
         }
 
-        public class StatusUpdate
-        {
-            public int CurrentChannel;
-            public int TotalChannels;
-            public int CurrentProgramme;
-            public int TotalProgrammes;
-            public string currentChannelID;
-            public string currentChannelName;
-            public string currentProgrammeID;
-            public string currentProgrammeTitle;
-            public string statusMessage;
-        }
-
         private class SDRequestQueue
         {
             public List<SDRequestQueueItem> items;
@@ -312,6 +299,17 @@ namespace SDGrabSharp.Common
         public class ActivityLogEventArgs : EventArgs
         {
             public string ActivityText;
+        }
+
+        public class StatusUpdateArgs : EventArgs
+        {
+            public int progressValue;
+            public int progressMax;
+            public string currentChannelID;
+            public string currentChannelName;
+            public string currentProgrammeID;
+            public string currentProgrammeTitle;
+            public string statusMessage;
         }
     }
 

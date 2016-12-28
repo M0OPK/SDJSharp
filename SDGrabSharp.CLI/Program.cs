@@ -55,39 +55,6 @@ namespace SDGrabSharp.CLI
             Environment.Exit(0);
         }
 
-        private static void handle_BuilderUpdates(object sender, EventArgs ev)
-        {
-            // The async nature makes this inaccurate, but some feedback is better than none.
-            var xmlObj = (XmlTVBuilder)sender;
-            XmlTVBuilder.StatusUpdate status = xmlObj.statusData;
-
-            if (lastStatusUpdate != status.statusMessage)
-            {
-                if (needcr)
-                    Console.WriteLine("");
-                Console.WriteLine(status.statusMessage);
-                lastStatusUpdate = status.statusMessage;
-                needcr = false;
-            }
-
-            if (lastChannel != status.currentChannelID)
-            {
-                Console.Write(".");
-                lastChannel = status.currentChannelID;
-                needcr = true;
-            }
-
-            if (lastProgram != status.currentProgrammeID)
-            {
-                Console.Write(".");
-                lastProgram = status.currentProgrammeID;
-                needcr = true;
-            }
-
-            xmlObj.ResetUpdateStatus();
-
-        }
-
         private static void LoadConfig(string filename = null)
         {
             string fileName = filename != null ? filename : "SDGrabSharp.xml";
