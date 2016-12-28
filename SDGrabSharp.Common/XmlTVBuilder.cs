@@ -560,6 +560,13 @@ namespace SDGrabSharp.Common
             StopThreads();
             ActivityLog("Threads stopped, saving XML file");
             xmlTV.SaveXmlTV(config.XmlTVFileName);
+
+            // Cleanup and GC
+            cache = null;
+            config = null;
+            sd = null;
+            xmlTV = null;
+            GC.Collect();
             ActivityLog("File saved, all complete");
         }
 
@@ -1286,7 +1293,7 @@ namespace SDGrabSharp.Common
 
             var programmeNode = programmeNodesByProgrammeID[programId].FirstOrDefault();
 
-            if (programmeNode.Attributes["sd-md5"] != null)
+            if (programmeNode != null && programmeNode.Attributes["sd-md5"] != null)
                 return programmeNode.Attributes["sd-md5"].Value;
 
             return null;
