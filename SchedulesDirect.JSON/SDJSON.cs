@@ -399,15 +399,15 @@ namespace SchedulesDirect
         }
 
         /// <summary>
-        /// Return program information for the specified list of programs
+        /// Return programme information for the specified list of programmes
         /// </summary>
-        /// <param name="programs"></param>
+        /// <param name="programmes"></param>
         /// <returns></returns>
-        public IEnumerable<SDProgramResponse> GetPrograms(string[] programs)
+        public IEnumerable<SDProgrammeResponse> GetProgrammes(string[] programmes)
         {
             try
             {
-                return PostJSON<IEnumerable<SDProgramResponse>, string[]>("programs", programs, loginToken);
+                return PostJSON<IEnumerable<SDProgrammeResponse>, string[]>("programs", programmes, loginToken);
             }
             catch (Exception ex)
             {
@@ -417,33 +417,32 @@ namespace SchedulesDirect
         }
 
         /// <summary>
-        /// Return program descriptions for the specified list of programs
+        /// Return program descriptions for the specified list of programmes
         /// </summary>
-        /// <param name="programs"></param>
+        /// <param name="programmes"></param>
         /// <returns></returns>
-        public IEnumerable<SDDescriptionResponse> GetDescriptions(string[] programs)
+        public IEnumerable<SDDescriptionResponse> GetDescriptions(string[] programmes)
         {
             try
             {
-                dynamic result = GetDynamic(WebPost("metadata/description", CreateJSONstring<string[]>(programs), loginToken));
+                dynamic result = GetDynamic(WebPost("metadata/description", CreateJSONstring<string[]>(programmes), loginToken));
 
                 if (result == null)
                     return null;
 
-                var programData = new List<SDDescriptionResponse>();
+                var programmeData = new List<SDDescriptionResponse>();
                 foreach (string key in result.Keys)
                 {
-                    var thisProgram = new SDDescriptionResponse();
-                    thisProgram.episodeID = key;
+                    var thisProgramme = new SDDescriptionResponse();
+                    thisProgramme.episodeID = key;
                     dynamic temp = result[key];
-                    //thisProgram.episodeDescription = (SDDescriptionResponse.SDProgramDescription)result[key];
-                    try { thisProgram.episodeDescription.code = temp["code"]; } catch { };
-                    try { thisProgram.episodeDescription.description100 = temp["description100"]; } catch { };
-                    try { thisProgram.episodeDescription.description1000 = temp["description1000"]; } catch { };
-                    programData.Add(thisProgram);
+                    try { thisProgramme.episodeDescription.code = temp["code"]; } catch { };
+                    try { thisProgramme.episodeDescription.description100 = temp["description100"]; } catch { };
+                    try { thisProgramme.episodeDescription.description1000 = temp["description1000"]; } catch { };
+                    programmeData.Add(thisProgramme);
                 }
 
-                return programData.AsEnumerable();
+                return programmeData.AsEnumerable();
             }
             catch (Exception ex)
             {
@@ -538,15 +537,15 @@ namespace SchedulesDirect
         }
 
         /// <summary>
-        /// Obtain live program information for example, for sporting events (if available)
+        /// Obtain live programme information for example, for sporting events (if available)
         /// </summary>
-        /// <param name="programID"></param>
+        /// <param name="programmeID"></param>
         /// <returns></returns>
-        public SDStillRunningResponse GetStillRunning(string programID)
+        public SDStillRunningResponse GetStillRunning(string programmeID)
         {
             try
             {
-                return GetJSON<SDStillRunningResponse>("metadata/stillRunning/" + programID, loginToken);
+                return GetJSON<SDStillRunningResponse>("metadata/stillRunning/" + programmeID, loginToken);
             }
             catch (Exception ex)
             {
@@ -556,15 +555,15 @@ namespace SchedulesDirect
         }
 
         /// <summary>
-        /// Obtain image data for assets for specified program ID(s)
+        /// Obtain image data for assets for specified programme ID(s)
         /// </summary>
-        /// <param name="programs"></param>
+        /// <param name="programmes"></param>
         /// <returns></returns>
-        public IEnumerable<SDProgramMetadataResponse> GetProgramMetadata(string[] programs)
+        public IEnumerable<SDProgrammeMetadataResponse> GetProgramMetadata(string[] programmes)
         {
             try
             {
-                return PostJSON<IEnumerable<SDProgramMetadataResponse>, string[]>("metadata/programs/", programs);
+                return PostJSON<IEnumerable<SDProgrammeMetadataResponse>, string[]>("metadata/programs/", programmes);
             }
             catch (Exception ex)
             {
@@ -578,7 +577,7 @@ namespace SchedulesDirect
         /// </summary>
         /// <param name="rootId"></param>
         /// <returns></returns>
-        public IEnumerable<SDImageData> GetProgramRootMetadata(string rootId)
+        public IEnumerable<SDImageData> GetProgrammeRootMetadata(string rootId)
         {
             try
             {

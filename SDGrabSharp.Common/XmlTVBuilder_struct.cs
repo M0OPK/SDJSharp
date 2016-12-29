@@ -46,7 +46,7 @@ namespace SDGrabSharp.Common
             {
                 SDRequestMD5,
                 SDRequestSchedule,
-                SDRequestProgram,
+                SDRequestProgramme,
                 SDReqeustNone
             }
 
@@ -105,7 +105,7 @@ namespace SDGrabSharp.Common
                     if (thisSplit.Count() > 0)
                     {
                         SDRequestQueueItem thisRequest = new SDRequestQueueItem();
-                        thisRequest.sdRequestType = RequestType.SDRequestProgram;
+                        thisRequest.sdRequestType = RequestType.SDRequestProgramme;
 
                         thisRequest.programmeRequest = thisSplit;
                         thisRequest.retryTimeUtc = retryTime.HasValue ? retryTime.Value : DateTime.UtcNow;
@@ -149,7 +149,7 @@ namespace SDGrabSharp.Common
             {
                 SDResponseMD5,
                 SDResponseSchedule,
-                SDResponseProgram
+                SDResponseProgramme
             }
             public class MD5ResultPair
             {
@@ -178,9 +178,9 @@ namespace SDGrabSharp.Common
             public class ProgrammeResultPair
             {
                 public string programmeRequest;
-                public SDProgramResponse programmeResponse;
+                public SDProgrammeResponse programmeResponse;
 
-                public ProgrammeResultPair(string request, SDProgramResponse response)
+                public ProgrammeResultPair(string request, SDProgrammeResponse response)
                 {
                     programmeRequest = request;
                     programmeResponse = response;
@@ -214,7 +214,7 @@ namespace SDGrabSharp.Common
             {
                 SDResponseQueueItem thisRequest = new SDResponseQueueItem();
                 thisRequest.programmeResponse = programmeResponse;
-                thisRequest.sdResponseType = ResponseType.SDResponseProgram;
+                thisRequest.sdResponseType = ResponseType.SDResponseProgramme;
                 thisRequest.stationContext = stationContext;
                 items.Add(thisRequest);
             }

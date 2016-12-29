@@ -149,7 +149,7 @@ namespace SchedulesDirect
     }
 
     /// <summary>
-    /// Version response, contains information about specified client program
+    /// Version response, contains information about specified client programme
     /// </summary>
     [DataContract]
     public class SDVersionResponse
@@ -420,10 +420,10 @@ namespace SchedulesDirect
     }
 
     /// <summary>
-    /// Program response. Provides details about requested programs.
+    /// Programme response. Provides details about requested programs.
     /// </summary>
     [DataContract]
-    public class SDProgramResponse
+    public class SDProgrammeResponse
     {
         [DataMember]
         public string programID;
@@ -432,11 +432,11 @@ namespace SchedulesDirect
         [DataMember]
         public string message;
         [DataMember]
-        public SDProgramTitles[] titles;
+        public SDProgrammeTitles[] titles;
         [DataMember]
-        public SDProgramEventDetails eventDetails;
+        public SDProgrammeEventDetails eventDetails;
         [DataMember]
-        public SDProgramDescriptions descriptions;
+        public SDProgrammeDescriptions descriptions;
         [DataMember]
         public string originalAirDate;
         [DataMember]
@@ -444,11 +444,11 @@ namespace SchedulesDirect
         [DataMember]
         public string episodeTitle150;
         [DataMember]
-        public SDProgramMetadata[] metadata;
+        public SDProgrammeMetadata[] metadata;
         [DataMember]
-        public SDProgramPerson[] cast;
+        public SDProgrammePerson[] cast;
         [DataMember]
-        public SDProgramPerson[] crew;
+        public SDProgrammePerson[] crew;
         [DataMember]
         public string showType;
         [DataMember]
@@ -457,27 +457,27 @@ namespace SchedulesDirect
         public string md5;
 
         [DataContract]
-        public class SDProgramTitles
+        public class SDProgrammeTitles
         {
             [DataMember]
             public string title120;
         }
 
         [DataContract]
-        public class SDProgramEventDetails
+        public class SDProgrammeEventDetails
         {
             [DataMember]
             public string subType;
         }
 
         [DataContract]
-        public class SDProgramDescriptions
+        public class SDProgrammeDescriptions
         {
             [DataMember]
-            public SDProgramDescription100[] description1000;
+            public SDProgrammeDescription100[] description1000;
 
             [DataContract]
-            public class SDProgramDescription100
+            public class SDProgrammeDescription100
             {
                 [DataMember]
                 public string descriptionLanguage;
@@ -487,13 +487,13 @@ namespace SchedulesDirect
         }
 
         [DataContract]
-        public class SDProgramMetadata
+        public class SDProgrammeMetadata
         {
             [DataMember]
-            public SDProgramMetadataGracenote Gracenote;
+            public SDProgrammeMetadataGracenote Gracenote;
 
             [DataContract]
-            public class SDProgramMetadataGracenote
+            public class SDProgrammeMetadataGracenote
             {
                 [DataMember]
                 public int season;
@@ -503,7 +503,7 @@ namespace SchedulesDirect
         }
 
         [DataContract]
-        public class SDProgramPerson
+        public class SDProgrammePerson
         {
             [DataMember]
             public string personId;
@@ -527,15 +527,15 @@ namespace SchedulesDirect
         [DataMember]
         public string episodeID;
         [DataMember]
-        public SDProgramDescription episodeDescription;
+        public SDProgrammeDescription episodeDescription;
 
         public SDDescriptionResponse()
         {
-            episodeDescription = new SDProgramDescription();
+            episodeDescription = new SDProgrammeDescription();
         }
 
         [DataContract]
-        public class SDProgramDescription
+        public class SDProgrammeDescription
         {
             [DataMember]
             public int code;
@@ -584,7 +584,7 @@ namespace SchedulesDirect
         [DataMember]
         public string stationID;
         [DataMember]
-        public SDScheduleProgram[] programs;
+        public SDScheduleProgramme[] programs;
         [DataMember]
         public SDScheduleMetadata metadata;
         // Possible error fields
@@ -598,7 +598,7 @@ namespace SchedulesDirect
         public DateTime? retryTime;
 
         [DataContract]
-        public class SDScheduleProgram
+        public class SDScheduleProgramme
         {
             [DataMember]
             public string programID;
@@ -802,10 +802,10 @@ namespace SchedulesDirect
     }
 
     /// <summary>
-    /// Program metadata (image information) for programs response.
+    /// Programme metadata (image information) for programmes response.
     /// </summary>
     [DataContract]
-    public class SDProgramMetadataResponse
+    public class SDProgrammeMetadataResponse
     {
         [DataMember]
         public string programID;
@@ -838,10 +838,10 @@ namespace SchedulesDirect
         [DataMember]
         public string tier;
         [DataMember]
-        public SDProgramImageCaption caption;
+        public SDProgrammeImageCaption caption;
 
         [DataContract]
-        public class SDProgramImageCaption
+        public class SDProgrammeImageCaption
         {
             [DataMember]
             public string content;

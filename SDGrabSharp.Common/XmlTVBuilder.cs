@@ -13,30 +13,42 @@ namespace SDGrabSharp.Common
 {
     public partial class XmlTVBuilder
     {
+        // Event handlers/wait handles
         public event EventHandler<StatusUpdateArgs> StatusUpdate;
         public event EventHandler<ActivityLogEventArgs> ActivityLogUpdate;
         static EventWaitHandle evSDRequestReady;
         static EventWaitHandle evSDResponseReady;
+
+        // Multi-thread object locks
+        private static ReaderWriterLockSlim reqLock;
+        private static ReaderWriterLockSlim respLock;
+
+        // Multi thread objects
+        private SDRequestQueue requestQueue;
+        private SDResponseQueue responseQueue;
+
+        // Schedules direct request thread
+        Thread sdRequestThread;
+
+        // Current operation type (used to show what's being worked on
+        // for the very short time there's no request or response)
+        private SDRequestQueue.RequestType currentRequestOperation;
+
+        // Stop request signal
         static bool _requestStop;
+
+        // Objects
         private Config config;
         private DataCache cache;
         private XmlTV xmlTV;
         SDJson sd;
-        private static ReaderWriterLockSlim reqLock;
-        private static ReaderWriterLockSlim respLock;
-
-        private SDRequestQueue requestQueue;
-        private SDResponseQueue responseQueue;
-        Thread sdRequestThread;
-
-        private SDRequestQueue.RequestType currentRequestOperation;
 
         // Local keys for Xml Nodes
         Dictionary<string, XmlNode> channelByStationID;
         Dictionary<string, List<XmlNode>> programmeNodesByProgrammeID;
 
-        // Program object lookup by programme id
-        Dictionary<string, SDProgramResponse> programmeItemByProgrammeID;
+        // Programme object lookup by programme id
+        Dictionary<string, SDProgrammeResponse> programmeItemByProgrammeID;
 
         // SDStation lookup by station id
         Dictionary<string, SDGetLineupResponse.SDLineupStation> SDStationLookup;
@@ -45,6 +57,7 @@ namespace SDGrabSharp.Common
         {
             config = inputConfig;
             cache = inputCache;
+
             // If were supplied an instance, use it, else try to make one with the token in cache data if found, 
             // else no token and we'll login later
             sd = sdJs ?? new SDJson(cache.tokenData != null ? cache.tokenData.token : string.Empty);
@@ -53,8 +66,10 @@ namespace SDGrabSharp.Common
             evSDRequestReady = new AutoResetEvent(false);
             evSDResponseReady = new AutoResetEvent(false);
 
+            // Create locks
             reqLock = new ReaderWriterLockSlim();
             respLock = new ReaderWriterLockSlim();
+
             _requestStop = false;
         }
 
@@ -74,10 +89,11 @@ namespace SDGrabSharp.Common
         {
             xmlTV = new XmlTV(null, "SDGrabSharp", "https://github.com/M0OPK/SDJSharp", "SchedulesDirect");
 
-            if (System.IO.File.Exists(config.XmlTVFileName))
+            if (System.IO.File.Exists(filename))
             {
-                if (xmlTV.LoadXmlTV(config.XmlTVFileName))
+                if (xmlTV.LoadXmlTV(filename))
                 {
+                    // If there was a file loaded, update local keys with actual values
                     updateKeys();
                     return true;
                 }
@@ -115,6 +131,8 @@ namespace SDGrabSharp.Common
                 {
                     reqLock.ExitReadLock();
                 }
+
+                // If we found something, don't bother with a response lock
                 if (hasRequestItem)
                     return true;
 
@@ -135,70 +153,9 @@ namespace SDGrabSharp.Common
             }
         }
 
-        public void RunProcess()
+        private void preloadMD5Requests(List<SDScheduleRequest> scheduleRequestList, List<SDMD5Request> md5RequestList, 
+                                        ref int md5RequestsSent, ref int scheduleRequestsSent)
         {
-            ActivityLog("Starting");
-
-            // Ensure this instance is logged in
-            if (!sd.LoggedIn)
-                sd.Login(config.SDUsername, config.SDPasswordHash, true);
-
-            ActivityLog("Logged in");
-
-            // Initialize queues
-            requestQueue = new SDRequestQueue(config);
-            responseQueue = new SDResponseQueue();
-
-            // Begin SD thread
-            StartThreads();
-
-            // Lookups for programms/stations
-            channelByStationID = new Dictionary<string, XmlNode>();
-            programmeNodesByProgrammeID = new Dictionary<string, List<XmlNode>>();
-            SDStationLookup = new Dictionary<string, SDGetLineupResponse.SDLineupStation>();
-            programmeItemByProgrammeID = new Dictionary<string, SDProgramResponse>();
-
-            // Create lookup for SDStations
-            foreach (var lineup in config.TranslationMatrix.Select(line => line.Value.LineupID).Distinct())
-            {
-                var sdLineupStations = sd.GetLineup(lineup, true);
-                if (sdLineupStations != null)
-                {
-                    foreach (var sdStation in sdLineupStations.stations)
-                        SDStationLookup.Add(sdStation.stationID, sdStation);
-                }
-            }
-            ActivityLog("Station lookup created");
-            SendStatusUpdate("Loading existing XML");
-
-            // Load existing XMLTV file
-            LoadXmlTV(config.XmlTVFileName);
-
-            ActivityLog("Existing XML loaded");
-
-            SendStatusUpdate("Adding/updating channel nodes");
-            // Add/update channel nodes
-            doChannels();
-
-            // Get date range from config
-            DateTime dateMin = DateTime.Today.Date;
-            DateTime dateMax = dateMin.AddDays(config.ProgrammeRetrieveRangeDays);
-
-            if (config.ProgrammeRetrieveYesterday)
-                dateMin = dateMin.AddDays(-1.0f);
-
-            // Remove programmes outside of range
-            deleteProgrammesOutsideDateRange(dateMin, dateMax);
-
-            ActivityLog("Added channel nodes");
-
-            List<SDScheduleRequest> scheduleRequestList = new List<SDScheduleRequest>();
-            List<SDMD5Request> md5RequestList = new List<SDMD5Request>();
-            List<string> programmeRequestList = new List<string>();
-
-            int md5RequestsSent = 0;
-            int scheduleRequestsSent = 0;
-            int programRequestsSent = 0;
             // Process MD5 requests per channel
             foreach (var channel in channelByStationID)
             {
@@ -255,11 +212,11 @@ namespace SDGrabSharp.Common
             md5RequestList.Clear();
             scheduleRequestList.Clear();
             evSDRequestReady.Set();
+        }
 
-            SendStatusUpdate("Checking/Updating MD5 values");
-            ActivityLog("Processing MD5 responses");
-            int md5Count = 0;
-
+        private void processMD5Responses(List<SDScheduleRequest> scheduleRequestList, int md5RequestsSent, 
+                                         ref int md5Count, ref int scheduleRequestsSent)
+        {
             // Keep processing MD5 responses while there are queued requests 
             while (checkHasItems(SDRequestQueue.RequestType.SDRequestMD5, SDResponseQueue.ResponseType.SDResponseMD5, false)
                 || currentRequestOperation == SDRequestQueue.RequestType.SDRequestMD5)
@@ -271,14 +228,14 @@ namespace SDGrabSharp.Common
                 while (checkHasItems(SDRequestQueue.RequestType.SDRequestMD5, SDResponseQueue.ResponseType.SDResponseMD5, true))
                 {
                     IEnumerable<SDResponseQueue.MD5ResultPair> result = null;
-                    
+
                     // pop top item
                     try
                     {
                         respLock.EnterUpgradeableReadLock();
                         var tempResult = responseQueue.items.
                             Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseMD5).
-                            FirstOrDefault();                            
+                            FirstOrDefault();
                         result = tempResult.md5Response;
                         try
                         {
@@ -304,11 +261,11 @@ namespace SDGrabSharp.Common
                         if (thisResponse.md5Response.md5day != null)
                         {
                             md5Count++;
-                            SendStatusUpdate(null, Math.Min(md5Count, md5RequestsSent) , md5RequestsSent);
+                            SendStatusUpdate(null, Math.Min(md5Count, md5RequestsSent), md5RequestsSent);
 
                             // Check each MD5 against XML result
                             var thisChanDate = new List<DateTime>();
-                            foreach(var thisMD5 in thisResponse.md5Response.md5day)
+                            foreach (var thisMD5 in thisResponse.md5Response.md5day)
                             {
                                 // If error, or MD5 doesn't match, queue this date
                                 var md5Value = channelMD5Value(thisResponse.md5Response.stationID, thisMD5.date);
@@ -345,14 +302,11 @@ namespace SDGrabSharp.Common
                 }
             }
             ActivityLog(string.Format("Processed {0} MD5 responses", md5Count.ToString()));
+        }
 
-            ActivityLog("Processing schedule responses");
-            int scheduleCount = 0;
-            int programCount = 0;
-
-            SendStatusUpdate("Updating/Adding schedule data");
-            // Done with MD5 responses, now time to process any schedule responses
-            // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        private void processScheduleResponses(List<string> programmeRequestList, int scheduleRequestsSent,
+                                              ref int scheduleCount, ref int programmeCount, ref int programmeRequestsSent)
+        {
             // Keep processing Schedule responses while there are queued requests 
             while (checkHasItems(SDRequestQueue.RequestType.SDRequestSchedule, SDResponseQueue.ResponseType.SDResponseSchedule, false)
                 || currentRequestOperation == SDRequestQueue.RequestType.SDRequestSchedule)
@@ -401,21 +355,21 @@ namespace SDGrabSharp.Common
                                             thisResponse.scheduleResponse.metadata.startDate,
                                             thisResponse.scheduleResponse.metadata.md5);
 
-                        // Process programs in this schedule
-                        foreach (var program in thisResponse.scheduleResponse.programs)
+                        // Process programmes in this schedule
+                        foreach (var programme in thisResponse.scheduleResponse.programs)
                         {
-                            programCount++;
-                            DateTimeOffset startTime = new DateTimeOffset(program.airDateTime.Value);
-                            DateTimeOffset endTime = startTime.AddSeconds(program.duration);
+                            programmeCount++;
+                            DateTimeOffset startTime = new DateTimeOffset(programme.airDateTime.Value);
+                            DateTimeOffset endTime = startTime.AddSeconds(programme.duration);
 
-                            var existProgrammeMD5 = programmeMD5Value(program.programID);
+                            var existProgrammeMD5 = programmeMD5Value(programme.programID);
 
-                            // Check if this program was already received (it's possible the same program is on
+                            // Check if this programme was already received (it's possible the same program is on
                             // multiple channels)
-                            if (programmeItemByProgrammeID.ContainsKey(program.programID))
+                            if (programmeItemByProgrammeID.ContainsKey(programme.programID))
                             {
-                                // Add program direct and no need to queue it
-                                var thisProgramme = programmeItemByProgrammeID[program.programID];
+                                // Add programme direct and no need to queue it
+                                var thisProgramme = programmeItemByProgrammeID[programme.programID];
 
                                 string title = thisProgramme.titles.FirstOrDefault().title120;
                                 string titleLang = null;
@@ -435,7 +389,7 @@ namespace SDGrabSharp.Common
                                     titleLang = descLang;
                                     subtitleLang = descLang;
                                 }
-                                
+
                                 if (thisProgramme.episodeTitle150 != null)
                                     subtitle = thisProgramme.episodeTitle150;
 
@@ -453,48 +407,45 @@ namespace SDGrabSharp.Common
                             {
                                 // Update existing node/Add new skeleton node
                                 addProgramme(startTime, endTime, GetChannelID(thisResponse.scheduleResponse.stationID),
-                                             null, null, null, null, null, null, null, program.programID, program.md5);
+                                             null, null, null, null, null, null, null, programme.programID, programme.md5);
 
-                                // Queue program for retrieval
-                                if (existProgrammeMD5 == null || existProgrammeMD5 != program.md5)
-                                    programmeRequestList.Add(program.programID);
+                                // Queue programme for retrieval
+                                if (existProgrammeMD5 == null || existProgrammeMD5 != programme.md5)
+                                    programmeRequestList.Add(programme.programID);
                             }
                         }
 
-                        // Queue all distinct program id's for this station
+                        // Queue all distinct programme id's for this station
                         try
                         {
                             reqLock.EnterWriteLock();
-                            requestQueue.AddRequest(programmeRequestList.Distinct().ToArray(), 
+                            requestQueue.AddRequest(programmeRequestList.Distinct().ToArray(),
                                                     thisResponse.scheduleResponse.stationID);
                         }
                         finally
                         {
                             reqLock.ExitWriteLock();
                         }
-                        programRequestsSent += programmeRequestList.Count();
+                        programmeRequestsSent += programmeRequestList.Count();
                         programmeRequestList.Clear();
                     }
                 }
             }
 
-            ActivityLog(string.Format("Processed {0} schedules with {1} programs", scheduleCount.ToString(), programCount.ToString()));
+            ActivityLog(string.Format("Processed {0} schedules with {1} programmes", scheduleCount.ToString(), programmeCount.ToString()));
+        }
 
-            ActivityLog("Processing program responses");
-            programCount = 0;
-
-            SendStatusUpdate("Updating/Adding program items");
-            // Done with schedule nodes
-            // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            // Keep processing Program responses while there are queued requests 
-            while (checkHasItems(SDRequestQueue.RequestType.SDRequestProgram, SDResponseQueue.ResponseType.SDResponseProgram, false)
-                || currentRequestOperation == SDRequestQueue.RequestType.SDRequestProgram)
+        private void processProgrammeResponses(int programRequestsSent, ref int programmeCount)
+        {
+            // Keep processing programme responses while there are queued requests 
+            while (checkHasItems(SDRequestQueue.RequestType.SDRequestProgramme, SDResponseQueue.ResponseType.SDResponseProgramme, false)
+                || currentRequestOperation == SDRequestQueue.RequestType.SDRequestProgramme)
             {
                 // Wait to be triggered (1 second max)
                 evSDResponseReady.WaitOne(1000);
 
-                // Process all program responses
-                while (checkHasItems(SDRequestQueue.RequestType.SDRequestProgram, SDResponseQueue.ResponseType.SDResponseProgram, true))
+                // Process all programme responses
+                while (checkHasItems(SDRequestQueue.RequestType.SDRequestProgramme, SDResponseQueue.ResponseType.SDResponseProgramme, true))
                 {
                     IEnumerable<SDResponseQueue.ProgrammeResultPair> result = null;
 
@@ -503,7 +454,7 @@ namespace SDGrabSharp.Common
                     {
                         respLock.EnterUpgradeableReadLock();
                         var tempResult = responseQueue.items.
-                            Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseProgram).FirstOrDefault();
+                            Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseProgramme).FirstOrDefault();
                         result = tempResult.programmeResponse;
                         try
                         {
@@ -526,10 +477,10 @@ namespace SDGrabSharp.Common
                     // Process each response in this queue item
                     foreach (var thisResponse in result.Where(line => line.programmeResponse.code == SDErrors.OK))
                     {
-                        programCount++;
-                        SendStatusUpdate(null, Math.Min(programCount, programRequestsSent), programRequestsSent);
+                        programmeCount++;
+                        SendStatusUpdate(null, Math.Min(programmeCount, programRequestsSent), programRequestsSent);
 
-                        // Add this program to the local cache
+                        // Add this programme to the local cache
                         if (!programmeItemByProgrammeID.ContainsKey(thisResponse.programmeResponse.programID))
                             programmeItemByProgrammeID.Add(thisResponse.programmeResponse.programID, thisResponse.programmeResponse);
 
@@ -568,8 +519,109 @@ namespace SDGrabSharp.Common
                     }
                 }
             }
+            ActivityLog(string.Format("Processed {0} programme responses", programmeCount.ToString()));
+        }
+
+        public void RunProcess()
+        {
+            ActivityLog("Starting");
+
+            // Ensure this instance is logged in
+            if (!sd.LoggedIn)
+                sd.Login(config.SDUsername, config.SDPasswordHash, true);
+
+            ActivityLog("Logged in");
+
+            // Initialize queues
+            requestQueue = new SDRequestQueue(config);
+            responseQueue = new SDResponseQueue();
+
+            // Begin SD thread
+            StartThreads();
+
+            // Lookups for programmes/stations
+            channelByStationID = new Dictionary<string, XmlNode>();
+            programmeNodesByProgrammeID = new Dictionary<string, List<XmlNode>>();
+            SDStationLookup = new Dictionary<string, SDGetLineupResponse.SDLineupStation>();
+            programmeItemByProgrammeID = new Dictionary<string, SDProgrammeResponse>();
+
+            // Create lookup for SDStations
+            foreach (var lineup in config.TranslationMatrix.Select(line => line.Value.LineupID).Distinct())
+            {
+                var sdLineupStations = sd.GetLineup(lineup, true);
+                if (sdLineupStations != null)
+                {
+                    foreach (var sdStation in sdLineupStations.stations)
+                        SDStationLookup.Add(sdStation.stationID, sdStation);
+                }
+            }
+            ActivityLog("Station lookup created");
+            SendStatusUpdate("Loading existing XML");
+
+            // Load existing XMLTV file
+            LoadXmlTV(config.XmlTVFileName);
+
+            ActivityLog("Existing XML loaded");
+
+            SendStatusUpdate("Adding/updating channel nodes");
+            // Add/update channel nodes
+            doChannels();
+
+            // Get date range from config
+            DateTime dateMin = DateTime.Today.Date;
+            DateTime dateMax = dateMin.AddDays(config.ProgrammeRetrieveRangeDays);
+
+            if (config.ProgrammeRetrieveYesterday)
+                dateMin = dateMin.AddDays(-1.0f);
+
+            // Remove programmes outside of range
+            deleteProgrammesOutsideDateRange(dateMin, dateMax);
+
+            ActivityLog("Added channel nodes");
+
+            // Request lists (used by the queuing process)
+            List<SDScheduleRequest> scheduleRequestList = new List<SDScheduleRequest>();
+            List<SDMD5Request> md5RequestList = new List<SDMD5Request>();
+            List<string> programmeRequestList = new List<string>();
+
+            // Counters for requests sent (used by progress reports for UI)
+            int md5RequestsSent = 0;
+            int scheduleRequestsSent = 0;
+            int programmeRequestsSent = 0;
+
+            SendStatusUpdate("Checking/Updating MD5 values");
+            ActivityLog("Processing MD5 responses");
+
+            // counters for the responses (for status update purposes)
+            int md5Count = 0;
+            int scheduleCount = 0;
+            int programmeCount = 0;
+
+            // Load MD5 requests
+            preloadMD5Requests(scheduleRequestList, md5RequestList, ref md5RequestsSent, ref scheduleRequestsSent);
+
+            // Handle MD5 responses
+            processMD5Responses(scheduleRequestList, md5RequestsSent, ref md5Count, ref scheduleRequestsSent);
+
+            ActivityLog("Processing schedule responses");
+
+            SendStatusUpdate("Updating/Adding schedule data");
+
+            // Handle Schedule Responses
+            processScheduleResponses(programmeRequestList, scheduleRequestsSent, ref scheduleCount, 
+                                     ref programmeCount, ref programmeRequestsSent);
+
+            ActivityLog("Processing programme responses");
+
+            // reset programme counter
+            programmeCount = 0;
+
+            SendStatusUpdate("Updating/Adding programme items");
+
+            // Handle Programme Responses
+            processProgrammeResponses(programmeRequestsSent, ref programmeCount);
+
             SendStatusUpdate("Cleaning up");
-            ActivityLog(string.Format("Processed {0} program responses", programCount.ToString()));
             ActivityLog("Finished all activities, stopping threads");
             StopThreads();
             ActivityLog("Threads stopped, saving XML file");
@@ -792,9 +844,9 @@ namespace SDGrabSharp.Common
 
                         }
                     }
-                    else if (thisItem.sdRequestType == SDRequestQueue.RequestType.SDRequestProgram)
+                    else if (thisItem.sdRequestType == SDRequestQueue.RequestType.SDRequestProgramme)
                     {
-                        var response = sd.GetPrograms(thisItem.programmeRequest);
+                        var response = sd.GetProgrammes(thisItem.programmeRequest);
                         if (response != null)
                         {
                             // Create joined request/response list

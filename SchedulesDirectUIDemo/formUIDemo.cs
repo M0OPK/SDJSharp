@@ -153,7 +153,7 @@ namespace SchedulesDirect.UIDemo
         {
             string[] programs = { "EP008403901236", "SP003484480000" };
 
-            var result = sd.GetPrograms(programs);
+            var result = sd.GetProgrammes(programs);
             var results = sd.GetDescriptions(programs);
         }
 
