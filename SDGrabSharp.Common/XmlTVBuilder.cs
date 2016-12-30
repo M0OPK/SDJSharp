@@ -101,6 +101,16 @@ namespace SDGrabSharp.Common
             return false;
         }
 
+        public bool mergeXmlTV(string filename)
+        {
+            return xmlTV.LoadXmlTV(filename, true);
+        }
+
+        public IEnumerable<XmlTV.XMLTVError> GetXmlTVErrors()
+        {
+            return xmlTV.GetRawErrors();
+        }
+
         private bool checkHasItems(SDRequestQueue.RequestType requestType, SDResponseQueue.ResponseType responseType, bool readyItems = false)
         {
             // Check if queue has items (used in where loops) with appropriate reader locking
@@ -522,6 +532,15 @@ namespace SDGrabSharp.Common
             ActivityLog(string.Format("Processed {0} programme responses", programmeCount.ToString()));
         }
 
+        public void Init()
+        {
+            // Lookups for programmes/stations
+            channelByStationID = new Dictionary<string, XmlNode>();
+            programmeNodesByProgrammeID = new Dictionary<string, List<XmlNode>>();
+            SDStationLookup = new Dictionary<string, SDGetLineupResponse.SDLineupStation>();
+            programmeItemByProgrammeID = new Dictionary<string, SDProgrammeResponse>();
+        }
+
         public void RunProcess()
         {
             ActivityLog("Starting");
@@ -539,12 +558,6 @@ namespace SDGrabSharp.Common
             // Begin SD thread
             StartThreads();
 
-            // Lookups for programmes/stations
-            channelByStationID = new Dictionary<string, XmlNode>();
-            programmeNodesByProgrammeID = new Dictionary<string, List<XmlNode>>();
-            SDStationLookup = new Dictionary<string, SDGetLineupResponse.SDLineupStation>();
-            programmeItemByProgrammeID = new Dictionary<string, SDProgrammeResponse>();
-
             // Create lookup for SDStations
             foreach (var lineup in config.TranslationMatrix.Select(line => line.Value.LineupID).Distinct())
             {
@@ -557,9 +570,6 @@ namespace SDGrabSharp.Common
             }
             ActivityLog("Station lookup created");
             SendStatusUpdate("Loading existing XML");
-
-            // Load existing XMLTV file
-            LoadXmlTV(config.XmlTVFileName);
 
             ActivityLog("Existing XML loaded");
 
@@ -624,16 +634,6 @@ namespace SDGrabSharp.Common
             SendStatusUpdate("Cleaning up");
             ActivityLog("Finished all activities, stopping threads");
             StopThreads();
-            ActivityLog("Threads stopped, saving XML file");
-            xmlTV.SaveXmlTV(config.XmlTVFileName);
-
-            // Cleanup and GC
-            cache = null;
-            config = null;
-            sd = null;
-            xmlTV = null;
-            GC.Collect();
-            ActivityLog("File saved, all complete");
         }
 
         private void updateKeys()

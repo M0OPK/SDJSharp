@@ -65,7 +65,10 @@ namespace SDGrabSharp.UI
             var builder = new XmlTVBuilder(config, cache, null);
             builder.ActivityLogUpdate += updateActivityLog;
             builder.StatusUpdate += statusUpdate;
+            builder.Init();
+            builder.LoadXmlTV(config.XmlTVFileName);
             builder.RunProcess();
+            builder.SaveXmlTV();
             this.Cursor = Cursors.Default;
             builder = null;
             tsProgress.Value = 0;

@@ -120,10 +120,26 @@
   <data name="ConfigNotFound" xml:space="preserve">
     <value>The configuration file {0} could not be loaded. Terminating</value>
   </data>
+  <data name="HelpText" xml:space="preserve">
+    <value>SDGrabSharp CLI {0}
+  Usage:
+    --config &lt;config file&gt;            Specify configuration file to use
+    --importxmltv &lt;xmlTV filename&gt;    Specify external XMLTV file to import (multiple possible)
+    --quiet                           Don't output anything to console while running</value>
+  </data>
+  <data name="ImportingXMLTV" xml:space="preserve">
+    <value>Importing XMLTV file {0}</value>
+  </data>
   <data name="ProcessComplete" xml:space="preserve">
     <value>Schedule write process complete</value>
   </data>
   <data name="TooManyArgs" xml:space="preserve">
     <value>The only argument should be the path to an XML configuration file. No argument supplied will use SDGrabSharp.xml</value>
+  </data>
+  <data name="XmlTVFileNotFound" xml:space="preserve">
+    <value>The XmlTV file {0} could not be loaded. Terminating</value>
+  </data>
+  <data name="XmlTVMergeFailed" xml:space="preserve">
+    <value>Failed to merge XmlTV file {0}. Terminating</value>
   </data>
 </root>

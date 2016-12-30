@@ -70,6 +70,28 @@ namespace SDGrabSharp.CLI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SDGrabSharp CLI {0}
+        ///  Usage:
+        ///    --config &lt;config file&gt;            Specify configuration file to use
+        ///    --importxmltv &lt;xmlTV filename&gt;    Specify external XMLTV file to import (multiple possible)
+        ///    --quiet                           Don&apos;t output anything to console while running.
+        /// </summary>
+        internal static string HelpText {
+            get {
+                return ResourceManager.GetString("HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Importing XMLTV file {0}.
+        /// </summary>
+        internal static string ImportingXMLTV {
+            get {
+                return ResourceManager.GetString("ImportingXMLTV", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Schedule write process complete.
         /// </summary>
         internal static string ProcessComplete {
@@ -84,6 +106,24 @@ namespace SDGrabSharp.CLI.Resources {
         internal static string TooManyArgs {
             get {
                 return ResourceManager.GetString("TooManyArgs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The XmlTV file {0} could not be loaded. Terminating.
+        /// </summary>
+        internal static string XmlTVFileNotFound {
+            get {
+                return ResourceManager.GetString("XmlTVFileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to merge XmlTV file {0}. Terminating.
+        /// </summary>
+        internal static string XmlTVMergeFailed {
+            get {
+                return ResourceManager.GetString("XmlTVMergeFailed", resourceCulture);
             }
         }
     }
