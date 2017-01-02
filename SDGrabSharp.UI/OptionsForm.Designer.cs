@@ -213,6 +213,7 @@
             this.lvStations.Location = new System.Drawing.Point(6, 15);
             this.lvStations.Name = "lvStations";
             this.lvStations.Size = new System.Drawing.Size(319, 282);
+            this.lvStations.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.lvStations.TabIndex = 0;
             this.lvStations.UseCompatibleStateImageBehavior = false;
             this.lvStations.View = System.Windows.Forms.View.Details;

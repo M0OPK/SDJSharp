@@ -563,6 +563,7 @@ namespace SDGrabSharp.UI
             foreach (var addedItem in addedList)
             {
                 var localItem = localTranslate[addedItem.SDStationID];
+
                 if (localItem.displayNameHelper == null || localItem.displayNameHelper == string.Empty)
                 {
                     var station = cache.GetLineupData(sdJS, localItem.LineupID).stations.Where(thisstation => thisstation.stationID == localItem.SDStationID).FirstOrDefault();
@@ -848,7 +849,7 @@ namespace SDGrabSharp.UI
 
         private void AddChannelToMatrix(string lineup, ListViewItem item)
         {
-            string key = string.Format("{0},{1}", lineup, item.Text);
+            string key = item.Text;
 
             // First see if a deleted version exists
             Config.XmlTVTranslation localItem = null;

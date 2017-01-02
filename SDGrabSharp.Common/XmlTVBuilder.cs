@@ -532,6 +532,25 @@ namespace SDGrabSharp.Common
             ActivityLog(string.Format("Processed {0} programme responses", programmeCount.ToString()));
         }
 
+        private void validateCorrectProgrammes()
+        {
+            // Get all programmes with no title
+            var emptyProgrammes = xmlTV.GetProgrammeNodes().
+                Where(line => line.SelectNodes("title").Count == 0 && line.Attributes["sd-programmeid"] != null).
+                Select(line => line.Attributes["sd-programmeid"].Value).Distinct().ToArray();
+
+            if (emptyProgrammes.Count() > 0)
+                return;
+
+            // Request programmes
+            requestQueue.AddRequest(emptyProgrammes);
+
+            int dummy = 0;
+
+            // Process responses
+            processProgrammeResponses(0, ref dummy);
+        }
+
         public void Init()
         {
             // Lookups for programmes/stations
@@ -565,7 +584,11 @@ namespace SDGrabSharp.Common
                 if (sdLineupStations != null)
                 {
                     foreach (var sdStation in sdLineupStations.stations)
-                        SDStationLookup.Add(sdStation.stationID, sdStation);
+                    {
+                        // Sometimes the same channel is in multiple lineups
+                        if (!SDStationLookup.ContainsKey(sdStation.stationID))
+                            SDStationLookup.Add(sdStation.stationID, sdStation);
+                    }
                 }
             }
             ActivityLog("Station lookup created");
@@ -631,6 +654,9 @@ namespace SDGrabSharp.Common
             // Handle Programme Responses
             processProgrammeResponses(programmeRequestsSent, ref programmeCount);
 
+            SendStatusUpdate("Checking/Correcting empty programmes");
+            validateCorrectProgrammes();
+
             SendStatusUpdate("Cleaning up");
             ActivityLog("Finished all activities, stopping threads");
             StopThreads();
@@ -670,20 +696,22 @@ namespace SDGrabSharp.Common
             // Get unique list of lineups from translation matrix (e.g. ones we're interested in)
             var lineupList = config.TranslationMatrix.Select(line => line.Value.LineupID).Distinct();
 
+            List<ChannelBlock> channelDataset = new List<ChannelBlock>();
+
+            // Get date range from config
+            DateTime dateMin = DateTime.Today.Date;
+            DateTime dateMax = dateMin.AddDays(config.ProgrammeRetrieveRangeDays);
+
             foreach (var lineup in lineupList)
             {
                 var lineupData = cache.GetLineupData(sd, lineup);
                 if (lineupData == null)
                     continue;
 
-                // Get date range from config
-                DateTime dateMin = DateTime.Today.Date;
-                DateTime dateMax = dateMin.AddDays(config.ProgrammeRetrieveRangeDays);
-
                 if (config.ProgrammeRetrieveYesterday)
                     dateMin = dateMin.AddDays(-1.0f);
 
-                var channelDataset =
+                var channelDatasetLineup =
                     (
                         from translate in config.TranslationMatrix
                         join station in lineupData.stations
@@ -697,18 +725,20 @@ namespace SDGrabSharp.Common
                         }
                     );
 
-                // Rename any channels that might have changed ID/Display name
-                renameChannelNodes(channelDataset);
-
-                // Remove channels from xml set not fond in current configuration
-                deleteUnmatchingChannelNodes(channelDataset);
-
-                // Remove MD5 values outside current range
-                channelRemoveMD5OutsideDateRange(dateMin, dateMax);
-
-                foreach (var channel in channelDataset)
-                    addChannel(channel.station.stationID, null, null, null, channel.station.logo != null ? channel.station.logo.URL : null);
+                channelDataset.AddRange(channelDatasetLineup);
             }
+
+            // Rename any channels that might have changed ID/Display name
+            renameChannelNodes(channelDataset);
+
+            // Remove channels from xml set not fond in current configuration
+            deleteUnmatchingChannelNodes(channelDataset);
+
+            // Remove MD5 values outside current range
+            channelRemoveMD5OutsideDateRange(dateMin, dateMax);
+
+            foreach (var channel in channelDataset)
+                addChannel(channel.station.stationID, null, null, null, channel.station.logo != null ? channel.station.logo.URL : null);
         }
 
         private void SDCommandHandlerThread()
