@@ -92,7 +92,8 @@ namespace XMLTV
                     {
                         // Add programme
                         var start = XMLTV.XmlTV.StringToDate(programmeNode.Attributes["start"].Value).UtcDateTime;
-                        channelData[channelId].programmeNodes.Add(start, programmeNode);
+                        if (!channelData[channelId].programmeNodes.ContainsKey(start))
+                            channelData[channelId].programmeNodes.Add(start, programmeNode);
                     }
                 }
             }
