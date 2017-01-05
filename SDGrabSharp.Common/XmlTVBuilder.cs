@@ -539,7 +539,7 @@ namespace SDGrabSharp.Common
                 Where(line => line.SelectNodes("title").Count == 0 && line.Attributes["sd-programmeid"] != null).
                 Select(line => line.Attributes["sd-programmeid"].Value).Distinct().ToArray();
 
-            if (emptyProgrammes.Count() > 0)
+            if (emptyProgrammes.Count() == 0)
                 return;
 
             // Request programmes
