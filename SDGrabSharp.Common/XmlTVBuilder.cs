@@ -763,6 +763,15 @@ namespace SDGrabSharp.Common
                         var thisOrigItem = requestQueue.items.
                             Where(line => line.retryTimeUtc <= DateTime.UtcNow).
                             OrderBy(line => line.priority).ThenBy(line => line.retryTimeUtc).FirstOrDefault();
+
+                        // If we found nothing, then probably a delayed entry exists.
+                        // Delay for a short time and try again
+                        if (thisOrigItem == null)
+                        {
+                            Thread.Sleep(500);
+                            continue;
+                        }
+
                         thisItem = (SDRequestQueue.SDRequestQueueItem)thisOrigItem.Clone();
                         currentRequestOperation = thisItem.sdRequestType;
                         try
