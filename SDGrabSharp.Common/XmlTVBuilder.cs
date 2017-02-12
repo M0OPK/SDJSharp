@@ -821,13 +821,23 @@ namespace SDGrabSharp.Common
                         var response = sd.GetSchedules(thisItem.scheduleRequest);
                         if (response != null)
                         {
+                            // Process errors (NYI)
+                            /*var errorList =
+                                (
+                                    from thisResponse in response
+                                    join origRequest in thisItem.scheduleRequest
+                                        on thisResponse.stationID equals origRequest.stationID
+                                    where thisResponse.code != SDErrors.OK
+                                    select new SDResponseQueue.ScheduleResultPair(origRequest, thisResponse)
+                                );*/
+
                             // Create joined request/response list
                             var resultList =
                                 (
                                     from thisResponse in response
                                     join origRequest in thisItem.scheduleRequest
                                         on thisResponse.stationID equals origRequest.stationID
-                                    where origRequest.date.Contains(thisResponse.metadata.startDate)
+                                    where thisResponse.code == SDErrors.OK && origRequest.date.Contains(thisResponse.metadata.startDate)
                                     select new SDResponseQueue.ScheduleResultPair(origRequest, thisResponse)
                                 );
 
@@ -894,6 +904,7 @@ namespace SDGrabSharp.Common
                                     from thisResponse in response
                                     join origRequest in thisItem.programmeRequest
                                         on thisResponse.programID equals origRequest
+                                    where thisResponse.code == SDErrors.OK
                                     select new SDResponseQueue.ProgrammeResultPair(origRequest, thisResponse)
                                 );
 
