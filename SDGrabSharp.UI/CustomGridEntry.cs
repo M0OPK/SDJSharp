@@ -30,7 +30,8 @@ namespace SDGrabSharp.UI
             config = dataconfig;
             cache = datacache;
             localTranslate = dataLocalTranslate;
-
+            dgCustomEntry.SuspendLayout();
+            dgCustomEntry.Rows.Clear();
             foreach (var item in dataLocalTranslate.Select(line => line.Value).Where(line => line.FieldMode == Config.XmlTVTranslation.TranslateField.Custom))
             {
                 string channelNum = string.Empty;
@@ -55,6 +56,8 @@ namespace SDGrabSharp.UI
 
             if (dgCustomEntry.Rows.Count > 0)
                 dgCustomEntry.CurrentCell = dgCustomEntry.Rows[0].Cells[3];
+
+            dgCustomEntry.ResumeLayout();
         }
 
         private void Localize()

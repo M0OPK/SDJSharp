@@ -350,6 +350,7 @@ namespace SDGrabSharp.UI
         {
             Cursor.Current = Cursors.WaitCursor;
             lvStations.SuspendLayout();
+            lvStations.BeginUpdate();
             lvStations.Items.Clear();
             if (lvAccountLineups.SelectedItems.Count > 0)
             {
@@ -372,6 +373,7 @@ namespace SDGrabSharp.UI
             else
                 btnDeleteLineup.Enabled = false;
 
+            lvStations.EndUpdate();
             lvStations.ResumeLayout(true);
             Cursor.Current = Cursors.Default;
         }
@@ -636,8 +638,12 @@ namespace SDGrabSharp.UI
             Cursor.Current = Cursors.WaitCursor;
             lvAvailableChans.SuspendLayout();
             lvAddedChans.SuspendLayout();
+            lvAvailableChans.BeginUpdate();
+            lvAddedChans.BeginUpdate();
             showAvailableChannels();
             showAddedChannels();
+            lvAddedChans.EndUpdate();
+            lvAvailableChans.EndUpdate();
             lvAvailableChans.ResumeLayout(true);
             lvAddedChans.ResumeLayout(true);
             Cursor.Current = Cursors.Default;
@@ -1472,7 +1478,11 @@ namespace SDGrabSharp.UI
 
         private void txtChannelFilter_TextChanged(object sender, EventArgs e)
         {
+            lvAvailableChans.SuspendLayout();
+            lvAvailableChans.BeginUpdate();
             showAvailableChannels(txtChannelFilter.Text);
+            lvAvailableChans.EndUpdate();
+            lvAvailableChans.ResumeLayout();
         }
     }
 }
