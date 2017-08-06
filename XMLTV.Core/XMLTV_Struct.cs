@@ -7,6 +7,21 @@ using System.Xml;
 
 namespace XMLTV
 {
+    /// <summary>
+    /// Generic type for XML strings with a language identifier. Used a lot in XMLTV files
+    /// </summary>
+    public class XmlLangText
+    {
+        public string lang;
+        public string text;
+
+        public XmlLangText(string language, string langtext)
+        {
+            lang = language;
+            text = langtext;
+        }
+    }
+
     public partial class XmlTV
     {
         public class Channel
@@ -25,8 +40,8 @@ namespace XMLTV
         /// </summary>
         public class XmlTVData
         {
-            public XmlDocument rootDocument;
-            public XmlNode rootNode;
+            public XmlTVDocument rootDocument;
+            public XmlElement rootNode;
             public Dictionary<string, Channel> channelData;
 
             public IEnumerable<XmlNode> channelNodes
@@ -61,11 +76,11 @@ namespace XMLTV
                 return masterChannelList;
             }
 
-            public XmlTVData(XmlDocument doc)
+            public XmlTVData(XmlTVDocument doc)
             {
                 rootDocument = doc;
                 channelData = new Dictionary<string, Channel>();
-                rootNode = doc.SelectSingleNode("//tv");
+                rootNode = doc.TvElement;
 
                 // Build internal dictionary for channels
                 foreach (XmlNode channelNode in rootNode.SelectNodes("channel"))
@@ -96,21 +111,6 @@ namespace XMLTV
                             channelData[channelId].programmeNodes.Add(start, programmeNode);
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Generic type for XML strings with a language identifier. Used a lot in XMLTV files
-        /// </summary>
-        public class XmlLangText
-        {
-            public string lang;
-            public string text;
-
-            public XmlLangText(string language, string langtext)
-            {
-                lang = language;
-                text = langtext;
             }
         }
 

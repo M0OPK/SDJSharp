@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Globalization;
+using System.Security.Policy;
 
 namespace XMLTV
 {
@@ -41,7 +42,7 @@ namespace XMLTV
                     _rootDataSourceName = string.Empty;
 
                 // New document for new data
-                XmlDocument newDoc = NewXML(_rootGeneratorName, _rootGeneratorUrl, _rootDataSourceName);
+                var newDoc = new XmlTVDocument(_rootGeneratorName, _rootGeneratorUrl, _rootDataSourceName);
                 xmlData = new XmlTVData(newDoc);
                 if (configuration == null)
                     config = new Config();
@@ -64,7 +65,7 @@ namespace XMLTV
         {
             try
             {
-                XmlDocument xmlTVLoad = new XmlDocument();
+                var xmlTVLoad = new XmlTVDocument();
                 xmlTVLoad.Load(filename);
                 XmlTVData localData = new XmlTVData(xmlTVLoad);
 
@@ -108,7 +109,7 @@ namespace XMLTV
                 localErrors = new List<XMLTVError>();
 
                 // New document for new data
-                XmlDocument newDoc = NewXML(_rootGeneratorName, _rootGeneratorUrl, _rootDataSourceName);
+                var newDoc = new XmlTVDocument(_rootGeneratorName, _rootGeneratorUrl, _rootDataSourceName);
                 xmlData = new XmlTVData(newDoc);
             }
             catch (Exception ex)
@@ -268,49 +269,7 @@ namespace XMLTV
                     }
                 }
 
-                XmlElement channelNode = xmlData.rootDocument.CreateElement("channel");
-
-                // Set ID
-                channelNode.SetAttribute("id", channelID);
-
-                // Display name(s) if any
-                foreach (var thisDisplayName in displayName)
-                {
-                    XmlElement displayNameNode = xmlData.rootDocument.CreateElement("display-name");
-                    displayNameNode.SetAttribute("lang", thisDisplayName.lang);
-                    displayNameNode.InnerText = thisDisplayName.text;
-                    channelNode.AppendChild(displayNameNode);
-                }
-
-                // Icon URL if available
-                if (iconUrl != null)
-                {
-                    XmlElement iconNode = xmlData.rootDocument.CreateElement("icon");
-                    iconNode.SetAttribute("src", iconUrl);
-                    channelNode.AppendChild(iconNode);
-                }
-
-                // Channel URL if available
-                if (url != null)
-                {
-                    XmlElement urlNode = xmlData.rootDocument.CreateElement("url");
-                    urlNode.InnerText = url;
-                    channelNode.AppendChild(urlNode);
-                }
-
-                // Any extra attributes
-                if (extraattributes != null)
-                {
-                    foreach (XmlAttribute extra in extraattributes)
-                        channelNode.Attributes.Append((XmlAttribute)extra.Clone());
-                }
-
-                // Any extra nodes
-                if (extranodes != null)
-                {
-                    foreach (XmlNode extra in extranodes)
-                        channelNode.AppendChild(extra.Clone());
-                }
+                XmlElement channelNode = xmlData.rootDocument.CreateChannelElement(channelID, displayName, url, iconUrl, extraattributes, extranodes);
                 return channelNode;
             }
             catch (Exception ex)
@@ -352,7 +311,7 @@ namespace XMLTV
         /// <returns></returns>
         public XmlNode AddProgramme(string start, string stop, string channel, XmlLangText title = null, XmlLangText 
                                  subtitle = null, XmlLangText description = null, XmlLangText[] categories = null, 
-                                 IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
+                                 IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlElement> extranodes = null)
         {
             try
             {
@@ -380,7 +339,7 @@ namespace XMLTV
         public XmlElement buildProgrammeNode(string start, string stop, string channel, XmlLangText title = null, 
                                              XmlLangText subtitle = null, XmlLangText description = null,
                                              XmlLangText[] categories = null, IEnumerable<XmlAttribute> extraattributes = null, 
-                                             IEnumerable<XmlNode> extranodes = null, bool replace = false)
+                                             IEnumerable<XmlElement> extranodes = null, bool replace = false)
         {
             try
             {
@@ -400,59 +359,7 @@ namespace XMLTV
                     }
                 }
 
-                XmlElement programmelNode = xmlData.rootDocument.CreateElement("programme");
-                programmelNode.SetAttribute("start", start);
-                programmelNode.SetAttribute("stop", stop);
-                programmelNode.SetAttribute("channel", channel);
-
-                if (title != null)
-                {
-                    XmlElement titleNode = xmlData.rootDocument.CreateElement("title");
-                    titleNode.SetAttribute("lang", title.lang);
-                    titleNode.InnerText = title.text;
-                    programmelNode.AppendChild(titleNode);
-                }
-
-                if (subtitle != null)
-                {
-                    XmlElement subtitleNode = xmlData.rootDocument.CreateElement("sub-title");
-                    subtitleNode.SetAttribute("lang", subtitle.lang);
-                    subtitleNode.InnerText = subtitle.text;
-                    programmelNode.AppendChild(subtitleNode);
-                }
-
-                if (description != null)
-                {
-                    XmlElement descriptionNode = xmlData.rootDocument.CreateElement("desc");
-                    descriptionNode.SetAttribute("lang", description.lang);
-                    descriptionNode.InnerText = description.text;
-                    programmelNode.AppendChild(descriptionNode);
-                }
-
-                if (categories != null)
-                {
-                    foreach (var category in categories)
-                    {
-                        XmlElement categoryNode = xmlData.rootDocument.CreateElement("category");
-                        categoryNode.SetAttribute("lang", category.lang);
-                        categoryNode.InnerText = category.text;
-                        programmelNode.AppendChild(categoryNode);
-                    }
-                }
-
-                // Any extra attributes
-                if (extraattributes != null)
-                {
-                    foreach (XmlAttribute extra in extraattributes)
-                        programmelNode.Attributes.Append(extra);
-                }
-
-                // Any extra nodes
-                if (extranodes != null)
-                {
-                    foreach (XmlNode extra in extranodes)
-                        programmelNode.AppendChild(extra);
-                }
+                XmlElement programmelNode = xmlData.rootDocument.CreateProgrammeElement(start, stop, channel, title, subtitle, description, categories, extraattributes, extranodes);
                 return programmelNode;
             }
             catch (System.Exception ex)
@@ -661,35 +568,6 @@ namespace XMLTV
         private void addError(int errorcode, string errormessage, XMLTVError.ErrorSeverity errorseverity = XMLTVError.ErrorSeverity.Error, string errordescription = "", string errorsource = "")
         {
             localErrors.Add(new XMLTVError(errorcode, errormessage, errorseverity, errordescription, errorsource));
-        }
-
-        private XmlDocument NewXML(string generatorname = "", string generatorurl = "", string sourcename = "")
-        {
-            try
-            {
-                // Generate out own root node/declaration
-                XmlDocument newDoc = new XmlDocument();
-
-                var rootXmlNode = newDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
-                newDoc.InsertBefore(rootXmlNode, newDoc.DocumentElement);
-                XmlElement rootTvNode = newDoc.CreateElement("tv");
-
-                // Set generator attributes
-                rootTvNode.SetAttribute("generator-info-name", generatorname);
-                rootTvNode.SetAttribute("generator-info-url", generatorurl);
-                if (sourcename != string.Empty)
-                    rootTvNode.SetAttribute("source-info-name", sourcename);
-
-                // add Root node to document
-                newDoc.AppendChild(rootTvNode);
-
-                return newDoc;
-            }
-            catch (Exception ex)
-            {
-                addError(ex);
-            }
-            return null;
         }
 
         private bool validateChannel(XmlTVData thisXmlFile, XmlTVData localXmlFile)

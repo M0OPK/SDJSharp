@@ -387,7 +387,7 @@ namespace SDGrabSharp.Common
                                 string descLang = null;
                                 string subtitle = null;
                                 string subtitleLang = null;
-                                var categories = new List<XmlTV.XmlLangText>();
+                                var categories = new List<XmlLangText>();
 
                                 if (thisProgramme.descriptions != null && thisProgramme.descriptions.description1000 != null
                                  && thisProgramme.descriptions.description1000.FirstOrDefault() != null
@@ -406,7 +406,7 @@ namespace SDGrabSharp.Common
                                 if (thisProgramme.genres != null)
                                 {
                                     foreach (var genre in thisProgramme.genres)
-                                        categories.Add(new XmlTV.XmlLangText(descLang ?? "en", genre));
+                                        categories.Add(new XmlLangText(descLang ?? "en", genre));
                                 }
 
                                 addProgramme(startTime, endTime, GetChannelID(thisResponse.scheduleResponse.stationID),
@@ -502,7 +502,7 @@ namespace SDGrabSharp.Common
                         string descLang = null;
                         string subtitle = null;
                         string subtitleLang = null;
-                        var categories = new List<XmlTV.XmlLangText>();
+                        var categories = new List<XmlLangText>();
 
                         if (thisProgramme.descriptions != null && thisProgramme.descriptions.description1000 != null
                          && thisProgramme.descriptions.description1000.FirstOrDefault() != null
@@ -521,7 +521,7 @@ namespace SDGrabSharp.Common
                         if (thisProgramme.genres != null)
                         {
                             foreach (var genre in thisProgramme.genres)
-                                categories.Add(new XmlTV.XmlLangText(descLang ?? "en", genre));
+                                categories.Add(new XmlLangText(descLang ?? "en", genre));
                         }
 
                         updateAllProgrammes(thisProgramme.programID, titleLang, title, subtitleLang, subtitle,
@@ -1015,7 +1015,7 @@ namespace SDGrabSharp.Common
             if (displayName == null)
                 displayName = GetChannelName(sdStation, thisTranslation);
 
-            var displayNameItem = new XmlTV.XmlLangText[] { new XmlTV.XmlLangText(displayLang ?? "en", displayName) };
+            var displayNameItem = new XmlLangText[] { new XmlLangText(displayLang ?? "en", displayName) };
 
             // Generate SD ID attribute
             XmlAttribute sdChannelIDAttrib = xmlTV.GetDocument().CreateAttribute("sd-stationid");
@@ -1238,7 +1238,7 @@ namespace SDGrabSharp.Common
                                   string titleLang = "en", string title = null,
                                   string subtitleLang = "en", string subtitle = null, 
                                   string descriptionLang = "en", string description = null,
-                                  XmlTV.XmlLangText[] categories = null, string sdProgrammeId = null, string sdMD5 = null)
+                                  XmlLangText[] categories = null, string sdProgrammeId = null, string sdMD5 = null)
         {
             string startString = XmlTV.DateToString(start);
             string stopString = XmlTV.DateToString(stop);
@@ -1317,17 +1317,17 @@ namespace SDGrabSharp.Common
             }
 
             // Create new programme node
-            XmlTV.XmlLangText titleText = null;
+            XmlLangText titleText = null;
             if (title != null)
-                titleText = new XmlTV.XmlLangText(titleLang, title);
+                titleText = new XmlLangText(titleLang, title);
 
-            XmlTV.XmlLangText subtitleText = null;
+            XmlLangText subtitleText = null;
             if (subtitle != null)
-                subtitleText = new XmlTV.XmlLangText(subtitleLang, subtitle);
+                subtitleText = new XmlLangText(subtitleLang, subtitle);
 
-            XmlTV.XmlLangText descriptionText = null;
+            XmlLangText descriptionText = null;
             if (description != null)
-                descriptionText = new XmlTV.XmlLangText(descriptionLang, description);
+                descriptionText = new XmlLangText(descriptionLang, description);
 
             List<XmlAttribute> attributes = new List<XmlAttribute>();
             XmlAttribute programmeIdAttrib = null;
@@ -1419,7 +1419,7 @@ namespace SDGrabSharp.Common
                                          string titleLang = "en", string title = null,
                                          string subtitleLang = "en", string subtitle = null,
                                          string descriptionLang = "en", string description = null,
-                                         XmlTV.XmlLangText[] categories = null, string sdMD5 = null)
+                                         XmlLangText[] categories = null, string sdMD5 = null)
         {
             if (!programmeNodesByProgrammeID.ContainsKey(sdProgrammeId))
                 return;
