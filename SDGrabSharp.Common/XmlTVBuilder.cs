@@ -44,8 +44,8 @@ namespace SDGrabSharp.Common
         SDJson sd;
 
         // Local keys for Xml Nodes
-        Dictionary<string, XmlNode> channelByStationID;
-        Dictionary<string, List<XmlNode>> programmeNodesByProgrammeID;
+        Dictionary<string, XmlElement> channelByStationID;
+        Dictionary<string, List<XmlElement>> programmeNodesByProgrammeID;
 
         // Programme object lookup by programme id
         Dictionary<string, SDProgrammeResponse> programmeItemByProgrammeID;
@@ -554,8 +554,8 @@ namespace SDGrabSharp.Common
         public void Init()
         {
             // Lookups for programmes/stations
-            channelByStationID = new Dictionary<string, XmlNode>();
-            programmeNodesByProgrammeID = new Dictionary<string, List<XmlNode>>();
+            channelByStationID = new Dictionary<string, XmlElement>();
+            programmeNodesByProgrammeID = new Dictionary<string, List<XmlElement>>();
             SDStationLookup = new Dictionary<string, SDGetLineupResponse.SDLineupStation>();
             programmeItemByProgrammeID = new Dictionary<string, SDProgrammeResponse>();
         }
@@ -678,7 +678,7 @@ namespace SDGrabSharp.Common
                     {
                         if (!programmeNodesByProgrammeID.ContainsKey(programme.Attributes["sd-programmeid"].Value))
                         {
-                            var nodeList = new List<XmlNode>();
+                            var nodeList = new List<XmlElement>();
                             nodeList.Add(programme);
                             programmeNodesByProgrammeID.Add(programme.Attributes["sd-programmeid"].Value, nodeList);
                         }
@@ -1301,7 +1301,7 @@ namespace SDGrabSharp.Common
                 {
                     // Add new if none already present
                     if (!programmeNodesByProgrammeID.ContainsKey(sdProgrammeId))
-                        programmeNodesByProgrammeID.Add(sdProgrammeId, new List<XmlNode>());
+                        programmeNodesByProgrammeID.Add(sdProgrammeId, new List<XmlElement>());
 
                     // Find existing node
                     var existNode = programmeNodesByProgrammeID[sdProgrammeId].
@@ -1359,7 +1359,7 @@ namespace SDGrabSharp.Common
 
             // Add entry to programme nodes
             if (!programmeNodesByProgrammeID.ContainsKey(sdProgrammeId))
-                programmeNodesByProgrammeID.Add(sdProgrammeId, new List<XmlNode>());
+                programmeNodesByProgrammeID.Add(sdProgrammeId, new List<XmlElement>());
 
             programmeNodesByProgrammeID[sdProgrammeId].Add(newProgrammeNode);
             return true;

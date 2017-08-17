@@ -69,7 +69,7 @@ namespace XMLTV
                 xmlTVLoad.Load(filename);
                 XmlTVData localData = new XmlTVData(xmlTVLoad);
 
-                XmlNode localRootTvNode = localData.rootDocument;
+                XmlElement localRootTvNode = localData.rootNode;
 
                 // Check for root TV node
                 if (localRootTvNode == null)
@@ -126,12 +126,12 @@ namespace XMLTV
                 return null;
         }
 
-        public IEnumerable<XmlNode> GetChannelNodes()
+        public IEnumerable<XmlElement> GetChannelNodes()
         {
             return xmlData.channelNodes;
         }
 
-        public IEnumerable<XmlNode> GetProgrammeNodes(string channelID)
+        public IEnumerable<XmlElement> GetProgrammeNodes(string channelID)
         {
             return xmlData.programmeNodes(channelID);
         }
@@ -201,7 +201,7 @@ namespace XMLTV
         /// <param name="extraattributes"></param>
         /// <param name="extranodes"></param>
         /// <returns></returns>
-        public XmlNode AddChannel(string channelID, XmlLangText[] displayName, string url = null, string iconUrl= null,
+        public XmlElement AddChannel(string channelID, XmlLangText[] displayName, string url = null, string iconUrl= null,
                                IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
         {
             try
@@ -309,7 +309,7 @@ namespace XMLTV
         /// <param name="extraattributes"></param>
         /// <param name="extranodes"></param>
         /// <returns></returns>
-        public XmlNode AddProgramme(string start, string stop, string channel, XmlLangText title = null, XmlLangText 
+        public XmlElement AddProgramme(string start, string stop, string channel, XmlLangText title = null, XmlLangText 
                                  subtitle = null, XmlLangText description = null, XmlLangText[] categories = null, 
                                  IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlElement> extranodes = null)
         {
@@ -435,9 +435,9 @@ namespace XMLTV
             return unMatchingItems;
         }
 
-        public XmlNode[] GetProgrammesOutsideDateRange(DateTimeOffset startDate, DateTimeOffset endDate)
+        public XmlElement[] GetProgrammesOutsideDateRange(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            List<XmlNode> nodeList = new List<XmlNode>();
+            List<XmlElement> nodeList = new List<XmlElement>();
             foreach (var channelInfo in xmlData.channelData)
             {
                 // Create list of nodes outside of range (using local time as cutoff points)
@@ -785,7 +785,7 @@ namespace XMLTV
                 foreach (var channelNodeData in fromData.channelData)
                 {
                     Channel thisChannel = new Channel();
-                    thisChannel.ChanelNode = toData.rootDocument.ImportNode(channelNodeData.Value.ChanelNode, true);
+                    thisChannel.ChanelNode = (XmlElement)toData.rootDocument.ImportNode(channelNodeData.Value.ChanelNode, true);
 
                     if (toData.channelData.ContainsKey(channelNodeData.Key))
                         toData.channelData[channelNodeData.Key] = thisChannel;
@@ -796,7 +796,7 @@ namespace XMLTV
                     // Programmes
                     foreach (var programmeNode in channelNodeData.Value.programmeNodes)
                     {
-                        var thisProgrammNode = toData.rootDocument.ImportNode(programmeNode.Value, true);
+                        var thisProgrammNode = (XmlElement)toData.rootDocument.ImportNode(programmeNode.Value, true);
 
                         if (thisChan.programmeNodes.ContainsKey(programmeNode.Key))
                             thisChan.programmeNodes[programmeNode.Key] = thisProgrammNode;

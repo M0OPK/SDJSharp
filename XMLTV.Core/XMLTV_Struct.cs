@@ -26,12 +26,12 @@ namespace XMLTV
     {
         public class Channel
         {
-            public XmlNode ChanelNode;
-            public SortedDictionary<DateTime, XmlNode> programmeNodes;
+            public XmlElement ChanelNode;
+            public SortedDictionary<DateTime, XmlElement> programmeNodes;
 
             public Channel()
             {
-                programmeNodes = new SortedDictionary<DateTime, XmlNode>();
+                programmeNodes = new SortedDictionary<DateTime, XmlElement>();
             }
         }
 
@@ -44,7 +44,7 @@ namespace XMLTV
             public XmlElement rootNode;
             public Dictionary<string, Channel> channelData;
 
-            public IEnumerable<XmlNode> channelNodes
+            public IEnumerable<XmlElement> channelNodes
             {
                 get
                 {
@@ -52,7 +52,7 @@ namespace XMLTV
                 }
             }
 
-            public IEnumerable<XmlNode> programmeNodes(string channel)
+            public IEnumerable<XmlElement> programmeNodes(string channel)
             {
                 if (channelData.ContainsKey(channel))
                     return channelData[channel].programmeNodes.Values;
@@ -66,9 +66,9 @@ namespace XMLTV
                     return rootNode.SelectNodes("channel");
                 }
             }*/
-            public IEnumerable<XmlNode> programmeNodes()
+            public IEnumerable<XmlElement> programmeNodes()
             {
-                List<XmlNode> masterChannelList = new List<XmlNode>();
+                List<XmlElement> masterChannelList = new List<XmlElement>();
 
                 foreach (var channelId in channelData.Keys)
                     masterChannelList.AddRange(programmeNodes(channelId));
@@ -83,7 +83,7 @@ namespace XMLTV
                 rootNode = doc.TvElement;
 
                 // Build internal dictionary for channels
-                foreach (XmlNode channelNode in rootNode.SelectNodes("channel"))
+                foreach (XmlElement channelNode in rootNode.SelectNodes("channel"))
                 {
                     rootNode.RemoveChild(channelNode);
                     if (channelNode.Attributes["id"] == null)
@@ -95,7 +95,7 @@ namespace XMLTV
                 }
 
                 // Build internal dictionary for programmes
-                foreach (XmlNode programmeNode in rootNode.SelectNodes("programme"))
+                foreach (XmlElement programmeNode in rootNode.SelectNodes("programme"))
                 {
                     rootNode.RemoveChild(programmeNode);
                     if (programmeNode.Attributes["start"] == null || programmeNode.Attributes["channel"] == null)

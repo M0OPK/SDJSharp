@@ -34,6 +34,13 @@ namespace XMLTV
             AppendChild(_tvTvElement);
         }
 
+        public override void Load(string file)
+        {
+            this.RemoveChild(_tvTvElement);
+            base.Load(file);
+            _tvTvElement = (XmlElement)SelectSingleNode("//tv");
+        }
+
         /// <summary>
         /// Create new XML "channel" element populated with channel details provided
         /// </summary>
