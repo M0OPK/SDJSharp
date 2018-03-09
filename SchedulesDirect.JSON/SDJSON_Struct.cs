@@ -190,6 +190,7 @@ namespace SchedulesDirect
     public class SDCountries
     {
         public List<Continent> continents;
+        public DateTime? cacheDate;
 
         public SDCountries()
         {
@@ -199,6 +200,7 @@ namespace SchedulesDirect
         public class Continent
         {
             public string continentname;
+            public DateTime? cacheDate;
             public List<Country> countries;
 
             public Continent()
@@ -209,6 +211,7 @@ namespace SchedulesDirect
 
         public class Country
         {
+            public DateTime? cacheDate;
             public string fullName;
             public string shortName;
             public string postalCodeExample;
@@ -232,6 +235,7 @@ namespace SchedulesDirect
     [DataContract]
     public class SDHeadendsResponse
     {
+        public DateTime? cacheDate;
         [DataMember]
         public string headend;
         [DataMember]
@@ -244,6 +248,7 @@ namespace SchedulesDirect
         [DataContract]
         public class SDLineup
         {
+            public DateTime? cacheDate;
             [DataMember]
             public string name;
             [DataMember]
@@ -310,6 +315,7 @@ namespace SchedulesDirect
     [DataContract]
     public class SDGetLineupResponse
     {
+        public DateTime? cacheDate;
         [DataMember]
         public SDLineupMap[] map;
         [DataMember]
@@ -320,6 +326,7 @@ namespace SchedulesDirect
         [DataContract]
         public class SDLineupMap
         {
+            public DateTime? cacheDate;
             [DataMember]
             public string stationID;
             [DataMember]
@@ -359,6 +366,7 @@ namespace SchedulesDirect
         [DataContract]
         public class SDLineupStation
         {
+            public DateTime? cacheDate;
             [DataMember]
             public string stationID;
             [DataMember]
@@ -417,6 +425,21 @@ namespace SchedulesDirect
             [DataMember]
             public string modulation;
         }
+    }
+
+    /// <summary>
+    /// Preview programme response. Provides details about channels in a line-up we don't have added
+    /// </summary>
+    [DataContract]
+    public class SDPreviewLineupResponse
+    {
+        public DateTime? cacheDate;
+        [DataMember]
+        public string channel;
+        [DataMember]
+        public string name;
+        [DataMember]
+        public string callsign;
     }
 
     /// <summary>

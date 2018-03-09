@@ -165,6 +165,7 @@ namespace SDGrabSharp.UI
             cbDisplayNameMode.Items.Add(Strings.cbDisplayNameMode_StationName);
             cbDisplayNameMode.Items.Add(Strings.cbDisplayNameMode_StationAfiliate);
             cbDisplayNameMode.Items.Add(Strings.cbDisplayNameMode_StationCallsign);
+            lblCacheExpiryHours.Text = Strings.lblCacheExpiryHours;
         }
 
         private void checkAlwaysAsk_CheckedChanged(object sender, EventArgs e)
@@ -427,10 +428,34 @@ namespace SDGrabSharp.UI
 
         private void tvHeadends_AfterSelect(object sender, TreeViewEventArgs e)
         {
+
             if (tvHeadends.SelectedNode.Parent != null)
+            {
                 btnLineupAdd.Enabled = true;
+
+                // Update channel list using preview data
+                var previewResponse = cache.GetLineupPreview(sdJS, tvHeadends.SelectedNode.Name)?.ToArray();
+                if (previewResponse == null || !previewResponse.Any()) return;
+
+                Cursor.Current = Cursors.WaitCursor;
+                lvStations.SuspendLayout();
+                lvStations.BeginUpdate();
+                lvStations.Items.Clear();
+                foreach (var channel in previewResponse)
+                {
+                    ListViewItem item = new ListViewItem();
+                    item.Text = $"P{channel.channel}/{channel.callsign}";
+                    item.SubItems.Add(channel.name);
+                    lvStations.Items.Add(item);
+                }
+                lvStations.EndUpdate();
+                lvStations.ResumeLayout(true);
+                Cursor.Current = Cursors.Default;
+            }
             else
+            {
                 btnLineupAdd.Enabled = false;
+            }
         }
 
         private void btnLineupAdd_Click(object sender, EventArgs e)
@@ -962,6 +987,8 @@ namespace SDGrabSharp.UI
             tkbProgrammeItems.Value = config.ProgrammeRetrievalItems;
             txtProgrammeItems.Text = config.ProgrammeRetrievalItems.ToString();
             txtOutputXmlTVFile.Text = config.XmlTVFileName;
+            tkbCacheExpiryHours.Value = config.CacheExpiryHours;
+            txtCacheExpiryHours.Text = config.CacheExpiryHours.ToString();
 
             if ((int)config.XmlTVDisplayNameMode >= 0 && (int)config.XmlTVDisplayNameMode < cbDisplayNameMode.Items.Count)
                 cbDisplayNameMode.SelectedIndex = (int)config.XmlTVDisplayNameMode;
@@ -1383,6 +1410,21 @@ namespace SDGrabSharp.UI
             config.ProgrammeRetrievalItems = tkbProgrammeItems.Value;
         }
 
+        private void txtProgrammeItems_Validated(object sender, EventArgs e)
+        {
+            int newValue = 0;
+            if (int.TryParse(txtProgrammeItems.Text, out newValue))
+            {
+                if (newValue >= tkbProgrammeItems.Minimum && newValue <= tkbProgrammeItems.Maximum)
+                {
+                    tkbProgrammeItems.Value = newValue;
+                    config.ProgrammeRetrievalItems = newValue;
+                }
+                else
+                    txtProgrammeItems.Text = tkbProgrammeItems.Value.ToString();
+            }
+        }
+
         private void tkbScheduleItems_Scroll(object sender, EventArgs e)
         {
             txtScheduleItems.Text = tkbScheduleItems.Value.ToString();
@@ -1404,18 +1446,26 @@ namespace SDGrabSharp.UI
             }
         }
 
-        private void txtProgrammeItems_Validated(object sender, EventArgs e)
+        private void tkbCacheExpiryHours_Scroll(object sender, EventArgs e)
+        {
+            txtCacheExpiryHours.Text = tkbCacheExpiryHours.Value.ToString();
+            config.CacheExpiryHours = tkbCacheExpiryHours.Value;
+        }
+
+        private void txtCacheExpiryHours_Validated(object sender, EventArgs e)
         {
             int newValue = 0;
-            if (int.TryParse(txtProgrammeItems.Text, out newValue))
+            if (int.TryParse(txtCacheExpiryHours.Text, out newValue))
             {
-                if (newValue >= tkbProgrammeItems.Minimum && newValue <= tkbProgrammeItems.Maximum)
+                if (newValue >= tkbCacheExpiryHours.Minimum && newValue <= tkbCacheExpiryHours.Maximum)
                 {
-                    tkbProgrammeItems.Value = newValue;
-                    config.ProgrammeRetrievalItems = newValue;
+                    tkbScheduleItems.Value = newValue;
+                    config.CacheExpiryHours = newValue;
                 }
                 else
-                    txtProgrammeItems.Text = tkbProgrammeItems.Value.ToString();
+                {
+                    txtCacheExpiryHours.Text = tkbCacheExpiryHours.Value.ToString();
+                }
             }
         }
 

@@ -61,7 +61,7 @@ namespace SDGrabSharp.CLI
 
             // Initialize objects
             config = new Config();
-            cache = new DataCache();
+            cache = new DataCache(config.CacheExpiryHours);
 
             // Load configuration
             LoadConfig(argData.configFile);

@@ -429,4 +429,7 @@
   <data name="gbProgress" xml:space="preserve">
     <value>Process Report</value>
   </data>
+  <data name="lblCacheExpiryHours" xml:space="preserve">
+    <value>Cache Expiry (Hours)</value>
+  </data>
 </root>

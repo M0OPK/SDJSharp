@@ -398,6 +398,19 @@ namespace SchedulesDirect
             return null;
         }
 
+        public IEnumerable<SDPreviewLineupResponse> GetLineupPreview(string lineup)
+        {
+            try
+            {
+                return GetJSON<IEnumerable<SDPreviewLineupResponse>>("lineups/preview/" + lineup, loginToken);
+            }
+            catch (Exception ex)
+            {
+                addError(ex);
+            }
+            return null;
+        }
+
         /// <summary>
         /// Return programme information for the specified list of programmes
         /// </summary>

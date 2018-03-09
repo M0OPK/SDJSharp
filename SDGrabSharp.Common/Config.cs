@@ -28,6 +28,7 @@ namespace SDGrabSharp.Common
         public int ProgrammeRetrievalItems;
         public DisplayNameMode XmlTVDisplayNameMode;
         public string XmlTVFileName;
+        public int CacheExpiryHours;
 
         public Config()
         {
@@ -40,6 +41,7 @@ namespace SDGrabSharp.Common
             ProgrammeRetrieveRangeDays = 3;
             ScheduleRetrievalItems = 3000;
             ProgrammeRetrievalItems = 3000;
+            CacheExpiryHours = 24;
         }
 
         public class XmlTVTranslation
@@ -104,6 +106,7 @@ namespace SDGrabSharp.Common
             AddSimpleXMLElement(rootConfigNode, "programme-maxitems", ProgrammeRetrievalItems.ToString());
             AddSimpleXMLElement(rootConfigNode, "displayname-mode", ((int)XmlTVDisplayNameMode).ToString());
             AddSimpleXMLElement(rootConfigNode, "xmltv-filename", XmlTVFileName);
+            AddSimpleXMLElement(rootConfigNode, "cache-expirehours", CacheExpiryHours.ToString());
 
             if (TranslationMatrix != null && TranslationMatrix.Count() != 0)
             {
@@ -207,6 +210,10 @@ namespace SDGrabSharp.Common
             workNode = rootConfigNode.SelectSingleNode("xmltv-filename");
             if (workNode != null)
                 XmlTVFileName = workNode.InnerText;
+
+            workNode = rootConfigNode.SelectSingleNode("cache-expirehours");
+            if (workNode != null)
+                try { CacheExpiryHours = int.Parse(workNode.InnerText); } catch { }
 
             XmlNode translateListNode = rootConfigNode.SelectSingleNode("TranslationMatrix");
             if (translateListNode != null)

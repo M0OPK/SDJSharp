@@ -130,6 +130,9 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
+            this.tkbCacheExpiryHours = new System.Windows.Forms.TrackBar();
+            this.lblCacheExpiryHours = new System.Windows.Forms.Label();
+            this.txtCacheExpiryHours = new System.Windows.Forms.TextBox();
             this.tcConfig.SuspendLayout();
             this.tpSD1.SuspendLayout();
             this.gbStations.SuspendLayout();
@@ -152,6 +155,7 @@
             this.gbXmlTVAttr.SuspendLayout();
             this.gbPersistentCache.SuspendLayout();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.tkbCacheExpiryHours)).BeginInit();
             this.SuspendLayout();
             // 
             // tcConfig
@@ -820,7 +824,7 @@
             this.gbXMLTVFile.Controls.Add(this.btnBrowseXmlTVFile);
             this.gbXMLTVFile.Controls.Add(this.txtOutputXmlTVFile);
             this.gbXMLTVFile.Controls.Add(this.lblOutputXmlTVFile);
-            this.gbXMLTVFile.Location = new System.Drawing.Point(6, 198);
+            this.gbXMLTVFile.Location = new System.Drawing.Point(6, 252);
             this.gbXMLTVFile.Name = "gbXMLTVFile";
             this.gbXMLTVFile.Size = new System.Drawing.Size(860, 41);
             this.gbXMLTVFile.TabIndex = 3;
@@ -866,7 +870,7 @@
             this.gbRetrievalOptions.Controls.Add(this.ckIncludeYesterday);
             this.gbRetrievalOptions.Controls.Add(this.txtProgrammePeriod);
             this.gbRetrievalOptions.Controls.Add(this.lbProgrammePeriod);
-            this.gbRetrievalOptions.Location = new System.Drawing.Point(380, 52);
+            this.gbRetrievalOptions.Location = new System.Drawing.Point(380, 106);
             this.gbRetrievalOptions.Name = "gbRetrievalOptions";
             this.gbRetrievalOptions.Size = new System.Drawing.Size(486, 140);
             this.gbRetrievalOptions.TabIndex = 2;
@@ -988,7 +992,7 @@
             this.gbXmlTVAttr.Controls.Add(this.ckStationID);
             this.gbXmlTVAttr.Controls.Add(this.ckLogicalChannelNo);
             this.gbXmlTVAttr.Controls.Add(this.ckMD5);
-            this.gbXmlTVAttr.Location = new System.Drawing.Point(6, 52);
+            this.gbXmlTVAttr.Location = new System.Drawing.Point(6, 106);
             this.gbXmlTVAttr.Name = "gbXmlTVAttr";
             this.gbXmlTVAttr.Size = new System.Drawing.Size(368, 140);
             this.gbXmlTVAttr.TabIndex = 1;
@@ -1120,13 +1124,16 @@
             // 
             // gbPersistentCache
             // 
+            this.gbPersistentCache.Controls.Add(this.txtCacheExpiryHours);
+            this.gbPersistentCache.Controls.Add(this.lblCacheExpiryHours);
+            this.gbPersistentCache.Controls.Add(this.tkbCacheExpiryHours);
             this.gbPersistentCache.Controls.Add(this.btnBrowseCache);
             this.gbPersistentCache.Controls.Add(this.ckPersistentCache);
             this.gbPersistentCache.Controls.Add(this.txtCacheFilename);
             this.gbPersistentCache.Controls.Add(this.lbCacheFilename);
             this.gbPersistentCache.Location = new System.Drawing.Point(6, 6);
             this.gbPersistentCache.Name = "gbPersistentCache";
-            this.gbPersistentCache.Size = new System.Drawing.Size(860, 40);
+            this.gbPersistentCache.Size = new System.Drawing.Size(860, 94);
             this.gbPersistentCache.TabIndex = 0;
             this.gbPersistentCache.TabStop = false;
             this.gbPersistentCache.Text = "Persistent Cache (NT)";
@@ -1224,6 +1231,34 @@
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
+            // tkbCacheExpiryHours
+            // 
+            this.tkbCacheExpiryHours.Location = new System.Drawing.Point(142, 38);
+            this.tkbCacheExpiryHours.Maximum = 168;
+            this.tkbCacheExpiryHours.Minimum = 1;
+            this.tkbCacheExpiryHours.Name = "tkbCacheExpiryHours";
+            this.tkbCacheExpiryHours.Size = new System.Drawing.Size(606, 45);
+            this.tkbCacheExpiryHours.TabIndex = 4;
+            this.tkbCacheExpiryHours.Value = 1;
+            this.tkbCacheExpiryHours.Scroll += new System.EventHandler(this.tkbCacheExpiryHours_Scroll);
+            // 
+            // lblCacheExpiryHours
+            // 
+            this.lblCacheExpiryHours.AutoSize = true;
+            this.lblCacheExpiryHours.Location = new System.Drawing.Point(6, 38);
+            this.lblCacheExpiryHours.Name = "lblCacheExpiryHours";
+            this.lblCacheExpiryHours.Size = new System.Drawing.Size(130, 13);
+            this.lblCacheExpiryHours.TabIndex = 5;
+            this.lblCacheExpiryHours.Text = "Cache Expiry (Hours) (NT)";
+            // 
+            // txtCacheExpiryHours
+            // 
+            this.txtCacheExpiryHours.Location = new System.Drawing.Point(754, 38);
+            this.txtCacheExpiryHours.Name = "txtCacheExpiryHours";
+            this.txtCacheExpiryHours.Size = new System.Drawing.Size(100, 20);
+            this.txtCacheExpiryHours.TabIndex = 6;
+            this.txtCacheExpiryHours.Validated += new System.EventHandler(this.txtCacheExpiryHours_Validated);
+            // 
             // frmOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1266,6 +1301,7 @@
             this.gbPersistentCache.ResumeLayout(false);
             this.gbPersistentCache.PerformLayout();
             this.panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.tkbCacheExpiryHours)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1374,5 +1410,8 @@
         private System.Windows.Forms.Label lblLogicalChannel;
         private System.Windows.Forms.Label lblChannelNum;
         private System.Windows.Forms.TextBox txtChannelNum;
+        private System.Windows.Forms.TextBox txtCacheExpiryHours;
+        private System.Windows.Forms.Label lblCacheExpiryHours;
+        private System.Windows.Forms.TrackBar tkbCacheExpiryHours;
     }
 }

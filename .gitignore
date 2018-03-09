@@ -250,3 +250,7 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+/SDGrapSharpCLI-0.2.3.3-alpha.zip
+/SDGrapSharpCLI-0.2.3.3-alpha-debug.zip
+/SDGrabSharpUI-0.2.3.3-alpha.zip
+/SDGrabSharpUI-0.2.3.3-alpha-debug.zip

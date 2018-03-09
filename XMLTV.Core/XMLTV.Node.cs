@@ -17,7 +17,7 @@ namespace XMLTV
 
         private void initTVDoc(string generatorname = "", string generatorurl = "", string sourcename = "")
         {
-            // Generate out own root node/declaration
+            // Generate our own root node/declaration
             var rootXmlNode = CreateXmlDeclaration("1.0", "UTF-8", null);
             InsertBefore(rootXmlNode, DocumentElement);
             _tvTvElement = CreateElement("tv");
