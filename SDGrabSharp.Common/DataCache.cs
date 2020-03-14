@@ -33,8 +33,6 @@ namespace SDGrabSharp.Common
         private void AddCacheDateAttribute(XmlElement element, DateTime? cacheDate)
         {
             XmlAttribute cacheAttribute = element.OwnerDocument.CreateAttribute("cachedate");
-            if (cacheDate == null)
-                cacheDate = DateTime.UtcNow;
 
             cacheAttribute.InnerText = cacheDate.Value.ToString("yyyyMMddHHmmss");
             element.Attributes.Append(cacheAttribute);
@@ -58,6 +56,7 @@ namespace SDGrabSharp.Common
             if (!headendData.ContainsKey(headendKey))
             {
                 var headendDataJS = sd.GetHeadends(country, postcode);
+
                 if (headendDataJS != null)
                     headendData.Add(headendKey, headendDataJS);
 
@@ -380,6 +379,14 @@ namespace SDGrabSharp.Common
             cacheXml.Save(filename);
         }
 
+        private bool validateCacheDate(DateTime? cacheDateTime)
+        {
+            if (cacheDateTime == null || cacheDateTime.Value.AddHours(cacheExpiryHours) >= DateTime.UtcNow)
+                return true;
+
+            return false;
+        }
+
         public bool Load(string filename)
         {
             if (!File.Exists(filename))
@@ -405,31 +412,43 @@ namespace SDGrabSharp.Common
                 countryData = new SDCountries();
                 countryData.cacheDate = GetCacheDate(countryDataNode);
 
-                var continentNodes = countryDataNode.SelectNodes("continent");
-                foreach (XmlNode continentNode in continentNodes)
+                if (validateCacheDate(countryData.cacheDate))
                 {
-                    var thisContinent = new SDCountries.Continent();
-                    thisContinent.cacheDate = GetCacheDate(continentNode);
-                    thisContinent.continentname = continentNode.Attributes["name"].Value;
-
-                    var countryNodes = continentNode.SelectNodes("country");
-                    foreach (XmlNode countryNode in countryNodes)
+                    var continentNodes = countryDataNode.SelectNodes("continent");
+                    foreach (XmlNode continentNode in continentNodes)
                     {
-                        var thisCountry = new SDCountries.Country();
-                        thisCountry.cacheDate = GetCacheDate(countryNode);
-                        if (countryNode.Attributes["shortname"] != null)
-                            thisCountry.shortName = countryNode.Attributes["shortname"].Value;
-                        if (countryNode.Attributes["postalCodeExample"] != null)
-                            thisCountry.postalCodeExample = countryNode.Attributes["postalCodeExample"].Value;
-                        if (countryNode.Attributes["postalCode"] != null)
-                            thisCountry.postalCode = countryNode.Attributes["postalCode"].Value;
-                        if (countryNode.Attributes["onePostalCode"] != null)
-                            thisCountry.onePostalCode = (countryNode.Attributes["onePostalCode"].Value == "true");
-                        if (countryNode.InnerText != null)
-                            thisCountry.fullName = countryNode.InnerText;
-                        thisContinent.countries.Add(thisCountry);
+                        var thisContinent = new SDCountries.Continent();
+                        thisContinent.cacheDate = GetCacheDate(continentNode);
+                        thisContinent.continentname = continentNode.Attributes["name"].Value;
+
+                        if (validateCacheDate(thisContinent.cacheDate))
+                        {
+                            var countryNodes = continentNode.SelectNodes("country");
+                            foreach (XmlNode countryNode in countryNodes)
+                            {
+                                var thisCountry = new SDCountries.Country();
+                                thisCountry.cacheDate = GetCacheDate(countryNode);
+                                if (validateCacheDate(thisCountry.cacheDate))
+                                {
+                                    if (countryNode.Attributes["shortname"] != null)
+                                        thisCountry.shortName = countryNode.Attributes["shortname"].Value;
+                                    if (countryNode.Attributes["postalCodeExample"] != null)
+                                        thisCountry.postalCodeExample =
+                                            countryNode.Attributes["postalCodeExample"].Value;
+                                    if (countryNode.Attributes["postalCode"] != null)
+                                        thisCountry.postalCode = countryNode.Attributes["postalCode"].Value;
+                                    if (countryNode.Attributes["onePostalCode"] != null)
+                                        thisCountry.onePostalCode =
+                                            (countryNode.Attributes["onePostalCode"].Value == "true");
+                                    if (countryNode.InnerText != null)
+                                        thisCountry.fullName = countryNode.InnerText;
+                                    thisContinent.countries.Add(thisCountry);
+                                }
+                            }
+
+                            countryData.continents.Add(thisContinent);
+                        }
                     }
-                    countryData.continents.Add(thisContinent);
                 }
             }
 
@@ -446,27 +465,34 @@ namespace SDGrabSharp.Common
                         List<SDHeadendsResponse.SDLineup> lineUpList = new List<SDHeadendsResponse.SDLineup>();
                         SDHeadendsResponse thisHeadEnd = new SDHeadendsResponse();
                         thisHeadEnd.cacheDate = GetCacheDate(headEndNode);
-                        if (headEndNode.Attributes["headend"] != null)
-                            thisHeadEnd.headend = headEndNode.Attributes["headend"].Value;
-                        if (headEndNode.Attributes["location"] != null)
-                            thisHeadEnd.location = headEndNode.Attributes["location"].Value;
-                        if (headEndNode.Attributes["transport"] != null)
-                            thisHeadEnd.transport = headEndNode.Attributes["transport"].Value;
-
-                        foreach (XmlNode lineUpNode in headEndNode.SelectNodes("LineUp"))
+                        if (validateCacheDate(thisHeadEnd.cacheDate))
                         {
-                            SDHeadendsResponse.SDLineup thisLineup = new SDHeadendsResponse.SDLineup();
-                            thisLineup.cacheDate = GetCacheDate(lineUpNode);
-                            if (lineUpNode.Attributes["lineup"] != null)
-                                thisLineup.lineup = lineUpNode.Attributes["lineup"].Value;
-                            if (lineUpNode.Attributes["uri"] != null)
-                                thisLineup.uri = lineUpNode.Attributes["uri"].Value;
-                            if (lineUpNode.InnerText != null)
-                                thisLineup.name = lineUpNode.InnerText;
-                            lineUpList.Add(thisLineup);
+                            if (headEndNode.Attributes["headend"] != null)
+                                thisHeadEnd.headend = headEndNode.Attributes["headend"].Value;
+                            if (headEndNode.Attributes["location"] != null)
+                                thisHeadEnd.location = headEndNode.Attributes["location"].Value;
+                            if (headEndNode.Attributes["transport"] != null)
+                                thisHeadEnd.transport = headEndNode.Attributes["transport"].Value;
+
+                            foreach (XmlNode lineUpNode in headEndNode.SelectNodes("LineUp"))
+                            {
+                                SDHeadendsResponse.SDLineup thisLineup = new SDHeadendsResponse.SDLineup();
+                                thisLineup.cacheDate = GetCacheDate(lineUpNode);
+                                if (validateCacheDate(thisLineup.cacheDate))
+                                {
+                                    if (lineUpNode.Attributes["lineup"] != null)
+                                        thisLineup.lineup = lineUpNode.Attributes["lineup"].Value;
+                                    if (lineUpNode.Attributes["uri"] != null)
+                                        thisLineup.uri = lineUpNode.Attributes["uri"].Value;
+                                    if (lineUpNode.InnerText != null)
+                                        thisLineup.name = lineUpNode.InnerText;
+                                    lineUpList.Add(thisLineup);
+                                }
+                            }
+
+                            thisHeadEnd.lineups = lineUpList.ToArray();
+                            headEnds.Add(thisHeadEnd);
                         }
-                        thisHeadEnd.lineups = lineUpList.ToArray();
-                        headEnds.Add(thisHeadEnd);
                     }
 
                     headendData.Add(thisKey, headEnds);
@@ -482,11 +508,14 @@ namespace SDGrabSharp.Common
                     foreach (XmlNode channelNode in previewLineupNode.SelectNodes("Channel"))
                     {
                         SDPreviewLineupResponse channel = new SDPreviewLineupResponse();
-                        channel.channel = channelNode?.Attributes["channel"]?.Value ?? string.Empty;
-                        channel.callsign = channelNode?.Attributes["callsign"]?.Value ?? string.Empty;
-                        channel.name = channelNode.InnerText ?? string.Empty;
                         channel.cacheDate = GetCacheDate(previewLineupNode);
-                        previewList.Add(channel);
+                        if (validateCacheDate(channel.cacheDate))
+                        {
+                            channel.channel = channelNode?.Attributes["channel"]?.Value ?? string.Empty;
+                            channel.callsign = channelNode?.Attributes["callsign"]?.Value ?? string.Empty;
+                            channel.name = channelNode.InnerText ?? string.Empty;
+                            previewList.Add(channel);
+                        }
                     }
                     previewStationData.Add(lineup, previewList);
                 }
@@ -502,110 +531,126 @@ namespace SDGrabSharp.Common
                     SDGetLineupResponse thisStationMap = new SDGetLineupResponse();
                     thisStationMap.cacheDate = GetCacheDate(lineUpNode);
 
-                    // Maps
-                    List<SDGetLineupResponse.SDLineupMap> mapList = new List<SDGetLineupResponse.SDLineupMap>();
-                    foreach (XmlNode mapNode in lineUpNode.SelectNodes("Map"))
+                    if (validateCacheDate(thisStationMap.cacheDate))
                     {
-                        var thisMap = new SDGetLineupResponse.SDLineupMap();
-                        thisMap.cacheDate = GetCacheDate(mapNode);
-                        if (mapNode.Attributes["atscMajor"] != null)
-                            thisMap.atscMajor = int.Parse(mapNode.Attributes["atscMajor"].Value);
-                        if (mapNode.Attributes["atscMinor"] != null)
-                            thisMap.atscMinor = int.Parse(mapNode.Attributes["atscMinor"].Value);
-                        if (mapNode.Attributes["channel"] != null)
-                            thisMap.channel = mapNode.Attributes["channel"].Value;
-                        if (mapNode.Attributes["deliverySystem"] != null)
-                            thisMap.deliverySystem = mapNode.Attributes["deliverySystem"].Value;
-                        if (mapNode.Attributes["fec"] != null)
-                            thisMap.fec = mapNode.Attributes["fec"].Value;
-                        if (mapNode.Attributes["frequencyHz"] != null)
-                            thisMap.frequencyHz = UInt64.Parse(mapNode.Attributes["frequencyHz"].Value);
-                        if (mapNode.Attributes["logicalChannelNumber"] != null)
-                            thisMap.logicalChannelNumber = mapNode.Attributes["logicalChannelNumber"].Value;
-                        if (mapNode.Attributes["matchType"] != null)
-                            thisMap.matchType = mapNode.Attributes["matchType"].Value;
-                        if (mapNode.Attributes["modulationSystem"] != null)
-                            thisMap.modulationSystem = mapNode.Attributes["modulationSystem"].Value;
-                        if (mapNode.Attributes["networkID"] != null)
-                            thisMap.networkID = mapNode.Attributes["networkID"].Value;
-                        if (mapNode.Attributes["polarization"] != null)
-                            thisMap.polarization = mapNode.Attributes["polarization"].Value;
-                        if (mapNode.Attributes["providerCallsign"] != null)
-                            thisMap.providerCallsign = mapNode.Attributes["providerCallsign"].Value;
-                        if (mapNode.Attributes["serviceID"] != null)
-                            thisMap.serviceID = mapNode.Attributes["serviceID"].Value;
-                        if (mapNode.Attributes["stationID"] != null)
-                            thisMap.stationID = mapNode.Attributes["stationID"].Value;
-                        if (mapNode.Attributes["symbolrate"] != null)
-                            thisMap.symbolrate = int.Parse(mapNode.Attributes["symbolrate"].Value);
-                        if (mapNode.Attributes["transportID"] != null)
-                            thisMap.transportID = mapNode.Attributes["transportID"].Value;
-                        if (mapNode.Attributes["uhfVhf"] != null)
-                            thisMap.uhfVhf = int.Parse(mapNode.Attributes["uhfVhf"].Value);
-                        mapList.Add(thisMap);
-                    }
-
-                    // Stations
-                    List<SDGetLineupResponse.SDLineupStation> stationList = new List<SDGetLineupResponse.SDLineupStation>();
-                    foreach (XmlNode stationNode in lineUpNode.SelectNodes("Station"))
-                    {
-                        var thisStation = new SDGetLineupResponse.SDLineupStation();
-                        thisStation.cacheDate = GetCacheDate(stationNode);
-                        if (stationNode.Attributes["affiliate"] != null)
-                            thisStation.affiliate = stationNode.Attributes["affiliate"].Value;
-                        if (stationNode.Attributes["id"] != null)
-                            thisStation.stationID = stationNode.Attributes["id"].Value;
-                        if (stationNode.Attributes["callsign"] != null)
-                            thisStation.callsign = stationNode.Attributes["callsign"].Value;
-                        if (stationNode.Attributes["name"] != null)
-                            thisStation.name = stationNode.Attributes["name"].Value;
-
-                        List<string> broadcastLanguages = new List<string>();
-                        foreach (XmlNode broadcastLanguageNode in stationNode.SelectNodes("BroadcastLanguage"))
-                            broadcastLanguages.Add(broadcastLanguageNode.InnerText);
-                        thisStation.broadcastLanguage = broadcastLanguages.ToArray();
-
-                        List<string> descriptionLanguages = new List<string>();
-                        foreach (XmlNode descriptionLanguageNode in stationNode.SelectNodes("DescriptionLanguage"))
-                            descriptionLanguages.Add(descriptionLanguageNode.InnerText);
-                        thisStation.descriptionLanguage = descriptionLanguages.ToArray();
-
-                        XmlNode broadcasterNode = stationNode.SelectSingleNode("Broadcaster");
-                        if (broadcasterNode != null)
+                        // Maps
+                        List<SDGetLineupResponse.SDLineupMap> mapList = new List<SDGetLineupResponse.SDLineupMap>();
+                        foreach (XmlNode mapNode in lineUpNode.SelectNodes("Map"))
                         {
-                            thisStation.broadcaster = new SDGetLineupResponse.SDLineupStation.SDStationBroadcaster();
-                            thisStation.broadcaster.city = broadcasterNode.Attributes["city"].Value;
-                            thisStation.broadcaster.state = broadcasterNode.Attributes["state"].Value;
-                            thisStation.broadcaster.postalcode = broadcasterNode.Attributes["postalcode"].Value;
-                            thisStation.broadcaster.country = broadcasterNode.Attributes["country"].Value;
+                            var thisMap = new SDGetLineupResponse.SDLineupMap();
+                            thisMap.cacheDate = GetCacheDate(mapNode);
+                            if (validateCacheDate(thisMap.cacheDate))
+                            {
+                                if (mapNode.Attributes["atscMajor"] != null)
+                                    thisMap.atscMajor = int.Parse(mapNode.Attributes["atscMajor"].Value);
+                                if (mapNode.Attributes["atscMinor"] != null)
+                                    thisMap.atscMinor = int.Parse(mapNode.Attributes["atscMinor"].Value);
+                                if (mapNode.Attributes["channel"] != null)
+                                    thisMap.channel = mapNode.Attributes["channel"].Value;
+                                if (mapNode.Attributes["deliverySystem"] != null)
+                                    thisMap.deliverySystem = mapNode.Attributes["deliverySystem"].Value;
+                                if (mapNode.Attributes["fec"] != null)
+                                    thisMap.fec = mapNode.Attributes["fec"].Value;
+                                if (mapNode.Attributes["frequencyHz"] != null)
+                                    thisMap.frequencyHz = UInt64.Parse(mapNode.Attributes["frequencyHz"].Value);
+                                if (mapNode.Attributes["logicalChannelNumber"] != null)
+                                    thisMap.logicalChannelNumber = mapNode.Attributes["logicalChannelNumber"].Value;
+                                if (mapNode.Attributes["matchType"] != null)
+                                    thisMap.matchType = mapNode.Attributes["matchType"].Value;
+                                if (mapNode.Attributes["modulationSystem"] != null)
+                                    thisMap.modulationSystem = mapNode.Attributes["modulationSystem"].Value;
+                                if (mapNode.Attributes["networkID"] != null)
+                                    thisMap.networkID = mapNode.Attributes["networkID"].Value;
+                                if (mapNode.Attributes["polarization"] != null)
+                                    thisMap.polarization = mapNode.Attributes["polarization"].Value;
+                                if (mapNode.Attributes["providerCallsign"] != null)
+                                    thisMap.providerCallsign = mapNode.Attributes["providerCallsign"].Value;
+                                if (mapNode.Attributes["serviceID"] != null)
+                                    thisMap.serviceID = mapNode.Attributes["serviceID"].Value;
+                                if (mapNode.Attributes["stationID"] != null)
+                                    thisMap.stationID = mapNode.Attributes["stationID"].Value;
+                                if (mapNode.Attributes["symbolrate"] != null)
+                                    thisMap.symbolrate = int.Parse(mapNode.Attributes["symbolrate"].Value);
+                                if (mapNode.Attributes["transportID"] != null)
+                                    thisMap.transportID = mapNode.Attributes["transportID"].Value;
+                                if (mapNode.Attributes["uhfVhf"] != null)
+                                    thisMap.uhfVhf = int.Parse(mapNode.Attributes["uhfVhf"].Value);
+                                mapList.Add(thisMap);
+                            }
                         }
 
-                        XmlNode logoNode = stationNode.SelectSingleNode("Logo");
-                        if (logoNode != null)
+                        // Stations
+                        List<SDGetLineupResponse.SDLineupStation> stationList =
+                            new List<SDGetLineupResponse.SDLineupStation>();
+                        foreach (XmlNode stationNode in lineUpNode.SelectNodes("Station"))
                         {
-                            thisStation.logo = new SDGetLineupResponse.SDLineupStation.SDStationLogo();
-                            thisStation.logo.URL = logoNode.Attributes["url"].Value;
-                            thisStation.logo.height = int.Parse(logoNode.Attributes["height"].Value);
-                            thisStation.logo.width = int.Parse(logoNode.Attributes["width"].Value);
-                            thisStation.logo.md5 = logoNode.Attributes["md5"].Value;
+                            var thisStation = new SDGetLineupResponse.SDLineupStation();
+                            thisStation.cacheDate = GetCacheDate(stationNode);
+                            if (validateCacheDate(thisStation.cacheDate))
+                            {
+                                if (stationNode.Attributes["affiliate"] != null)
+                                    thisStation.affiliate = stationNode.Attributes["affiliate"].Value;
+                                if (stationNode.Attributes["id"] != null)
+                                    thisStation.stationID = stationNode.Attributes["id"].Value;
+                                if (stationNode.Attributes["callsign"] != null)
+                                    thisStation.callsign = stationNode.Attributes["callsign"].Value;
+                                if (stationNode.Attributes["name"] != null)
+                                    thisStation.name = stationNode.Attributes["name"].Value;
+
+                                List<string> broadcastLanguages = new List<string>();
+                                foreach (XmlNode broadcastLanguageNode in stationNode.SelectNodes("BroadcastLanguage"))
+                                    broadcastLanguages.Add(broadcastLanguageNode.InnerText);
+                                thisStation.broadcastLanguage = broadcastLanguages.ToArray();
+
+                                List<string> descriptionLanguages = new List<string>();
+                                foreach (XmlNode descriptionLanguageNode in stationNode.SelectNodes(
+                                    "DescriptionLanguage"))
+                                    descriptionLanguages.Add(descriptionLanguageNode.InnerText);
+                                thisStation.descriptionLanguage = descriptionLanguages.ToArray();
+
+                                XmlNode broadcasterNode = stationNode.SelectSingleNode("Broadcaster");
+                                if (broadcasterNode != null)
+                                {
+                                    thisStation.broadcaster =
+                                        new SDGetLineupResponse.SDLineupStation.SDStationBroadcaster();
+                                    thisStation.broadcaster.city = broadcasterNode.Attributes["city"].Value;
+                                    thisStation.broadcaster.state = broadcasterNode.Attributes["state"].Value;
+                                    thisStation.broadcaster.postalcode = broadcasterNode.Attributes["postalcode"].Value;
+                                    thisStation.broadcaster.country = broadcasterNode.Attributes["country"].Value;
+                                }
+
+                                XmlNode logoNode = stationNode.SelectSingleNode("Logo");
+                                if (logoNode != null)
+                                {
+                                    thisStation.logo = new SDGetLineupResponse.SDLineupStation.SDStationLogo();
+                                    thisStation.logo.URL = logoNode.Attributes["url"].Value;
+                                    thisStation.logo.height = int.Parse(logoNode.Attributes["height"].Value);
+                                    thisStation.logo.width = int.Parse(logoNode.Attributes["width"].Value);
+                                    thisStation.logo.md5 = logoNode.Attributes["md5"].Value;
+                                }
+
+                                stationList.Add(thisStation);
+                            }
                         }
-                        stationList.Add(thisStation);
-                    }
 
-                    thisStationMap.map = mapList.ToArray();
-                    thisStationMap.stations = stationList.ToArray();
+                        thisStationMap.map = mapList.ToArray();
+                        thisStationMap.stations = stationList.ToArray();
 
-                    // Metadata
-                    XmlNode metadataNode = lineUpNode.SelectSingleNode("MetaData");
-                    if (metadataNode != null)
-                    {
-                        thisStationMap.metadata = new SDGetLineupResponse.SDLineupMetadata();
-                        thisStationMap.metadata.lineup = metadataNode.Attributes["lineup"].Value;
-                        thisStationMap.metadata.modified = DateTime.ParseExact(metadataNode.Attributes["modified"].Value, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-                        thisStationMap.metadata.transport = metadataNode.Attributes["transport"].Value;
-                        thisStationMap.metadata.modulation = metadataNode.Attributes["modulation"].Value;
+                        // Metadata
+                        XmlNode metadataNode = lineUpNode.SelectSingleNode("MetaData");
+                        if (metadataNode != null)
+                        {
+                            thisStationMap.metadata = new SDGetLineupResponse.SDLineupMetadata();
+                            thisStationMap.metadata.lineup = metadataNode.Attributes["lineup"].Value;
+                            thisStationMap.metadata.modified = DateTime.ParseExact(
+                                metadataNode.Attributes["modified"].Value, "yyyyMMddHHmmss",
+                                CultureInfo.InvariantCulture);
+                            thisStationMap.metadata.transport = metadataNode.Attributes["transport"].Value;
+                            thisStationMap.metadata.modulation = metadataNode.Attributes["modulation"].Value;
+                        }
+
+                        stationMapData.Add(thisKey, thisStationMap);
                     }
-                    stationMapData.Add(thisKey, thisStationMap);
                 }
             }
             return true;

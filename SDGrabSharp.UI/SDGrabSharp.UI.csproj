@@ -98,7 +98,7 @@
     <Compile Include="SDGrabSharpMain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SDGrabSharpMain.designer.cs">
+    <Compile Include="SDGrabSharpMain.Designer.cs">
       <DependentUpon>SDGrabSharpMain.cs</DependentUpon>
     </Compile>
     <Compile Include="Resources\Strings.Designer.cs">

@@ -610,7 +610,7 @@ namespace XMLTV
                     }
                     else
                     {
-                        string errorMessage = "Duplicate channel(s) found:\r\n";
+                        string errorMessage = "Duplicate channel(s) found (local):\r\n";
                         foreach (var dupe in grouped)
                             errorMessage += string.Format("{0}", dupe);
 
@@ -650,7 +650,7 @@ namespace XMLTV
                         foreach (XmlNode dupeNode in dupeChannels)
                             errorMessage += string.Format("{0}\r\n", dupeNode.Attributes["id"].Value ?? "<NULL>");
 
-                        addError(1001, "Duplicate channel(s) found", XMLTVError.ErrorSeverity.Error, errorMessage, "LoadXmlTV");
+                        addError(1001, "Duplicate channel(s) found (merge data)", XMLTVError.ErrorSeverity.Error, errorMessage, "LoadXmlTV");
                         return true;
                     }
                 }

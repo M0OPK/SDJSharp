@@ -17,10 +17,11 @@ namespace SDGrabSharp.UI
         static void Main()
         {
             Config config = new Config();
-            DataCache cache = new DataCache(config.CacheExpiryHours);
 
             if (System.IO.File.Exists("SDGrabSharp.xml"))
                 config.Load("SDGrabSharp.xml");
+
+            DataCache cache = new DataCache(config.CacheExpiryHours);
 
             if (config.PersistantCache && config.cacheFilename != string.Empty && System.IO.File.Exists(config.cacheFilename))
                 cache.Load(config.cacheFilename);
