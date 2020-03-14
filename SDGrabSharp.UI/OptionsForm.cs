@@ -512,9 +512,47 @@ namespace SDGrabSharp.UI
             config.SDUsername = txtLogin.Text;
             if (txtPassword.Text != passwordHashEntry)
                 config.SDPasswordHash = sdJS.hashPassword(txtPassword.Text);
+
+            // Remove invalid channels from matrix
+            var results = validateMatrix(localTranslate);
+
+            if (results != null)
+                MessageBox.Show($"Invalid custom channels removed{Environment.NewLine}{string.Join(Environment.NewLine, results)}");
+
             config.TranslationMatrix = localTranslate;
             config.Save(filename);
             MessageBox.Show(this, Strings.ConfigSaved, "SDSharp", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private string[] validateMatrix(Dictionary<string, Config.XmlTVTranslation> matrix)
+        {
+            // Pre cache all lineups
+            var lineUps = matrix.Values.Select(row => row.LineupID).Distinct().ToArray();
+            var stationLookup = new Dictionary<string, SDGetLineupResponse.SDLineupStation[]>();
+            foreach(var lineup in lineUps)
+            {
+                var linupData = cache.GetLineupData(sdJS, lineup);
+                if (linupData != null && linupData.stations != null)
+                    stationLookup.Add(lineup, linupData.stations);
+            }
+
+            var toDelete = new List<string>();
+            var removedNames = new List<string>();
+            foreach (var trItem in matrix)
+            {
+                var channel = stationLookup[trItem.Value.LineupID].FirstOrDefault(row => row.stationID.Equals(trItem.Value.SDStationID));
+                //var channel = cache.GetLineupData(sdJS, trItem.Value.LineupID).stations.FirstOrDefault(row => row.stationID == trItem.Value.SDStationID);
+                if (channel == null)
+                {
+                    toDelete.Add(trItem.Key);
+                    removedNames.Add(trItem.Value.CustomTranslate);
+                }
+            }
+
+            foreach (var delItem in toDelete)
+                matrix.Remove(delItem);
+
+            return removedNames.Count > 0 ? removedNames.ToArray() : null;
         }
 
         private void btnLocationCacheClear_Click(object sender, EventArgs e)
@@ -559,10 +597,13 @@ namespace SDGrabSharp.UI
             rdName.Enabled = false;
         }
 
-        private void showAddedChannels()
+        private void showAddedChannels(string filter = "")
         {
             if (cbLineup.SelectedItem == null)
                 return;
+
+            lvAddedChans.SuspendLayout();
+            lvAddedChans.BeginUpdate();
 
             lvAddedChans.Items.Clear();
 
@@ -616,12 +657,19 @@ namespace SDGrabSharp.UI
                         }
                     }
                 }
-                ListViewItem item = new ListViewItem();
-                item.Text = localItem.SDStationID;
-                item.SubItems.Add(localItem.displayNameHelper);
-                item.Tag = (string)localItem.LineupID;
-                lvAddedChans.Items.Add(item);
+
+                if (filter.Equals(string.Empty) || localItem.displayNameHelper.ToLower().Contains(filter.ToLower()))
+                {
+                    ListViewItem item = new ListViewItem();
+                    item.Text = localItem.SDStationID;
+                    item.SubItems.Add(localItem.displayNameHelper);
+                    item.Tag = (string) localItem.LineupID;
+                    lvAddedChans.Items.Add(item);
+                }
             }
+
+            lvAddedChans.EndUpdate();
+            lvAddedChans.ResumeLayout();
         }
 
         private void showAvailableChannels(string filter = "")
@@ -635,6 +683,8 @@ namespace SDGrabSharp.UI
 
             locationInfo = new List<ChannelLocationInfo>();
 
+            lvAvailableChans.SuspendLayout();
+            lvAvailableChans.BeginUpdate();
             lvAvailableChans.Items.Clear();
             int originalPosition = 0;
             foreach (var station in stationInfo.stations)
@@ -656,6 +706,8 @@ namespace SDGrabSharp.UI
                 locationInfo.Add(thisInfo);
                 originalPosition++;
             }
+            lvAvailableChans.EndUpdate();
+            lvAvailableChans.ResumeLayout();
         }
 
         private void cbLineup_SelectedIndexChanged(object sender, EventArgs e)
@@ -1528,11 +1580,8 @@ namespace SDGrabSharp.UI
 
         private void txtChannelFilter_TextChanged(object sender, EventArgs e)
         {
-            lvAvailableChans.SuspendLayout();
-            lvAvailableChans.BeginUpdate();
             showAvailableChannels(txtChannelFilter.Text);
-            lvAvailableChans.EndUpdate();
-            lvAvailableChans.ResumeLayout();
+            showAddedChannels(txtChannelFilter.Text);
         }
     }
 }

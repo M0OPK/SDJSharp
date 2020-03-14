@@ -53,6 +53,17 @@ namespace SchedulesDirect
         public static int HCF = 9999;
     }
 
+    [DataContract]
+    public class SDCachedElement
+    {
+        private DateTime? _cacheDate;
+        public DateTime? cacheDate
+        {
+            get { return _cacheDate ?? DateTime.UtcNow; }
+            set { _cacheDate = value; }
+        }
+    }
+
     /// <summary>
     /// Message contains login/hashed password to authenticate
     /// </summary>
@@ -187,20 +198,19 @@ namespace SchedulesDirect
     /// <summary>
     /// Countries response. Provides list of continents/countries for which service is available
     /// </summary>
-    public class SDCountries
+    public class SDCountries : SDCachedElement
     {
         public List<Continent> continents;
-        public DateTime? cacheDate;
 
         public SDCountries()
         {
             continents = new List<Continent>();
+            cacheDate = DateTime.UtcNow;
         }
 
-        public class Continent
+        public class Continent : SDCachedElement
         {
             public string continentname;
-            public DateTime? cacheDate;
             public List<Country> countries;
 
             public Continent()
@@ -209,9 +219,8 @@ namespace SchedulesDirect
             }
         }
 
-        public class Country
+        public class Country : SDCachedElement
         {
-            public DateTime? cacheDate;
             public string fullName;
             public string shortName;
             public string postalCodeExample;
@@ -233,9 +242,8 @@ namespace SchedulesDirect
     /// Headends response. Provides a list of headends and lineups
     /// </summary>
     [DataContract]
-    public class SDHeadendsResponse
+    public class SDHeadendsResponse : SDCachedElement
     {
-        public DateTime? cacheDate;
         [DataMember]
         public string headend;
         [DataMember]
@@ -246,9 +254,8 @@ namespace SchedulesDirect
         public SDLineup[] lineups;
 
         [DataContract]
-        public class SDLineup
+        public class SDLineup : SDCachedElement
         {
-            public DateTime? cacheDate;
             [DataMember]
             public string name;
             [DataMember]
@@ -313,9 +320,8 @@ namespace SchedulesDirect
     /// Lineup response. Provides list of lineup maps, stations and metadata.
     /// </summary>
     [DataContract]
-    public class SDGetLineupResponse
+    public class SDGetLineupResponse : SDCachedElement
     {
-        public DateTime? cacheDate;
         [DataMember]
         public SDLineupMap[] map;
         [DataMember]
@@ -324,9 +330,8 @@ namespace SchedulesDirect
         public SDLineupMetadata metadata;
 
         [DataContract]
-        public class SDLineupMap
+        public class SDLineupMap : SDCachedElement
         {
-            public DateTime? cacheDate;
             [DataMember]
             public string stationID;
             [DataMember]
@@ -364,9 +369,8 @@ namespace SchedulesDirect
         }
 
         [DataContract]
-        public class SDLineupStation
+        public class SDLineupStation : SDCachedElement
         {
-            public DateTime? cacheDate;
             [DataMember]
             public string stationID;
             [DataMember]
@@ -431,9 +435,8 @@ namespace SchedulesDirect
     /// Preview programme response. Provides details about channels in a line-up we don't have added
     /// </summary>
     [DataContract]
-    public class SDPreviewLineupResponse
+    public class SDPreviewLineupResponse : SDCachedElement
     {
-        public DateTime? cacheDate;
         [DataMember]
         public string channel;
         [DataMember]
