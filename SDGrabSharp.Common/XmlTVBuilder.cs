@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -887,8 +888,36 @@ namespace SDGrabSharp.Common
                                     reqLock.ExitWriteLock();
                                 }
 
-                                // Now we either have 500 items, or all the current items
+                                if (!programmesToRequest.Any())
+                                    continue;
+
                                 var response = sd.GetProgrammes(programmesToRequest.ToArray());
+
+                                if (response == null)
+                                {
+                                    // Sometimes an error happens, and we should then just requeue all the programmes
+                                    var retryTime = DateTime.UtcNow.AddSeconds(10);
+                                    try
+                                    {
+                                        reqLock.EnterWriteLock();
+                                        requestQueue.AddRequest(programmesToRequest.ToArray(), null,
+                                            retryTime);
+                                    }
+                                    finally
+                                    {
+                                        reqLock.ExitWriteLock();
+                                    }
+                                    ActivityLog($"Empty response received. Requeuing {programmesToRequest.Count} programmes for process in 10 secs");
+
+                                    // Also dump any errors, in case there's a clue here
+                                    while (sd.HasErrors)
+                                    {
+                                        var thisError = sd.GetLastError();
+                                        ActivityLog($"Error reported by SD engine. Code {thisError.code}. Text {thisError.description}. Message {thisError.message}");
+                                    }
+                                }
+
+                                // Now we either have 5000 items, or all the current items
                                 if (response != null)
                                 {
                                     // Create joined request/response list
@@ -908,7 +937,8 @@ namespace SDGrabSharp.Common
                                     // Auto requeue retry nodes
                                     var retryResponse = resultList.Where(line =>
                                         line.programmeResponse.code == SDErrors.PROGRAMID_QUEUED);
-                                    if (retryResponse == null || retryResponse.Count() == 0)
+
+                                    if (retryResponse != null && retryResponse.Any())
                                     {
                                         // New list, set retry time to now
                                         List<string> retryList = new List<string>();
@@ -941,6 +971,43 @@ namespace SDGrabSharp.Common
                                                 reqLock.ExitWriteLock();
                                             }
                                         }
+                                        ActivityLog($"Programme(s) queued response received. Requeuing {retryList.Count} programmes for process in 10 secs");
+                                    }
+
+                                    // Handle missing responses
+                                    var missingResponse = programmesToRequest.Where(row => !resultList.Select(xrow => xrow.programmeRequest).Contains(row));
+                                    if (missingResponse != null && missingResponse.Any())
+                                    {
+                                        // New list, set retry time to now
+                                        List<string> retryList = new List<string>();
+                                        DateTime retryTime = DateTime.UtcNow;
+
+                                        foreach (var result in missingResponse)
+                                        {
+                                            // Create new request, add to list
+                                            var thisRequest = result;
+                                            retryList.Add(thisRequest);
+
+                                            // If this retrytime is later than current, update current
+                                            retryTime = DateTime.UtcNow.AddSeconds(10);
+                                        }
+
+                                        // Requeue any retries found with the longest retrytime encountered
+                                        if (retryList.Count() > 0)
+                                        {
+                                            try
+                                            {
+                                                reqLock.EnterWriteLock();
+                                                requestQueue.AddRequest(retryList.ToArray(), null,
+                                                    retryTime);
+                                            }
+                                            finally
+                                            {
+                                                reqLock.ExitWriteLock();
+                                            }
+                                            ActivityLog($"Missing programs in response. Requeuing {retryList.Count} programmes for process in 10 secs");
+                                        }
+
                                     }
 
                                     try
@@ -954,7 +1021,6 @@ namespace SDGrabSharp.Common
                                     }
 
                                     evSDResponseReady.Set();
-
                                 }
                             }
                             continue;
@@ -1083,89 +1149,7 @@ namespace SDGrabSharp.Common
 
                         }
                     }
-/*                    else if (thisItem.sdRequestType == SDRequestQueue.RequestType.SDRequestProgramme)
-                    {
-                        TimeSpan diff = DateTime.UtcNow - lastProgramme;
 
-                        try
-                        {
-                            reqLock.EnterUpgradeableReadLock();
-                            // Check if we should execute now
-                            if (diff.TotalMilliseconds >= 1000 || getTotalProgrammeQueue(requestQueue) >= 5000)
-                            {
-                                var programmeRequestList = new List<string>();
-
-
-                                var response = sd.GetProgrammes(thisItem.programmeRequest);
-                                if (response != null)
-                                {
-                                    // Create joined request/response list
-                                    var resultList =
-                                    (
-                                        from thisResponse in response
-                                        join origRequest in thisItem.programmeRequest
-                                            on thisResponse.programID equals origRequest
-                                        where thisResponse.code == SDErrors.OK
-                                        select new SDResponseQueue.ProgrammeResultPair(origRequest, thisResponse)
-                                    );
-
-                                    // Auto requeue retry nodes
-                                    var retryResponse = resultList.Where(line =>
-                                        line.programmeResponse.code == SDErrors.PROGRAMID_QUEUED);
-                                    if (retryResponse == null || retryResponse.Count() == 0)
-                                    {
-                                        // New list, set retry time to now
-                                        List<string> retryList = new List<string>();
-                                        DateTime retryTime = DateTime.UtcNow;
-
-                                        foreach (var result in retryResponse)
-                                        {
-                                            // Convert dates to datetime
-                                            List<DateTime> originalDates = new List<DateTime>();
-
-                                            // Create new request, add to list
-                                            var thisRequest = result.programmeResponse.programID;
-                                            retryList.Add(thisRequest);
-
-                                            // If this retrytime is later than current, update current
-                                            retryTime = DateTime.UtcNow.AddSeconds(10);
-                                        }
-
-                                        // Requeue any retries found with the longest retrytime encountered
-                                        if (retryList.Count() > 0)
-                                        {
-                                            try
-                                            {
-                                                reqLock.EnterWriteLock();
-                                                requestQueue.AddRequest(retryList.ToArray(), thisItem.stationContext,
-                                                    retryTime);
-                                            }
-                                            finally
-                                            {
-                                                reqLock.ExitWriteLock();
-                                            }
-                                        }
-                                    }
-
-                                    try
-                                    {
-                                        respLock.EnterWriteLock();
-                                        responseQueue.AddResponse(resultList, thisItem.stationContext);
-                                    }
-                                    finally
-                                    {
-                                        respLock.ExitWriteLock();
-                                    }
-
-                                    evSDResponseReady.Set();
-                                }
-                            }
-                        }
-                        finally
-                        {
-                            reqLock.ExitUpgradeableReadLock();
-                        }
-                    }*/
                     currentRequestOperation = SDRequestQueue.RequestType.SDReqeustNone;
                 }
             }
