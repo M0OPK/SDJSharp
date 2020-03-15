@@ -34,7 +34,7 @@ namespace SDGrabSharp.Common
         {
             XmlAttribute cacheAttribute = element.OwnerDocument.CreateAttribute("cachedate");
 
-            cacheAttribute.InnerText = cacheDate.Value.ToString("yyyyMMddHHmmss");
+            cacheAttribute.InnerText = (cacheDate ?? DateTime.UtcNow).ToString("yyyyMMddHHmmss");
             element.Attributes.Append(cacheAttribute);
         }
 

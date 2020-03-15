@@ -744,10 +744,14 @@ namespace SDGrabSharp.Common
         private void SDCommandHandlerThread()
         {
             currentRequestOperation = SDRequestQueue.RequestType.SDReqeustNone;
+            DateTime lastProgramme = DateTime.UtcNow;
+            SDRequestQueue.SDRequestQueueItem lastProgrammeItem = null;
+            var programmeCache = new Dictionary<string, SDProgrammeResponse>();
+
             while (!_requestStop)
             {
                 // Wait for signal
-                evSDRequestReady.WaitOne(1000);
+                evSDRequestReady.WaitOne(200);
 
                 // If it's time to finish, then exit
                 if (_requestStop)
@@ -772,7 +776,193 @@ namespace SDGrabSharp.Common
                             continue;
                         }
 
+                        // Special handling for programmes, we want to pack as many in per request as possible
+                        if (thisOrigItem.sdRequestType == SDRequestQueue.RequestType.SDRequestProgramme)
+                        {
+                            // Either 1 second passed since last programme request or we have more than 5000 programmes
+                            TimeSpan diff = DateTime.UtcNow - lastProgramme;
+                            if (lastProgrammeItem != thisOrigItem)
+                            {
+                                lastProgramme = DateTime.UtcNow;
+                                lastProgrammeItem = thisOrigItem;
+                            }
+
+                            if (diff.TotalMilliseconds >= 1000 || getTotalProgrammeQueue(requestQueue) >= 5000)
+                            {
+                                var cachedResponses = new List<SDProgrammeResponse>();
+                                var programmesToRequest = new List<string>();
+                                var allProgrammeRequests = requestQueue.items.Where(req =>
+                                    req.sdRequestType == SDRequestQueue.RequestType.SDRequestProgramme).ToList();
+                                try
+                                {
+                                    reqLock.EnterWriteLock();
+
+                                    while (programmesToRequest.Count < 5000 && allProgrammeRequests.Any())
+                                    {
+                                        // Handle anything we have cached first
+                                        foreach (var programmeRequest in allProgrammeRequests)
+                                        {
+                                            foreach (var request in programmeRequest.programmeRequest)
+                                            {
+                                                SDProgrammeResponse result;
+                                                if (programmeCache.TryGetValue(request, out result))
+                                                {
+                                                    cachedResponses.Add(result);
+                                                }
+                                            }
+
+                                            programmeRequest.programmeRequest = programmeRequest.programmeRequest
+                                                .Where(row =>
+                                                    !cachedResponses.Select(xrow => xrow.programID).Contains(row))
+                                                .ToArray();
+                                        }
+
+                                        if (cachedResponses.Any())
+                                        {
+                                            // Create joined request/response list
+                                            var resultList =
+                                            (
+                                                from thisResponse in cachedResponses
+                                                join origRequest in programmesToRequest
+                                                    on thisResponse.programID equals origRequest
+                                                where thisResponse.code == SDErrors.OK
+                                                select new SDResponseQueue.ProgrammeResultPair(origRequest, thisResponse)
+                                            ).ToList();
+
+                                            try
+                                            {
+                                                respLock.EnterWriteLock();
+                                                responseQueue.AddResponse(resultList);
+                                            }
+                                            finally
+                                            {
+                                                respLock.ExitWriteLock();
+                                            }
+
+                                            cachedResponses.Clear();
+                                            evSDResponseReady.Set();
+                                            continue;
+                                        }
+
+                                        // Delete any requests that are now empty
+                                        var emptyRequests = allProgrammeRequests.Where(row => !row.programmeRequest.Any()).ToArray();
+                                        foreach (var emptyRequest in emptyRequests)
+                                        {
+                                            requestQueue.items.Remove(emptyRequest);
+                                            allProgrammeRequests.Remove(emptyRequest);
+                                        }
+                                        if (!allProgrammeRequests.Any())
+                                            continue;
+
+                                        var programmeItem = allProgrammeRequests.FirstOrDefault();
+                                        if (programmesToRequest.Count + programmeItem.programmeRequest.Length <= 5000)
+                                        {
+                                            programmesToRequest.AddRange(programmeItem.programmeRequest.Where(prog => !programmesToRequest.Contains(prog)).Distinct());
+                                            requestQueue.items.Remove(programmeItem);
+                                            allProgrammeRequests.Remove(programmeItem);
+                                        }
+                                        else
+                                        {
+                                            var programmeList = programmeItem.programmeRequest.Distinct().ToList();
+                                            while (programmesToRequest.Count < 5000)
+                                            {
+                                                var thisProgramme = programmeList.FirstOrDefault();
+                                                if (!programmesToRequest.Contains(thisProgramme))
+                                                    programmesToRequest.Add(thisProgramme);
+
+                                                programmeList.Remove(thisProgramme);
+                                            }
+
+                                            programmeItem.programmeRequest = programmeList.ToArray();
+                                            if (!programmeItem.programmeRequest.Any())
+                                            {
+                                                allProgrammeRequests.Remove(programmeItem);
+                                                requestQueue.items.Remove(programmeItem);
+                                            }
+                                        }
+                                    }
+                                }
+                                finally
+                                {
+                                    reqLock.ExitWriteLock();
+                                }
+
+                                // Now we either have 500 items, or all the current items
+                                var response = sd.GetProgrammes(programmesToRequest.ToArray());
+                                if (response != null)
+                                {
+                                    // Create joined request/response list
+                                    var resultList =
+                                    (
+                                        from thisResponse in response
+                                        join origRequest in programmesToRequest
+                                            on thisResponse.programID equals origRequest
+                                        where thisResponse.code == SDErrors.OK
+                                        select new SDResponseQueue.ProgrammeResultPair(origRequest, thisResponse)
+                                    ).ToList();
+
+                                    // Add good results to cache
+                                    foreach (var result in resultList)
+                                        programmeCache.Add(result.programmeRequest, result.programmeResponse);
+
+                                    // Auto requeue retry nodes
+                                    var retryResponse = resultList.Where(line =>
+                                        line.programmeResponse.code == SDErrors.PROGRAMID_QUEUED);
+                                    if (retryResponse == null || retryResponse.Count() == 0)
+                                    {
+                                        // New list, set retry time to now
+                                        List<string> retryList = new List<string>();
+                                        DateTime retryTime = DateTime.UtcNow;
+
+                                        foreach (var result in retryResponse)
+                                        {
+                                            // Convert dates to datetime
+                                            List<DateTime> originalDates = new List<DateTime>();
+
+                                            // Create new request, add to list
+                                            var thisRequest = result.programmeResponse.programID;
+                                            retryList.Add(thisRequest);
+
+                                            // If this retrytime is later than current, update current
+                                            retryTime = DateTime.UtcNow.AddSeconds(10);
+                                        }
+
+                                        // Requeue any retries found with the longest retrytime encountered
+                                        if (retryList.Count() > 0)
+                                        {
+                                            try
+                                            {
+                                                reqLock.EnterWriteLock();
+                                                requestQueue.AddRequest(retryList.ToArray(), null,
+                                                    retryTime);
+                                            }
+                                            finally
+                                            {
+                                                reqLock.ExitWriteLock();
+                                            }
+                                        }
+                                    }
+
+                                    try
+                                    {
+                                        respLock.EnterWriteLock();
+                                        responseQueue.AddResponse(resultList);
+                                    }
+                                    finally
+                                    {
+                                        respLock.ExitWriteLock();
+                                    }
+
+                                    evSDResponseReady.Set();
+
+                                }
+                            }
+                            continue;
+                            
+                        }
+
                         thisItem = (SDRequestQueue.SDRequestQueueItem)thisOrigItem.Clone();
+
                         currentRequestOperation = thisItem.sdRequestType;
                         try
                         {
@@ -893,72 +1083,109 @@ namespace SDGrabSharp.Common
 
                         }
                     }
-                    else if (thisItem.sdRequestType == SDRequestQueue.RequestType.SDRequestProgramme)
+/*                    else if (thisItem.sdRequestType == SDRequestQueue.RequestType.SDRequestProgramme)
                     {
-                        var response = sd.GetProgrammes(thisItem.programmeRequest);
-                        if (response != null)
+                        TimeSpan diff = DateTime.UtcNow - lastProgramme;
+
+                        try
                         {
-                            // Create joined request/response list
-                            var resultList =
-                                (
-                                    from thisResponse in response
-                                    join origRequest in thisItem.programmeRequest
-                                        on thisResponse.programID equals origRequest
-                                    where thisResponse.code == SDErrors.OK
-                                    select new SDResponseQueue.ProgrammeResultPair(origRequest, thisResponse)
-                                );
-
-                            // Auto requeue retry nodes
-                            var retryResponse = resultList.Where(line => line.programmeResponse.code == SDErrors.PROGRAMID_QUEUED);
-                            if (retryResponse == null || retryResponse.Count() == 0)
+                            reqLock.EnterUpgradeableReadLock();
+                            // Check if we should execute now
+                            if (diff.TotalMilliseconds >= 1000 || getTotalProgrammeQueue(requestQueue) >= 5000)
                             {
-                                // New list, set retry time to now
-                                List<string> retryList = new List<string>();
-                                DateTime retryTime = DateTime.UtcNow;
+                                var programmeRequestList = new List<string>();
 
-                                foreach (var result in retryResponse)
+
+                                var response = sd.GetProgrammes(thisItem.programmeRequest);
+                                if (response != null)
                                 {
-                                    // Convert dates to datetime
-                                    List<DateTime> originalDates = new List<DateTime>();
+                                    // Create joined request/response list
+                                    var resultList =
+                                    (
+                                        from thisResponse in response
+                                        join origRequest in thisItem.programmeRequest
+                                            on thisResponse.programID equals origRequest
+                                        where thisResponse.code == SDErrors.OK
+                                        select new SDResponseQueue.ProgrammeResultPair(origRequest, thisResponse)
+                                    );
 
-                                    // Create new request, add to list
-                                    var thisRequest = result.programmeResponse.programID;
-                                    retryList.Add(thisRequest);
+                                    // Auto requeue retry nodes
+                                    var retryResponse = resultList.Where(line =>
+                                        line.programmeResponse.code == SDErrors.PROGRAMID_QUEUED);
+                                    if (retryResponse == null || retryResponse.Count() == 0)
+                                    {
+                                        // New list, set retry time to now
+                                        List<string> retryList = new List<string>();
+                                        DateTime retryTime = DateTime.UtcNow;
 
-                                    // If this retrytime is later than current, update current
-                                    retryTime = DateTime.UtcNow.AddSeconds(10);
-                                }
+                                        foreach (var result in retryResponse)
+                                        {
+                                            // Convert dates to datetime
+                                            List<DateTime> originalDates = new List<DateTime>();
 
-                                // Requeue any retries found with the longest retrytime encountered
-                                if (retryList.Count() > 0)
-                                {
+                                            // Create new request, add to list
+                                            var thisRequest = result.programmeResponse.programID;
+                                            retryList.Add(thisRequest);
+
+                                            // If this retrytime is later than current, update current
+                                            retryTime = DateTime.UtcNow.AddSeconds(10);
+                                        }
+
+                                        // Requeue any retries found with the longest retrytime encountered
+                                        if (retryList.Count() > 0)
+                                        {
+                                            try
+                                            {
+                                                reqLock.EnterWriteLock();
+                                                requestQueue.AddRequest(retryList.ToArray(), thisItem.stationContext,
+                                                    retryTime);
+                                            }
+                                            finally
+                                            {
+                                                reqLock.ExitWriteLock();
+                                            }
+                                        }
+                                    }
+
                                     try
                                     {
-                                        reqLock.EnterWriteLock();
-                                        requestQueue.AddRequest(retryList.ToArray(), thisItem.stationContext, retryTime);
+                                        respLock.EnterWriteLock();
+                                        responseQueue.AddResponse(resultList, thisItem.stationContext);
                                     }
                                     finally
                                     {
-                                        reqLock.ExitWriteLock();
+                                        respLock.ExitWriteLock();
                                     }
+
+                                    evSDResponseReady.Set();
                                 }
                             }
-
-                            try
-                            {
-                                respLock.EnterWriteLock();
-                                responseQueue.AddResponse(resultList, thisItem.stationContext);
-                            }
-                            finally
-                            {
-                                respLock.ExitWriteLock();
-                            }
-                            evSDResponseReady.Set();
                         }
-                    }
+                        finally
+                        {
+                            reqLock.ExitUpgradeableReadLock();
+                        }
+                    }*/
                     currentRequestOperation = SDRequestQueue.RequestType.SDReqeustNone;
                 }
             }
+        }
+
+        private int getTotalProgrammeQueue(SDRequestQueue queue)
+        {
+            int programmeCount = 0;
+            var allRequests = new List<string>();
+
+            foreach (var queueItem in queue.items.Where(row => row.sdRequestType == SDRequestQueue.RequestType.SDRequestProgramme).Distinct())
+            {
+                foreach (var request in queueItem.programmeRequest)
+                {
+                    if (!allRequests.Contains(request))
+                        allRequests.Add(request);
+                }
+            }
+
+            return allRequests.Count;
         }
 
         private IEnumerable<XmlNode> FindProgrammeNodesByID(string sdProgrammeId)

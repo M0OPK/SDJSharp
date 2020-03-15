@@ -15,6 +15,9 @@ namespace SchedulesDirect
 {
     public partial class SDJson
     {
+#if DEBUG
+        private static readonly string DEBUG_FILE = "SDGrabSharp.debug.txt";
+#endif
         private string loginToken;
         private List<SDJsonError> localErrors;
         private static string urlBase = "https://json.schedulesdirect.org/20141201/";
@@ -664,7 +667,15 @@ namespace SchedulesDirect
         private V PostJSON<V, T>(string command, T obj, string token = "", WebHeaderCollection headers = null)
         {
             string requestString = CreateJSONstring(obj);
-            return ParseJSON<V>(WebPost(command, requestString, token, headers));
+#if DEBUG
+            DebugLog($"JSON Post [{command}] Request: {requestString}{Environment.NewLine}");
+#endif
+            var response = WebPost(command, requestString, token, headers);
+            var result = ParseJSON<V>(response);
+#if DEBUG
+            DebugLog($"JSON Post Response: {response}{Environment.NewLine}");
+#endif
+            return result;
         }
 
         // Perform get action and parse response via JSON serializer to known object type
@@ -797,5 +808,13 @@ namespace SchedulesDirect
         {
             addError(ex);
         }
+
+#if DEBUG
+        private void DebugLog(string debugText)
+        {
+            string logStamp = DateTime.Now.ToString("O");
+            File.AppendAllText(DEBUG_FILE, $"{logStamp}: {debugText}");
+        }
+#endif
     }
 }
