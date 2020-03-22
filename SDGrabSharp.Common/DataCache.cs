@@ -52,7 +52,7 @@ namespace SDGrabSharp.Common
 
         public IEnumerable<SDHeadendsResponse> GetHeadendData(SDJson sd, string country, string postcode)
         {
-            string headendKey = string.Format("{0},{1}", country, postcode);
+            string headendKey = $"{country},{postcode}";
             if (!headendData.ContainsKey(headendKey))
             {
                 var headendDataJS = sd.GetHeadends(country, postcode);
@@ -458,7 +458,8 @@ namespace SDGrabSharp.Common
                 foreach (XmlNode headEndListNode in headendDataNode.SelectNodes("HeadEndList"))
                 {
                     List<SDHeadendsResponse> headEnds = new List<SDHeadendsResponse>();
-                    string thisKey = string.Format("{0},{1}", headEndListNode.Attributes["country"].Value, headEndListNode.Attributes["postcode"].Value);
+                    string thisKey =
+                        $"{headEndListNode.Attributes["country"].Value},{headEndListNode.Attributes["postcode"].Value}";
 
                     foreach (XmlNode headEndNode in headEndListNode.SelectNodes("HeadEnd"))
                     {

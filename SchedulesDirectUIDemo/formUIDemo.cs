@@ -36,7 +36,8 @@ namespace SchedulesDirect.UIDemo
 
             var result = sd.GetStatus();
             if (result != null)
-                rtResult.Text = string.Format("{0}\r\n{1}", result.systemStatus.FirstOrDefault().status, result.systemStatus.FirstOrDefault().message);
+                rtResult.Text =
+                    $"{result.systemStatus.FirstOrDefault().status}\r\n{result.systemStatus.FirstOrDefault().message}";
         }
 
         private void btnServices_Click(object sender, EventArgs e)
@@ -54,7 +55,7 @@ namespace SchedulesDirect.UIDemo
             string serviceText = "Services:\r\n";
             foreach (var service in serviceList)
             {
-                serviceText += string.Format("{0} - {1}: {2}\r\n", service.type, service.description, service.uri);
+                serviceText += $"{service.type} - {service.description}: {service.uri}\r\n";
             }
             rtResult.Text = serviceText;
         }
@@ -89,7 +90,7 @@ namespace SchedulesDirect.UIDemo
 
             foreach (var tx in txList)
             {
-                lbContinents.Items.Add(string.Format("{0}\t{1}", tx.transmitterArea, tx.transmitterID));
+                lbContinents.Items.Add($"{tx.transmitterArea}\t{tx.transmitterID}");
             }
             mode = 2;
         }
@@ -110,7 +111,7 @@ namespace SchedulesDirect.UIDemo
                 if (headEnd == null)
                     continue;
 
-                lbContinents.Items.Add(string.Format("{0}\t{1}\t{2}", headEnd.headend, headEnd.location, headEnd.transport));
+                lbContinents.Items.Add($"{headEnd.headend}\t{headEnd.location}\t{headEnd.transport}");
             }
             mode = 3;
             if (lbContinents.Items.Count > 0)
@@ -187,7 +188,7 @@ namespace SchedulesDirect.UIDemo
             lbCountries.Items.Clear();
             foreach (var lineup in lineups)
             {
-                lbCountries.Items.Add(string.Format("{0}\t{1}\t{2}", lineup.lineup, lineup.name, lineup.uri));
+                lbCountries.Items.Add($"{lineup.lineup}\t{lineup.name}\t{lineup.uri}");
             }
         }
 

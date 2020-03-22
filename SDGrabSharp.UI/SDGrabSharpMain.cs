@@ -85,7 +85,7 @@ namespace SDGrabSharp.UI
                 }));
                 return;
             }
-            rtActivityLog.AppendText(string.Format("{0}\r\n", args.ActivityText));
+            rtActivityLog.AppendText($"{args.ActivityText}\r\n");
             rtActivityLog.SelectionStart = rtActivityLog.Text.Length;
             rtActivityLog.ScrollToCaret();
             Application.DoEvents();

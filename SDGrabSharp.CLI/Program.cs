@@ -92,7 +92,7 @@ namespace SDGrabSharp.CLI
                     {
                         foreach(var error in builder.GetXmlTVErrors())
                         {
-                            Console.WriteLine(string.Format("{0}: {1}", error.code, error.description));
+                            Console.WriteLine($"{error.code}: {error.description}");
                         }
                     }
                     Console.WriteLine(string.Format(Strings.XmlTVMergeFailed, xmlTvFile));

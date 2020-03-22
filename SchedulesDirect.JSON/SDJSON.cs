@@ -28,7 +28,7 @@ namespace SchedulesDirect
         public SDJson(string clientUserAgent = "", string token = "")
         {
             localErrors = new List<SDJsonError>();
-            userAgentFull = (clientUserAgent == string.Empty) ? userAgentDefault : string.Format("{0} ({1})", userAgentShort, clientUserAgent);
+            userAgentFull = (clientUserAgent == string.Empty) ? userAgentDefault : $"{userAgentShort} ({clientUserAgent})";
 
             // If token supplied, use it
             if (token != string.Empty)
@@ -317,7 +317,7 @@ namespace SchedulesDirect
         {
             try
             {
-                return GetJSON<IEnumerable<SDHeadendsResponse>>(string.Format("headends?country={0}&postalcode={1}", country, postcode), loginToken);
+                return GetJSON<IEnumerable<SDHeadendsResponse>>($"headends?country={country}&postalcode={postcode}", loginToken);
             }
             catch (Exception ex)
             {

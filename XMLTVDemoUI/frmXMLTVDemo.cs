@@ -40,9 +40,9 @@ namespace XMLTVDemoUI
             string errorLine = string.Empty;
             foreach (XmlTV.XMLTVError thisError in xmlTV.GetRawErrors())
             {
-                errorLine += string.Format("{0} ({1})\r\n", thisError.message, thisError.code.ToString());
+                errorLine += $"{thisError.message} ({thisError.code.ToString()})\r\n";
                 if (thisError.description != string.Empty)
-                    errorLine += string.Format("{0}\r\n", thisError.description);
+                    errorLine += $"{thisError.description}\r\n";
             }
 
             if (errorLine != string.Empty)

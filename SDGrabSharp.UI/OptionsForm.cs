@@ -418,7 +418,7 @@ namespace SDGrabSharp.UI
 
                 foreach (var headend in headendData)
                 {
-                    var node = tvHeadends.Nodes.Add(string.Format("{0}/{1}", headend.location, headend.headend));
+                    var node = tvHeadends.Nodes.Add($"{headend.location}/{headend.headend}");
 
                     foreach (var lineup in headend.lineups)
                         node.Nodes.Add(lineup.lineup, lineup.name);
@@ -1071,7 +1071,7 @@ namespace SDGrabSharp.UI
                 initialFile = "persistentcache.xml";
 
             dialog.InitialDirectory = folder;
-            dialog.Filter = string.Format("{0}|*.xml|{1}|*.*", Strings.XmlFiles, Strings.AllFiles);
+            dialog.Filter = $"{Strings.XmlFiles}|*.xml|{Strings.AllFiles}|*.*";
             dialog.FileName = initialFile;
             dialog.Title = Strings.SaveCacheDialogCaption;
             var dialogResult = dialog.ShowDialog(this);
@@ -1327,7 +1327,7 @@ namespace SDGrabSharp.UI
 
             dialog.InitialDirectory = folder;
             dialog.Title = Strings.SaveConfigDialogCaption;
-            dialog.Filter = string.Format("{0}|*.xml|{1}|*.*", Strings.XmlFiles, Strings.AllFiles);
+            dialog.Filter = $"{Strings.XmlFiles}|*.xml|{Strings.AllFiles}|*.*";
             dialog.FileName = initialFile;
             var dialogResult = dialog.ShowDialog(this);
 
@@ -1538,7 +1538,7 @@ namespace SDGrabSharp.UI
                 initialFile = "guide.xml";
 
             dialog.InitialDirectory = folder;
-            dialog.Filter = string.Format("{0}|*.xml|{1}|*.*", Strings.XmlFiles, Strings.AllFiles);
+            dialog.Filter = $"{Strings.XmlFiles}|*.xml|{Strings.AllFiles}|*.*";
             dialog.FileName = initialFile;
             dialog.Title = Strings.SaveXmlTvFileDialog;
             var dialogResult = dialog.ShowDialog(this);

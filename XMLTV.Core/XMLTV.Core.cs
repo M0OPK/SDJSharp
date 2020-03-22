@@ -264,7 +264,8 @@ namespace XMLTV
 
                     if (collideChannel != null)
                     {
-                        addError(1001, "Duplicate channel found", XMLTVError.ErrorSeverity.Error, string.Format("Duplicate channel found:\r\n{0}\r\n", channelID), "AddChannel");
+                        addError(1001, "Duplicate channel found", XMLTVError.ErrorSeverity.Error,
+                            $"Duplicate channel found:\r\n{channelID}\r\n", "AddChannel");
                         return null;
                     }
                 }
@@ -354,7 +355,7 @@ namespace XMLTV
                     if (collide != null)
                     {
                         addError(2001, "Duplicate programme found", XMLTVError.ErrorSeverity.Error,
-                                 string.Format("Duplicate programme found:\r\n{0} from {1} to {2}", start, stop, channel), "AddProgramme");
+                            $"Duplicate programme found:\r\n{start} from {stop} to {channel}", "AddProgramme");
                         return null;
                     }
                 }
@@ -612,7 +613,7 @@ namespace XMLTV
                     {
                         string errorMessage = "Duplicate channel(s) found (local):\r\n";
                         foreach (var dupe in grouped)
-                            errorMessage += string.Format("{0}", dupe);
+                            errorMessage += $"{dupe}";
 
                         addError(1001, "Duplicate channel(s) found", XMLTVError.ErrorSeverity.Error, errorMessage, "LoadXmlTV");
                     }
@@ -648,7 +649,7 @@ namespace XMLTV
                     {
                         string errorMessage = "Duplicate channels found:\r\n";
                         foreach (XmlNode dupeNode in dupeChannels)
-                            errorMessage += string.Format("{0}\r\n", dupeNode.Attributes["id"].Value ?? "<NULL>");
+                            errorMessage += $"{dupeNode.Attributes["id"].Value ?? "<NULL>"}\r\n";
 
                         addError(1001, "Duplicate channel(s) found (merge data)", XMLTVError.ErrorSeverity.Error, errorMessage, "LoadXmlTV");
                         return true;
@@ -710,7 +711,7 @@ namespace XMLTV
                     {
                         string errorMessage = "Duplicate programmes found:\r\n";
                         foreach (var dupe in grouped)
-                            errorMessage += string.Format("{0} at {1}\r\n", dupe.channelID, dupe.startTime);
+                            errorMessage += $"{dupe.channelID} at {dupe.startTime}\r\n";
 
                         addError(2001, "Duplicate programmes(s) found", XMLTVError.ErrorSeverity.Error, errorMessage, "LoadXmlTV");
                     }
@@ -759,10 +760,8 @@ namespace XMLTV
                     {
                         string errorMessage = "Duplicate programmes found:\r\n";
                         foreach (XmlNode dupeNode in dupeProgrammes)
-                            errorMessage += string.Format("{0} between {1} and {2}\r\n",
-                                            dupeNode.Attributes["channel"].Value ?? "<NULL>",
-                                            dupeNode.Attributes["start"].Value ?? "<NULL>",
-                                            dupeNode.Attributes["stop"].Value ?? "<NULL>");
+                            errorMessage +=
+                                $"{dupeNode.Attributes["channel"].Value ?? "<NULL>"} between {dupeNode.Attributes["start"].Value ?? "<NULL>"} and {dupeNode.Attributes["stop"].Value ?? "<NULL>"}\r\n";
 
                         addError(2001, "Duplicate programmes(s) found", XMLTVError.ErrorSeverity.Error, errorMessage, "LoadXmlTV");
                         return true;

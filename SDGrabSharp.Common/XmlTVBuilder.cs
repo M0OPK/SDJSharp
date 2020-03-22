@@ -76,7 +76,7 @@ namespace SDGrabSharp.Common
 
         public void StartThreads()
         {
-            sdRequestThread = new Thread(() => SDCommandHandlerThread());
+            sdRequestThread = new Thread(SDCommandHandlerThread);
             sdRequestThread.Start();
         }
 
@@ -121,8 +121,7 @@ namespace SDGrabSharp.Common
                 try
                 {
                     respLock.EnterReadLock();
-                    responseQueueReadyItems = (responseQueue.items.
-                        Where(line => line.sdResponseType == responseType).FirstOrDefault() != null);
+                    responseQueueReadyItems = (responseQueue.items.FirstOrDefault(line => line.sdResponseType == responseType) != null);
                 }
                 finally
                 {
@@ -136,7 +135,7 @@ namespace SDGrabSharp.Common
                 try
                 {
                     reqLock.EnterReadLock();
-                    hasRequestItem = (requestQueue.items.Where(line => line.sdRequestType == requestType).FirstOrDefault() != null);
+                    hasRequestItem = (requestQueue.items.FirstOrDefault(line => line.sdRequestType == requestType) != null);
                 }
                 finally
                 {
@@ -151,7 +150,7 @@ namespace SDGrabSharp.Common
                 try
                 {
                     respLock.EnterReadLock();
-                    hasResponseItem = (responseQueue.items.Where(line => line.sdResponseType == responseType).FirstOrDefault() != null);
+                    hasResponseItem = (responseQueue.items.FirstOrDefault(line => line.sdResponseType == responseType) != null);
                 }
                 finally
                 {
@@ -175,7 +174,7 @@ namespace SDGrabSharp.Common
                 if (channelNode.Attributes["id"] == null)
                     continue;
 
-                ActivityLog(string.Format("Working on channel {0}", channel.Value.Attributes["id"].Value));
+                ActivityLog($"Working on channel {channel.Value.Attributes["id"].Value}");
 
                 string stationId = channel.Key;
 
@@ -244,9 +243,7 @@ namespace SDGrabSharp.Common
                     try
                     {
                         respLock.EnterUpgradeableReadLock();
-                        var tempResult = responseQueue.items.
-                            Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseMD5).
-                            FirstOrDefault();
+                        var tempResult = responseQueue.items.FirstOrDefault(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseMD5);
                         result = tempResult.md5Response;
                         try
                         {
@@ -312,7 +309,7 @@ namespace SDGrabSharp.Common
                     }
                 }
             }
-            ActivityLog(string.Format("Processed {0} MD5 responses", md5Count.ToString()));
+            ActivityLog($"Processed {md5Count.ToString()} MD5 responses");
         }
 
         private void processScheduleResponses(List<string> programmeRequestList, int scheduleRequestsSent,
@@ -335,8 +332,7 @@ namespace SDGrabSharp.Common
                     {
                         respLock.EnterUpgradeableReadLock();
                         var tempResult = responseQueue.items.
-                            Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseSchedule).
-                            FirstOrDefault();
+                            FirstOrDefault(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseSchedule);
                         result = tempResult.scheduleResponse;
                         try
                         {
@@ -390,9 +386,7 @@ namespace SDGrabSharp.Common
                                 string subtitleLang = null;
                                 var categories = new List<XmlLangText>();
 
-                                if (thisProgramme.descriptions != null && thisProgramme.descriptions.description1000 != null
-                                 && thisProgramme.descriptions.description1000.FirstOrDefault() != null
-                                 && thisProgramme.descriptions.description1000.FirstOrDefault().description != null)
+                                if (thisProgramme.descriptions?.description1000?.FirstOrDefault() != null && thisProgramme.descriptions.description1000.FirstOrDefault().description != null)
                                 {
                                     description = thisProgramme.descriptions.description1000.FirstOrDefault().description;
                                     descLang = fixLang(thisProgramme.descriptions.description1000.FirstOrDefault().descriptionLanguage);
@@ -443,7 +437,7 @@ namespace SDGrabSharp.Common
                 }
             }
 
-            ActivityLog(string.Format("Processed {0} schedules with {1} programmes", scheduleCount.ToString(), programmeCount.ToString()));
+            ActivityLog($"Processed {scheduleCount.ToString()} schedules with {programmeCount.ToString()} programmes");
         }
 
         private void processProgrammeResponses(int programRequestsSent, ref int programmeCount)
@@ -464,8 +458,7 @@ namespace SDGrabSharp.Common
                     try
                     {
                         respLock.EnterUpgradeableReadLock();
-                        var tempResult = responseQueue.items.
-                            Where(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseProgramme).FirstOrDefault();
+                        var tempResult = responseQueue.items.FirstOrDefault(line => line.sdResponseType == SDResponseQueue.ResponseType.SDResponseProgramme);
                         result = tempResult.programmeResponse;
                         try
                         {
@@ -530,7 +523,7 @@ namespace SDGrabSharp.Common
                     }
                 }
             }
-            ActivityLog(string.Format("Processed {0} programme responses", programmeCount.ToString()));
+            ActivityLog($"Processed {programmeCount.ToString()} programme responses");
         }
 
         private void validateCorrectProgrammes()
@@ -540,7 +533,7 @@ namespace SDGrabSharp.Common
                 Where(line => line.SelectNodes("title").Count == 0 && line.Attributes["sd-programmeid"] != null).
                 Select(line => line.Attributes["sd-programmeid"].Value).Distinct().ToArray();
 
-            if (emptyProgrammes.Count() == 0)
+            if (!emptyProgrammes.Any())
                 return;
 
             // Request programmes
@@ -993,7 +986,7 @@ namespace SDGrabSharp.Common
                                         }
 
                                         // Requeue any retries found with the longest retrytime encountered
-                                        if (retryList.Count() > 0)
+                                        if (retryList.Any())
                                         {
                                             try
                                             {
@@ -1099,7 +1092,7 @@ namespace SDGrabSharp.Common
 
                             // Auto requeue retry nodes
                             var retryResponse = resultList.Where(line => line.scheduleResponse.code == SDErrors.SCHEDULE_QUEUED);
-                            if (retryResponse == null || retryResponse.Count() == 0)
+                            if (retryResponse == null || !retryResponse.Any())
                             {
                                 // New list, set retry time to now
                                 List<SDScheduleRequest> retryList = new List<SDScheduleRequest>();
@@ -1352,7 +1345,7 @@ namespace SDGrabSharp.Common
 
             foreach(XmlNode md5Node in md5Nodes)
             {
-                string md5Item = string.Format("{0},{1}", md5Node.Attributes["date"].Value, md5Node.InnerText);
+                string md5Item = $"{md5Node.Attributes["date"].Value},{md5Node.InnerText}";
                 listMD5.Add(md5Item);
             }
 
@@ -1383,8 +1376,8 @@ namespace SDGrabSharp.Common
             if (md5Nodes == null)
                 return;
 
-            var md5Node = md5Nodes.Cast<XmlNode>().
-                Where(node => node.Attributes["date"] != null && node.Attributes["date"].Value == date).FirstOrDefault();
+            var md5Node = md5Nodes.
+                Cast<XmlNode>().FirstOrDefault(node => node.Attributes["date"] != null && node.Attributes["date"].Value == date);
 
             if (md5Node != null)
                 md5Node.InnerText = md5;
@@ -1410,8 +1403,8 @@ namespace SDGrabSharp.Common
             if (md5Nodes == null)
                 return;
 
-            var md5Node = md5Nodes.Cast<XmlNode>().
-                Where(node => node.Attributes["date"] != null && node.Attributes["date"].Value == date).FirstOrDefault();
+            var md5Node = md5Nodes.
+                Cast<XmlNode>().FirstOrDefault(node => node.Attributes["date"] != null && node.Attributes["date"].Value == date);
 
             if (md5Node != null)
                 thisNode.RemoveChild(md5Node);
@@ -1515,10 +1508,9 @@ namespace SDGrabSharp.Common
                         programmeNodesByProgrammeID.Add(sdProgrammeId, new List<XmlElement>());
 
                     // Find existing node
-                    var existNode = programmeNodesByProgrammeID[sdProgrammeId].
-                        Where(line => line.Attributes["start"] != null && line.Attributes["channel"] != null
-                           && line.Attributes["start"].Value == startString
-                           && line.Attributes["channel"].Value == channel).FirstOrDefault();
+                    var existNode = programmeNodesByProgrammeID[sdProgrammeId].FirstOrDefault(line => line.Attributes["start"] != null && line.Attributes["channel"] != null
+                                                                                                                                       && line.Attributes["start"].Value == startString
+                                                                                                                                       && line.Attributes["channel"].Value == channel);
 
                     // If none, add this one
                     if (existNode == null)
@@ -1757,7 +1749,7 @@ namespace SDGrabSharp.Common
         {
             EventHandler<ActivityLogEventArgs> logHandler = ActivityLogUpdate;
             var args = new ActivityLogEventArgs();
-            args.ActivityText = string.Format("{0}: {1}", DateTime.Now.ToString("HH:mm:ss.ffffff"), text);
+            args.ActivityText = $"{DateTime.Now.ToString("HH:mm:ss.ffffff")}: {text}";
             if (logHandler != null)
                 logHandler.Invoke(this, args);
         }
