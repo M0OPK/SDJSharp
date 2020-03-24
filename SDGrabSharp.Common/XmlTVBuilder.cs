@@ -536,10 +536,13 @@ namespace SDGrabSharp.Common
             if (!emptyProgrammes.Any())
                 return;
 
+            ActivityLog($"Found {emptyProgrammes.Length} empty programmes");
+
             // Request programmes
             requestQueue.AddRequest(emptyProgrammes);
 
             int dummy = 0;
+
 
             // Process responses
             processProgrammeResponses(0, ref dummy);
@@ -773,7 +776,8 @@ namespace SDGrabSharp.Common
                         // Special handling for programmes, we want to pack as many in per request as possible
                         if (thisOrigItem.sdRequestType == SDRequestQueue.RequestType.SDRequestProgramme)
                         {
-                            // Either 1 second passed since last programme request or we have more than 5000 programmes
+                            currentRequestOperation = SDRequestQueue.RequestType.SDRequestProgramme;
+                            // Either 1 second passed since last programme request or we have more than the maximum programmes
                             TimeSpan diff = DateTime.UtcNow - lastProgramme;
                             if (lastProgrammeItem != thisOrigItem)
                             {
@@ -781,7 +785,7 @@ namespace SDGrabSharp.Common
                                 lastProgrammeItem = thisOrigItem;
                             }
 
-                            if (diff.TotalMilliseconds >= 1000 || getTotalProgrammeQueue(requestQueue) >= 5000)
+                            if (diff.TotalMilliseconds >= 1000 || getTotalProgrammeQueue(requestQueue) >= config.ProgrammeRetrievalItems)
                             {
                                 var cachedResponses = new List<SDProgrammeResponse>();
                                 var programmesToRequest = new List<string>();
@@ -791,7 +795,7 @@ namespace SDGrabSharp.Common
                                 {
                                     reqLock.EnterWriteLock();
 
-                                    while (programmesToRequest.Count < 5000 && allProgrammeRequests.Any())
+                                    while (programmesToRequest.Count < config.ProgrammeRetrievalItems && allProgrammeRequests.Any())
                                     {
                                         // Handle anything we have cached first
                                         foreach (var programmeRequest in allProgrammeRequests)
@@ -845,11 +849,12 @@ namespace SDGrabSharp.Common
                                             requestQueue.items.Remove(emptyRequest);
                                             allProgrammeRequests.Remove(emptyRequest);
                                         }
+
                                         if (!allProgrammeRequests.Any())
                                             continue;
 
                                         var programmeItem = allProgrammeRequests.FirstOrDefault();
-                                        if (programmesToRequest.Count + programmeItem.programmeRequest.Length <= 5000)
+                                        if (programmesToRequest.Count + programmeItem.programmeRequest.Length <= config.ProgrammeRetrievalItems)
                                         {
                                             programmesToRequest.AddRange(programmeItem.programmeRequest.Where(prog => !programmesToRequest.Contains(prog)).Distinct());
                                             requestQueue.items.Remove(programmeItem);
@@ -858,7 +863,7 @@ namespace SDGrabSharp.Common
                                         else
                                         {
                                             var programmeList = programmeItem.programmeRequest.Distinct().ToList();
-                                            while (programmesToRequest.Count < 5000)
+                                            while (programmesToRequest.Count < config.ProgrammeRetrievalItems)
                                             {
                                                 var thisProgramme = programmeList.FirstOrDefault();
                                                 if (!programmesToRequest.Contains(thisProgramme))
@@ -910,7 +915,7 @@ namespace SDGrabSharp.Common
                                     }
                                 }
 
-                                // Now we either have 5000 items, or all the current items
+                                // Now we either have the maximum items, or all the current items
                                 if (response != null)
                                 {
                                     // Create joined request/response list
@@ -1016,8 +1021,8 @@ namespace SDGrabSharp.Common
                                     evSDResponseReady.Set();
                                 }
                             }
+                            currentRequestOperation = SDRequestQueue.RequestType.SDReqeustNone;
                             continue;
-                            
                         }
 
                         thisItem = (SDRequestQueue.SDRequestQueueItem)thisOrigItem.Clone();

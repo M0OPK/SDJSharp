@@ -16,7 +16,10 @@ namespace SDGrabSharp.CLI
         private static DataCache cache;
         private static XmlTVBuilder builder;
         private static bool needcr;
-        private static string version;
+        private static string cliVersion;
+        private static string commonVersion;
+        private static string jsonVersion;
+        private static string xmltvVersion;
 
         private class localArgs
         {
@@ -34,7 +37,10 @@ namespace SDGrabSharp.CLI
 
         static void Main(string[] args)
         {
-            version = typeof(SDGrabSharp.CLI.Program).Assembly.GetName().Version.ToString();
+            cliVersion = typeof(SDGrabSharp.CLI.Program).Assembly.GetName().Version.ToString();
+            commonVersion = typeof(SDGrabSharp.Common.XmlTVBuilder).Assembly.GetName().Version.ToString();
+            jsonVersion = typeof(SchedulesDirect.SDJson).Assembly.GetName().Version.ToString();
+            xmltvVersion = typeof(XMLTV.XmlTV).Assembly.GetName().Version.ToString();
 
             // Read arguments
             var argData = processArgs(args);
@@ -45,6 +51,8 @@ namespace SDGrabSharp.CLI
                 Console.WriteLine(string.Format(Strings.ConfigNotFound, argData.configFile));
                 Environment.Exit(1);
             }
+
+            Console.WriteLine($"SDGrabSharp CLI {cliVersion}. Common lib {commonVersion}. JSONLib {jsonVersion}. XMLTVLib {xmltvVersion}");
 
             // Check any specified XMLTV files exist
             bool badXmlTV = false;
@@ -182,7 +190,7 @@ namespace SDGrabSharp.CLI
 
         private static void DoUsage(bool helpMode = false)
         {
-            Console.WriteLine(string.Format(Strings.HelpText, version));
+            Console.WriteLine(string.Format(Strings.HelpText, cliVersion));
         }
 
         private static void updateActivityLog(object sender, XmlTVBuilder.ActivityLogEventArgs args)
