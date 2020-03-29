@@ -179,11 +179,13 @@ namespace SDGrabSharp.Common
             {
                 public string programmeRequest;
                 public SDProgrammeResponse programmeResponse;
+                public bool isCached;
 
-                public ProgrammeResultPair(string request, SDProgrammeResponse response)
+                public ProgrammeResultPair(string request, SDProgrammeResponse response, bool cached = false)
                 {
                     programmeRequest = request;
                     programmeResponse = response;
+                    isCached = cached;
                 }
             }
 

@@ -442,6 +442,7 @@ namespace SDGrabSharp.Common
 
         private void processProgrammeResponses(int programRequestsSent, ref int programmeCount)
         {
+            int cachedResults = 0;
             // Keep processing programme responses while there are queued requests 
             while (checkHasItems(SDRequestQueue.RequestType.SDRequestProgramme, SDResponseQueue.ResponseType.SDResponseProgramme, false)
                 || currentRequestOperation == SDRequestQueue.RequestType.SDRequestProgramme)
@@ -481,6 +482,9 @@ namespace SDGrabSharp.Common
                     // Process each response in this queue item
                     foreach (var thisResponse in result.Where(line => line.programmeResponse.code == SDErrors.OK))
                     {
+                        if (thisResponse.isCached)
+                            cachedResults++;
+
                         programmeCount++;
                         SendStatusUpdate(null, Math.Min(programmeCount, programRequestsSent), programRequestsSent);
 
@@ -523,7 +527,12 @@ namespace SDGrabSharp.Common
                     }
                 }
             }
-            ActivityLog($"Processed {programmeCount.ToString()} programme responses");
+
+            if (cachedResults == 0)
+                ActivityLog($"Processed {programmeCount.ToString()} unique programme responses");
+            else
+                ActivityLog($"Processed {programmeCount.ToString()} unique programme responses, {cachedResults} cache hits");
+
         }
 
         private void validateCorrectProgrammes()
@@ -824,7 +833,7 @@ namespace SDGrabSharp.Common
                                                 join origRequest in programmesToRequest
                                                     on thisResponse.programID equals origRequest
                                                 where thisResponse.code == SDErrors.OK
-                                                select new SDResponseQueue.ProgrammeResultPair(origRequest, thisResponse)
+                                                select new SDResponseQueue.ProgrammeResultPair(origRequest, thisResponse, true)
                                             ).ToList();
 
                                             try
