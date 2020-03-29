@@ -22,8 +22,8 @@ namespace SDGrabSharp.Common
 
         private class SDRequestQueue
         {
-            public List<SDRequestQueueItem> items;
-            private Config config;
+            public readonly List<SDRequestQueueItem> items;
+            private readonly Config config;
 
             public class SDRequestQueueItem : ICloneable
             {
@@ -62,15 +62,17 @@ namespace SDGrabSharp.Common
                 var splitRequest = splitArray<SDMD5Request>(md5Request.ToArray(), config.ScheduleRetrievalItems);
                 foreach (var thisSplit in splitRequest)
                 {
-                    if (thisSplit.Count() > 0)
+                    if (thisSplit.Length > 0)
                     {
-                        SDRequestQueueItem thisRequest = new SDRequestQueueItem();
-                        thisRequest.sdRequestType = RequestType.SDRequestMD5;
+                        var thisRequest = new SDRequestQueueItem
+                        {
+                            sdRequestType = RequestType.SDRequestMD5,
+                            md5Request = thisSplit,
+                            retryTimeUtc = retryTime ?? DateTime.UtcNow,
+                            stationContext = stationContext,
+                            priority = priority
+                        };
 
-                        thisRequest.md5Request = thisSplit;
-                        thisRequest.retryTimeUtc = retryTime.HasValue ? retryTime.Value : DateTime.UtcNow;
-                        thisRequest.stationContext = stationContext;
-                        thisRequest.priority = priority;
                         items.Add(thisRequest);
                     }
                 }
@@ -82,15 +84,17 @@ namespace SDGrabSharp.Common
                 var splitRequest = splitArray<SDScheduleRequest>(scheduleRequest.ToArray(), config.ScheduleRetrievalItems);
                 foreach (var thisSplit in splitRequest)
                 {
-                    if (thisSplit.Count() > 0)
+                    if (thisSplit.Length > 0)
                     {
-                        SDRequestQueueItem thisRequest = new SDRequestQueueItem();
-                        thisRequest.sdRequestType = RequestType.SDRequestSchedule;
+                        var thisRequest = new SDRequestQueueItem
+                        {
+                            sdRequestType = RequestType.SDRequestSchedule,
+                            scheduleRequest = thisSplit,
+                            retryTimeUtc = retryTime ?? DateTime.UtcNow,
+                            stationContext = stationContext,
+                            priority = priority
+                        };
 
-                        thisRequest.scheduleRequest = thisSplit;
-                        thisRequest.retryTimeUtc = retryTime.HasValue ? retryTime.Value : DateTime.UtcNow;
-                        thisRequest.stationContext = stationContext;
-                        thisRequest.priority = priority;
                         items.Add(thisRequest);
                     }
                 }
@@ -102,15 +106,17 @@ namespace SDGrabSharp.Common
                 var splitRequest = splitArray<string>(programRequest, config.ProgrammeRetrievalItems);
                 foreach (var thisSplit in splitRequest)
                 {
-                    if (thisSplit.Count() > 0)
+                    if (thisSplit.Length > 0)
                     {
-                        SDRequestQueueItem thisRequest = new SDRequestQueueItem();
-                        thisRequest.sdRequestType = RequestType.SDRequestProgramme;
+                        var thisRequest = new SDRequestQueueItem
+                        {
+                            sdRequestType = RequestType.SDRequestProgramme,
+                            programmeRequest = thisSplit,
+                            retryTimeUtc = retryTime ?? DateTime.UtcNow,
+                            stationContext = stationContext,
+                            priority = priority
+                        };
 
-                        thisRequest.programmeRequest = thisSplit;
-                        thisRequest.retryTimeUtc = retryTime.HasValue ? retryTime.Value : DateTime.UtcNow;
-                        thisRequest.stationContext = stationContext;
-                        thisRequest.priority = priority;
                         items.Add(thisRequest);
                     }
                 }
@@ -121,7 +127,7 @@ namespace SDGrabSharp.Common
                 var origList = items.ToList();
                 var list = new List<T[]>();
 
-                for (int i = 0; i < origList.Count; i += nSize)
+                for (var i = 0; i < origList.Count; i += nSize)
                     list.Add(origList.GetRange(i, Math.Min(nSize, origList.Count - i)).ToArray());
 
                 return list;
@@ -130,7 +136,7 @@ namespace SDGrabSharp.Common
 
         private class SDResponseQueue
         {
-            public List<SDResponseQueueItem> items;
+            public readonly List<SDResponseQueueItem> items;
 
             public class SDResponseQueueItem : ICloneable
             {
@@ -154,7 +160,7 @@ namespace SDGrabSharp.Common
             public class MD5ResultPair
             {
                 public SDMD5Request md5Request;
-                public SDMD5Response md5Response;
+                public readonly SDMD5Response md5Response;
 
                 public MD5ResultPair(SDMD5Request request, SDMD5Response response)
                 {
@@ -165,8 +171,8 @@ namespace SDGrabSharp.Common
 
             public class ScheduleResultPair
             {
-                public SDScheduleRequest scheduleRequest;
-                public SDScheduleResponse scheduleResponse;
+                public readonly SDScheduleRequest scheduleRequest;
+                public readonly SDScheduleResponse scheduleResponse;
 
                 public ScheduleResultPair(SDScheduleRequest request, SDScheduleResponse response)
                 {
@@ -177,9 +183,9 @@ namespace SDGrabSharp.Common
 
             public class ProgrammeResultPair
             {
-                public string programmeRequest;
-                public SDProgrammeResponse programmeResponse;
-                public bool isCached;
+                public readonly string programmeRequest;
+                public readonly SDProgrammeResponse programmeResponse;
+                public readonly bool isCached;
 
                 public ProgrammeResultPair(string request, SDProgrammeResponse response, bool cached = false)
                 {
@@ -196,28 +202,34 @@ namespace SDGrabSharp.Common
 
             public void AddResponse(IEnumerable<MD5ResultPair> md5Response, string stationContext = null)
             {
-                SDResponseQueueItem thisRequest = new SDResponseQueueItem();
+                var thisRequest = new SDResponseQueueItem
+                {
+                    md5Response = md5Response,
+                    sdResponseType = ResponseType.SDResponseMD5,
+                    stationContext = stationContext
+                };
 
-                thisRequest.md5Response = md5Response;
-                thisRequest.sdResponseType = ResponseType.SDResponseMD5;
-                thisRequest.stationContext = stationContext;
                 items.Add(thisRequest);
             }
 
             public void AddResponse(IEnumerable<ScheduleResultPair> schedule5Response, string stationContext = null)
             {
-                SDResponseQueueItem thisRequest = new SDResponseQueueItem();
-                thisRequest.scheduleResponse = schedule5Response;
-                thisRequest.sdResponseType = ResponseType.SDResponseSchedule;
-                thisRequest.stationContext = stationContext;
+                var thisRequest = new SDResponseQueueItem
+                {
+                    scheduleResponse = schedule5Response,
+                    sdResponseType = ResponseType.SDResponseSchedule,
+                    stationContext = stationContext
+                };
                 items.Add(thisRequest);
             }
             public void AddResponse(IEnumerable<ProgrammeResultPair> programmeResponse, string stationContext = null)
             {
-                SDResponseQueueItem thisRequest = new SDResponseQueueItem();
-                thisRequest.programmeResponse = programmeResponse;
-                thisRequest.sdResponseType = ResponseType.SDResponseProgramme;
-                thisRequest.stationContext = stationContext;
+                var thisRequest = new SDResponseQueueItem
+                {
+                    programmeResponse = programmeResponse,
+                    sdResponseType = ResponseType.SDResponseProgramme,
+                    stationContext = stationContext
+                };
                 items.Add(thisRequest);
             }
         }
@@ -255,21 +267,9 @@ namespace SDGrabSharp.Common
                 return queueItems.Where(line => line.nextTry <= DateTime.UtcNow).AsEnumerable().OrderBy(line => line.nextTry).Select(line => line.itemId);
             }
 
-            public int Count
-            {
-                get
-                {
-                    return queueItems.Count();
-                }
-            }
+            public int Count => queueItems.Count;
 
-            public bool ItemsReady
-            {
-                get
-                {
-                    return (GetReadyItems().Count() > 0);
-                }
-            }
+            public bool ItemsReady => GetReadyItems().Any();
 
             public int DelayTime
             {
@@ -280,7 +280,7 @@ namespace SDGrabSharp.Common
                     else
                     {
                         var nextTime = queueItems.OrderBy(line => line.nextTry).FirstOrDefault().nextTry;
-                        TimeSpan span = nextTime - DateTime.UtcNow;
+                        var span = nextTime - DateTime.UtcNow;
                         return span.Milliseconds;
                     }
                 }

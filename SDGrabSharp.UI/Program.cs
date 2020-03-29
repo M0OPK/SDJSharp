@@ -8,20 +8,20 @@ using SDGrabSharp.Common;
 
 namespace SDGrabSharp.UI
 {
-    static class Program
+    internal static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
-            Config config = new Config();
+            var config = new Config();
 
             if (System.IO.File.Exists("SDGrabSharp.xml"))
                 config.Load("SDGrabSharp.xml");
 
-            DataCache cache = new DataCache(config.CacheExpiryHours);
+            var cache = new DataCache(config.CacheExpiryHours);
 
             if (config.PersistantCache && config.cacheFilename != string.Empty && System.IO.File.Exists(config.cacheFilename))
                 cache.Load(config.cacheFilename);

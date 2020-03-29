@@ -13,10 +13,10 @@ namespace XMLTV
     public partial class XmlTV
     {
         private List<XMLTVError> localErrors;
-        private string _rootGeneratorName;
-        private string _rootGeneratorUrl;
-        private string _rootDataSourceName;
-        private Config config;
+        private readonly string _rootGeneratorName;
+        private readonly string _rootGeneratorUrl;
+        private readonly string _rootDataSourceName;
+        private readonly Config config;
 
         private XmlTVData xmlData;
 
@@ -26,28 +26,14 @@ namespace XMLTV
             {
                 localErrors = new List<XMLTVError>();
 
-                if (generatorname == string.Empty)
-                    _rootGeneratorName = "XMLTVSharp 1.0";
-                else
-                    _rootGeneratorName = generatorname;
-
-                if (generatorurl == string.Empty)
-                    _rootGeneratorUrl = "https://github.com/M0OPK/SDJSharp";
-                else
-                    _rootGeneratorUrl = generatorurl;
-
-                if (datasourcename != string.Empty)
-                    _rootDataSourceName = datasourcename;
-                else
-                    _rootDataSourceName = string.Empty;
+                _rootGeneratorName = generatorname == string.Empty ? "XMLTVSharp 1.0" : generatorname;
+                _rootGeneratorUrl = generatorurl == string.Empty ? "https://github.com/M0OPK/SDJSharp" : generatorurl;
+                _rootDataSourceName = datasourcename != string.Empty ? datasourcename : string.Empty;
 
                 // New document for new data
                 var newDoc = new XmlTVDocument(_rootGeneratorName, _rootGeneratorUrl, _rootDataSourceName);
                 xmlData = new XmlTVData(newDoc);
-                if (configuration == null)
-                    config = new Config();
-                else
-                    config = configuration;
+                config = configuration ?? new Config();
             }
             catch (Exception ex)
             {
@@ -67,9 +53,9 @@ namespace XMLTV
             {
                 var xmlTVLoad = new XmlTVDocument();
                 xmlTVLoad.Load(filename);
-                XmlTVData localData = new XmlTVData(xmlTVLoad);
+                var localData = new XmlTVData(xmlTVLoad);
 
-                XmlElement localRootTvNode = localData.rootNode;
+                var localRootTvNode = localData.rootNode;
 
                 // Check for root TV node
                 if (localRootTvNode == null)
@@ -177,7 +163,7 @@ namespace XMLTV
         public IEnumerable<XmlNode> GetProgrammeNodes()
         {
             // This is not ideal
-            List<XmlNode> masterList = new List<XmlNode>();
+            var masterList = new List<XmlNode>();
             foreach (var channel in xmlData.channelData)
             {
                 if (channel.Value.programmeNodes.Values != null)
@@ -206,7 +192,7 @@ namespace XMLTV
         {
             try
             {
-                XmlElement channelNode = buildChannelNode(channelID, displayName, url, iconUrl, extraattributes, extranodes);
+                var channelNode = buildChannelNode(channelID, displayName, url, iconUrl, extraattributes, extranodes);
                 if (channelNode == null)
                     return null;
 
@@ -214,8 +200,7 @@ namespace XMLTV
                     xmlData.channelData[channelID].ChanelNode = channelNode;
                 else
                 {
-                    Channel thisChannel = new Channel();
-                    thisChannel.ChanelNode = channelNode;
+                    var thisChannel = new Channel {ChanelNode = channelNode};
                     xmlData.channelData.Add(channelID, thisChannel);
                 }
                 return channelNode;
@@ -227,29 +212,6 @@ namespace XMLTV
             return null;
         }
 
-        /*public XmlNode ReplaceChannel(string channelID, XmlLangText[] displayName, string url = null, string iconUrl = null,
-                                   IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
-        {
-            try
-            {
-                XmlNode existingChannel = FindFirstChannel(channelID);
-                if (existingChannel == null)
-                    return null;
-
-                XmlElement channelNode = buildChannelNode(channelID, displayName, url, iconUrl, extraattributes, extranodes, true);
-                if (channelNode == null)
-                    return null;
-
-                xmlData.rootNode.ReplaceChild(channelNode, existingChannel);
-                return channelNode;
-            }
-            catch (Exception ex)
-            {
-                addError(ex);
-            }
-            return null;
-        }*/
-
         private XmlElement buildChannelNode(string channelID, XmlLangText[] displayName, string url = null, string iconUrl = null,
                                             IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null, bool replace = false)
         {
@@ -260,7 +222,7 @@ namespace XMLTV
 
                 if (!replace)
                 {
-                    XmlNode collideChannel = FindFirstChannel(channelID);
+                    var collideChannel = FindFirstChannel(channelID);
 
                     if (collideChannel != null)
                     {
@@ -270,7 +232,7 @@ namespace XMLTV
                     }
                 }
 
-                XmlElement channelNode = xmlData.rootDocument.CreateChannelElement(channelID, displayName, url, iconUrl, extraattributes, extranodes);
+                var channelNode = xmlData.rootDocument.CreateChannelElement(channelID, displayName, url, iconUrl, extraattributes, extranodes);
                 return channelNode;
             }
             catch (Exception ex)
@@ -316,10 +278,10 @@ namespace XMLTV
         {
             try
             {
-                XmlElement programmeNode = buildProgrammeNode(start, stop, channel, title, subtitle, description,
+                var programmeNode = buildProgrammeNode(start, stop, channel, title, subtitle, description,
                                                             categories, extraattributes, extranodes);
 
-                DateTime startTime = XMLTV.XmlTV.StringToDate(start).UtcDateTime;
+                var startTime = XMLTV.XmlTV.StringToDate(start).UtcDateTime;
                 if (xmlData.channelData.ContainsKey(channel))
                 {
                     if (xmlData.channelData[channel].programmeNodes.ContainsKey(startTime))
@@ -350,7 +312,7 @@ namespace XMLTV
 
                 if (!replace)
                 {
-                    XmlNode collide = FindFirstProgramme(start, channel);
+                    var collide = FindFirstProgramme(start, channel);
 
                     if (collide != null)
                     {
@@ -360,7 +322,7 @@ namespace XMLTV
                     }
                 }
 
-                XmlElement programmelNode = xmlData.rootDocument.CreateProgrammeElement(start, stop, channel, title, subtitle, description, categories, extraattributes, extranodes);
+                var programmelNode = xmlData.rootDocument.CreateProgrammeElement(start, stop, channel, title, subtitle, description, categories, extraattributes, extranodes);
                 return programmelNode;
             }
             catch (System.Exception ex)
@@ -380,7 +342,7 @@ namespace XMLTV
                 if (!xmlData.channelData.ContainsKey(channel))
                     return false;
 
-                DateTime startTime = XmlTV.StringToDate(start).UtcDateTime;
+                var startTime = XmlTV.StringToDate(start).UtcDateTime;
                 if (!xmlData.channelData[channel].programmeNodes.ContainsKey(startTime))
                     return false;
 
@@ -396,7 +358,7 @@ namespace XMLTV
 
         public IEnumerable<XmlNode> FindMatchingProgrammeNodes(ProgrammeSearch[] searchItems)
         {
-            List<XmlNode> programmeNodes = new List<XmlNode>();
+            var programmeNodes = new List<XmlNode>();
 
             var channelList = xmlData.channelData.Keys.Intersect(searchItems.Select(line => line.Channel));
 
@@ -428,7 +390,7 @@ namespace XMLTV
         public string[] DeleteUnmatchingChannelNodes(string[] searchItems)
         {
             var unMatchingItems = xmlData.channelData.
-                Where(line => !searchItems.Any(search => search == line.Key)).Select(line => line.Key).ToArray();
+                Where(line => searchItems.All(search => search != line.Key)).Select(line => line.Key).ToArray();
 
             foreach (var deleteItem in unMatchingItems)
                 xmlData.channelData.Remove(deleteItem);
@@ -438,7 +400,7 @@ namespace XMLTV
 
         public XmlElement[] GetProgrammesOutsideDateRange(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            List<XmlElement> nodeList = new List<XmlElement>();
+            var nodeList = new List<XmlElement>();
             foreach (var channelInfo in xmlData.channelData)
             {
                 // Create list of nodes outside of range (using local time as cutoff points)
@@ -513,13 +475,13 @@ namespace XMLTV
             try
             {
                 // Build up nodes from dictionaries (Channels)
-                foreach (XmlNode channelNode in xmlData.channelData.Select(node => node.Value.ChanelNode))
+                foreach (XmlElement channelNode in xmlData.channelData.Select(node => node.Value.ChanelNode))
                     xmlData.rootNode.AppendChild(channelNode);
 
                 // Now programmes
-                foreach (Channel channelItem in xmlData.channelData.Values)
+                foreach (var channelItem in xmlData.channelData.Values)
                 {
-                    foreach (XmlNode programmeNode in channelItem.programmeNodes.Values)
+                    foreach (XmlElement programmeNode in channelItem.programmeNodes.Values)
                         xmlData.rootNode.AppendChild(programmeNode);
                 }
 
@@ -581,12 +543,10 @@ namespace XMLTV
 
                 // Validate local list against self first
                 var grouped =
-                (
-                    from localNode in localChannelNodes
-                    group localNode by localNode.Attributes["id"].Value into groupNode
-                    where groupNode.Count() > 1
-                    select groupNode.Key
-                );
+                from localNode in localChannelNodes
+                group localNode by localNode.Attributes["id"].Value into groupNode
+                where groupNode.Count() > 1
+                select groupNode.Key;
 
                 if (grouped != null && grouped.Count() > 0)
                 {
@@ -596,10 +556,10 @@ namespace XMLTV
                         foreach (var dupe in grouped)
                         {
                             // Get all matches
-                            IEnumerable<XmlNode> matches = localChannelNodes.Cast<XmlNode>().Where(node => node.Attributes["id"].Value == dupe);
+                            var matches = localChannelNodes.Cast<XmlNode>().Where(node => node.Attributes["id"].Value == dupe);
 
                             // Delete all but the first one
-                            bool first = true;
+                            var first = true;
                             foreach (XmlElement match in matches)
                             {
                                 if (!first)
@@ -611,7 +571,7 @@ namespace XMLTV
                     }
                     else
                     {
-                        string errorMessage = "Duplicate channel(s) found (local):\r\n";
+                        var errorMessage = "Duplicate channel(s) found (local):\r\n";
                         foreach (var dupe in grouped)
                             errorMessage += $"{dupe}";
 
@@ -620,24 +580,22 @@ namespace XMLTV
                 }
 
                 // Find matches in current data
-                IEnumerable<XmlNode> dupeChannels =
-                (
-                    from localNode in localChannelNodes.Cast<XmlNode>()
-                    join mainNode in thisXmlFile.channelNodes.Cast<XmlNode>()
-                        on localNode.Attributes["id"].Value ?? "" equals mainNode.Attributes["id"].Value ?? ""
-                    where mainNode.Attributes["id"] != null && localNode.Attributes["id"] != null
-                    select localNode
-                );
+                var dupeChannels =
+                from localNode in localChannelNodes.Cast<XmlNode>()
+                join mainNode in thisXmlFile.channelNodes.Cast<XmlNode>()
+                    on localNode.Attributes["id"].Value ?? "" equals mainNode.Attributes["id"].Value ?? ""
+                where mainNode.Attributes["id"] != null && localNode.Attributes["id"] != null
+                select localNode;
 
                 if (dupeChannels.Count() != 0)
                 {
                     if (config.SkipImportedDupeChannels)
                     {
                         // Remove the duplicates from the input file
-                        foreach (XmlNode dupeNode in dupeChannels)
+                        foreach (var dupeNode in dupeChannels)
                         {
                             // Get all matches
-                            IEnumerable<XmlNode> matches = localChannelNodes.Cast<XmlNode>().Where
+                            var matches = localChannelNodes.Cast<XmlNode>().Where
                                 (node => node.Attributes["id"].Value == dupeNode.Attributes["id"].Value);
 
                             // Delete all
@@ -647,8 +605,8 @@ namespace XMLTV
                     }
                     else
                     {
-                        string errorMessage = "Duplicate channels found:\r\n";
-                        foreach (XmlNode dupeNode in dupeChannels)
+                        var errorMessage = "Duplicate channels found:\r\n";
+                        foreach (var dupeNode in dupeChannels)
                             errorMessage += $"{dupeNode.Attributes["id"].Value ?? "<NULL>"}\r\n";
 
                         addError(1001, "Duplicate channel(s) found (merge data)", XMLTVError.ErrorSeverity.Error, errorMessage, "LoadXmlTV");
@@ -674,16 +632,14 @@ namespace XMLTV
 
                 // Validate local list against self first
                 var grouped =
-                (
-                    from localNode in localProgrammeNodes.Cast<XmlNode>()
-                    group localNode by new
-                    {
-                        channelID = localNode.Attributes["channel"].Value,
-                        startTime = localNode.Attributes["start"].Value
-                    } into groupNode
-                    where groupNode.Count() > 1
-                    select groupNode.Key
-                );
+                from localNode in localProgrammeNodes.Cast<XmlNode>()
+                group localNode by new
+                {
+                    channelID = localNode.Attributes["channel"].Value,
+                    startTime = localNode.Attributes["start"].Value
+                } into groupNode
+                where groupNode.Count() > 1
+                select groupNode.Key;
 
                 if (grouped != null && grouped.Count() > 0)
                 {
@@ -693,11 +649,11 @@ namespace XMLTV
                         foreach (var dupe in grouped)
                         {
                             // Get all matches
-                            IEnumerable<XmlNode> matches = localProgrammeNodes.Cast<XmlNode>().Where
+                            var matches = localProgrammeNodes.Cast<XmlNode>().Where
                                 (node => node.Attributes["channel"].Value == dupe.channelID && node.Attributes["start"].Value == dupe.startTime);
 
                             // Delete all but the first one
-                            bool first = true;
+                            var first = true;
                             foreach (XmlElement match in matches)
                             {
                                 if (!first)
@@ -709,7 +665,7 @@ namespace XMLTV
                     }
                     else
                     {
-                        string errorMessage = "Duplicate programmes found:\r\n";
+                        var errorMessage = "Duplicate programmes found:\r\n";
                         foreach (var dupe in grouped)
                             errorMessage += $"{dupe.channelID} at {dupe.startTime}\r\n";
 
@@ -718,35 +674,33 @@ namespace XMLTV
                 }
 
                 // Find exact matches in current data
-                IEnumerable<XmlNode> dupeProgrammes =
-                (
-                    from localNode in localProgrammeNodes.Cast<XmlNode>()
-                    join mainNode in programmeNodes.Cast<XmlNode>()
-                        on new
-                        {
-                            joinChannel = localNode.Attributes["channel"].Value ?? "",
-                            joinStart = localNode.Attributes["start"].Value ?? "",
-                            joinEnd = localNode.Attributes["stop"].Value ?? ""
-                        }
-                        equals new
-                        {
-                            joinChannel = mainNode.Attributes["channel"].Value ?? "",
-                            joinStart = mainNode.Attributes["start"].Value ?? "",
-                            joinEnd = mainNode.Attributes["stop"].Value ?? ""
-                        }
-                    where mainNode.Attributes["channel"] != null && localNode.Attributes["channel"] != null
-                    select localNode
-                );
+                var dupeProgrammes =
+                from localNode in localProgrammeNodes.Cast<XmlNode>()
+                join mainNode in programmeNodes.Cast<XmlNode>()
+                    on new
+                    {
+                        joinChannel = localNode.Attributes["channel"].Value ?? "",
+                        joinStart = localNode.Attributes["start"].Value ?? "",
+                        joinEnd = localNode.Attributes["stop"].Value ?? ""
+                    }
+                    equals new
+                    {
+                        joinChannel = mainNode.Attributes["channel"].Value ?? "",
+                        joinStart = mainNode.Attributes["start"].Value ?? "",
+                        joinEnd = mainNode.Attributes["stop"].Value ?? ""
+                    }
+                where mainNode.Attributes["channel"] != null && localNode.Attributes["channel"] != null
+                select localNode;
 
                 if (dupeProgrammes.Count() != 0)
                 {
                     if (config.SkipImportedDupeProgrammes)
                     {
                         // Remove the duplicates from the input file
-                        foreach (XmlNode dupeNode in dupeProgrammes)
+                        foreach (var dupeNode in dupeProgrammes)
                         {
                             // Get all matches
-                            IEnumerable<XmlNode> matches = localProgrammeNodes.Cast<XmlNode>().Where
+                            var matches = localProgrammeNodes.Cast<XmlNode>().Where
                                 (node => node.Attributes["channel"].Value == dupeNode.Attributes["channel"].Value && 
                                          node.Attributes["start"].Value == dupeNode.Attributes["start"].Value && 
                                          node.Attributes["stop"].Value == dupeNode.Attributes["stop"].Value);
@@ -758,8 +712,8 @@ namespace XMLTV
                     }
                     else
                     {
-                        string errorMessage = "Duplicate programmes found:\r\n";
-                        foreach (XmlNode dupeNode in dupeProgrammes)
+                        var errorMessage = "Duplicate programmes found:\r\n";
+                        foreach (var dupeNode in dupeProgrammes)
                             errorMessage +=
                                 $"{dupeNode.Attributes["channel"].Value ?? "<NULL>"} between {dupeNode.Attributes["start"].Value ?? "<NULL>"} and {dupeNode.Attributes["stop"].Value ?? "<NULL>"}\r\n";
 
@@ -783,8 +737,11 @@ namespace XMLTV
                 // Channels
                 foreach (var channelNodeData in fromData.channelData)
                 {
-                    Channel thisChannel = new Channel();
-                    thisChannel.ChanelNode = (XmlElement)toData.rootDocument.ImportNode(channelNodeData.Value.ChanelNode, true);
+                    var thisChannel = new Channel
+                    {
+                        ChanelNode =
+                            (XmlElement) toData.rootDocument.ImportNode(channelNodeData.Value.ChanelNode, true)
+                    };
 
                     if (toData.channelData.ContainsKey(channelNodeData.Key))
                         toData.channelData[channelNodeData.Key] = thisChannel;
@@ -815,7 +772,7 @@ namespace XMLTV
         {
             try
             {
-                XmlNode channelNode = xmlData.channelNodes.Cast<XmlNode>().Where
+                var channelNode = xmlData.channelNodes.Cast<XmlNode>().Where
                     (chan => chan.Attributes["id"] != null && chan.Attributes["id"].Value == channelID).FirstOrDefault();
 
                 if (channelNode != null)

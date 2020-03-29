@@ -10,7 +10,7 @@ using SDGrabSharp.Common;
 
 namespace SDGrabSharp.CLI
 {
-    class Program
+    internal class Program
     {
         private static Config config;
         private static DataCache cache;
@@ -24,7 +24,7 @@ namespace SDGrabSharp.CLI
         private class localArgs
         {
             public string configFile;
-            public List<string> xmlTVList;
+            public readonly List<string> xmlTVList;
             public bool quiet;
 
             public localArgs()
@@ -35,7 +35,7 @@ namespace SDGrabSharp.CLI
             }
         }
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             cliVersion = typeof(SDGrabSharp.CLI.Program).Assembly.GetName().Version.ToString();
             commonVersion = typeof(SDGrabSharp.Common.XmlTVBuilder).Assembly.GetName().Version.ToString();
@@ -55,7 +55,7 @@ namespace SDGrabSharp.CLI
             Console.WriteLine($"SDGrabSharp CLI {cliVersion}. Common lib {commonVersion}. JSONLib {jsonVersion}. XMLTVLib {xmltvVersion}");
 
             // Check any specified XMLTV files exist
-            bool badXmlTV = false;
+            var badXmlTV = false;
             foreach(var xmlTvFile in argData.xmlTVList)
             {
                 if (!File.Exists(xmlTvFile))
@@ -96,7 +96,7 @@ namespace SDGrabSharp.CLI
             {
                 if (!builder.mergeXmlTV(xmlTvFile))
                 {
-                    if (builder.GetXmlTVErrors().Count() > 0)
+                    if (builder.GetXmlTVErrors().Any())
                     {
                         foreach(var error in builder.GetXmlTVErrors())
                         {
@@ -122,10 +122,10 @@ namespace SDGrabSharp.CLI
             var argData = new localArgs();
 
             // Parse arguments
-            bool argMode = false;
-            bool invalidArg = false;
-            string argString = "";
-            foreach (string arg in args)
+            var argMode = false;
+            var invalidArg = false;
+            var argString = "";
+            foreach (var arg in args)
             {
                 // If we were waiting for an argument parameter, process it now
                 if (argMode)
@@ -203,7 +203,7 @@ namespace SDGrabSharp.CLI
 
         private static void LoadConfig(string filename = null)
         {
-            string fileName = filename != null ? filename : "SDGrabSharp.xml";
+            var fileName = filename ?? "SDGrabSharp.xml";
             if (!config.Load(fileName))
             {
                 Console.WriteLine(string.Format(Strings.TooManyArgs, fileName));

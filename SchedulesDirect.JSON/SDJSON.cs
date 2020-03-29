@@ -19,16 +19,16 @@ namespace SchedulesDirect
         private static readonly string DEBUG_FILE = "SDGrabSharp.debug.txt";
 #endif
         private string loginToken;
-        private List<SDJsonError> localErrors;
-        private static string urlBase = "https://json.schedulesdirect.org/20141201/";
-        private static string userAgentDefault = "SDJSharp JSON C# Library/1.0 (https://github.com/M0OPK/SDJSharp)";
-        private static string userAgentShort = "SDJSharp JSON C# Library/1.0";
+        private readonly List<SDJsonError> localErrors;
+        private static readonly string urlBase = "https://json.schedulesdirect.org/20141201/";
+        private static readonly string userAgentDefault = "SDJSharp JSON C# Library/1.0 (https://github.com/M0OPK/SDJSharp)";
+        private static readonly string userAgentShort = "SDJSharp JSON C# Library/1.0";
         private static string userAgentFull;
 
         public SDJson(string clientUserAgent = "", string token = "")
         {
             localErrors = new List<SDJsonError>();
-            userAgentFull = (clientUserAgent == string.Empty) ? userAgentDefault : $"{userAgentShort} ({clientUserAgent})";
+            userAgentFull = clientUserAgent == string.Empty ? userAgentDefault : $"{userAgentShort} ({clientUserAgent})";
 
             // If token supplied, use it
             if (token != string.Empty)
@@ -47,13 +47,7 @@ namespace SchedulesDirect
         /// <summary>
         /// Return true if there are errors to report
         /// </summary>
-        public bool HasErrors
-        {
-            get
-            {
-                return (localErrors.Count > 0);
-            }
-        }
+        public bool HasErrors => localErrors.Count > 0;
 
         /// <summary>
         /// Retrieve the most recent reported error. If specified pop (remove) after returning
@@ -137,18 +131,15 @@ namespace SchedulesDirect
         /// <returns></returns>
         public string hashPassword(string password)
         {
-            byte[] passBytes = Encoding.UTF8.GetBytes(password);
-            SHA1 hash = SHA1.Create();
-            byte[] hashBytes = hash.ComputeHash(passBytes);
+            var passBytes = Encoding.UTF8.GetBytes(password);
+            var hash = SHA1.Create();
+            var hashBytes = hash.ComputeHash(passBytes);
 
-            string hexString = BitConverter.ToString(hashBytes);
+            var hexString = BitConverter.ToString(hashBytes);
             return hexString.Replace("-", "").ToLower();
         }
 
-        public bool LoggedIn
-        {
-            get { return loginToken != null && loginToken != string.Empty; }
-        }
+        public bool LoggedIn => !string.IsNullOrEmpty(loginToken);
 
         /// <summary>
         /// Log in, and retrieve login token for session
@@ -160,8 +151,8 @@ namespace SchedulesDirect
         {
             try
             {
-                string passHash = isHash ? password : hashPassword(password);
-                SDTokenResponse response = PostJSON<SDTokenResponse, SDTokenRequest>("token", new SDTokenRequest(username, passHash));
+                var passHash = isHash ? password : hashPassword(password);
+                var response = PostJSON<SDTokenResponse, SDTokenRequest>("token", new SDTokenRequest(username, passHash));
                 if (response == null || response.code != 0)
                     return null;
 
@@ -241,22 +232,21 @@ namespace SchedulesDirect
         {
             try
             {
-                dynamic result = GetDynamic(WebGet("available/countries"));
+                var result = GetDynamic(WebGet("available/countries"));
                 if (result == null)
                     return null;
 
-                SDCountries countries = new SDCountries();
+                var countries = new SDCountries();
                 foreach (string key in result.Keys)
                 {
-                    SDCountries.Continent thisContinent = new SDCountries.Continent();
-                    thisContinent.continentname = key;
+                    var thisContinent = new SDCountries.Continent {continentname = key};
 
-                    foreach (dynamic country in result[key])
+                    foreach (var country in result[key])
                     {
                         if (country == null)
                             continue;
 
-                        SDCountries.Country thisCountry = new SDCountries.Country();
+                        var thisCountry = new SDCountries.Country();
                         try { thisCountry.fullName = country["fullName"]; } catch { }
                         try { thisCountry.shortName = country["shortName"]; } catch { }
                         try { thisCountry.postalCodeExample = country["postalCodeExample"]; } catch { }
@@ -285,16 +275,18 @@ namespace SchedulesDirect
         {
             try
             {
-                dynamic result = GetDynamic(WebGet("transmitters/" + countrycode));
+                var result = GetDynamic(WebGet("transmitters/" + countrycode));
                 if (result == null)
                     return null;
 
-                List<SDTransmitter> txList = new List<SDTransmitter>();
+                var txList = new List<SDTransmitter>();
                 foreach (string key in result.Keys)
                 {
-                    SDTransmitter thisTx = new SDTransmitter();
-                    thisTx.transmitterArea = key;
-                    thisTx.transmitterID = result[key];
+                    var thisTx = new SDTransmitter
+                    {
+                        transmitterArea = key,
+                        transmitterID = result[key]
+                    };
                     txList.Add(thisTx);
                 }
 
@@ -388,8 +380,7 @@ namespace SchedulesDirect
 
                 if (verbose)
                 {
-                    headers = new WebHeaderCollection();
-                    headers.Add("verboseMap: true");
+                    headers = new WebHeaderCollection {"verboseMap: true"};
                 }
 
                 return GetJSON<SDGetLineupResponse>("lineups/" + lineup, loginToken, headers);
@@ -441,7 +432,7 @@ namespace SchedulesDirect
         {
             try
             {
-                dynamic result = GetDynamic(WebPost("metadata/description", CreateJSONstring<string[]>(programmes), loginToken));
+                var result = GetDynamic(WebPost("metadata/description", CreateJSONstring<string[]>(programmes), loginToken));
 
                 if (result == null)
                     return null;
@@ -449,9 +440,8 @@ namespace SchedulesDirect
                 var programmeData = new List<SDDescriptionResponse>();
                 foreach (string key in result.Keys)
                 {
-                    var thisProgramme = new SDDescriptionResponse();
-                    thisProgramme.episodeID = key;
-                    dynamic temp = result[key];
+                    var thisProgramme = new SDDescriptionResponse {episodeID = key};
+                    var temp = result[key];
                     try { thisProgramme.episodeDescription.code = temp["code"]; } catch { };
                     try { thisProgramme.episodeDescription.description100 = temp["description100"]; } catch { };
                     try { thisProgramme.episodeDescription.description1000 = temp["description1000"]; } catch { };
@@ -494,7 +484,7 @@ namespace SchedulesDirect
         {
             try
             {
-                dynamic result = GetDynamic(WebPost("schedules/md5", CreateJSONstring<IEnumerable<SDMD5Request>>(request), loginToken));
+                var result = GetDynamic(WebPost("schedules/md5", CreateJSONstring<IEnumerable<SDMD5Request>>(request), loginToken));
 
                 if (result == null)
                     return null;
@@ -502,16 +492,14 @@ namespace SchedulesDirect
                 var md5Data = new List<SDMD5Response>();
                 foreach (string resultKey in result.Keys)
                 {
-                    var thisResponse = new SDMD5Response();
-                    thisResponse.stationID = resultKey;
+                    var thisResponse = new SDMD5Response {stationID = resultKey};
 
-                    dynamic dates = result[resultKey];
+                    var dates = result[resultKey];
 
-                    List<SDMD5Response.SDMD5Day> daysTemp = new List<SDMD5Response.SDMD5Day>();
+                    var daysTemp = new List<SDMD5Response.SDMD5Day>();
                     foreach (string dateKey in dates.Keys)
                     {
-                        SDMD5Response.SDMD5Day thisDay = new SDMD5Response.SDMD5Day();
-                        thisDay.date = dateKey;
+                        var thisDay = new SDMD5Response.SDMD5Day {date = dateKey};
                         try { thisDay.md5data.code = dates[dateKey]["code"]; } catch { };
                         try { thisDay.md5data.message = dates[dateKey]["message"]; } catch { };
                         DateTime testDate;
@@ -628,22 +616,22 @@ namespace SchedulesDirect
         // Parse JSON string and return dynamic type
         private dynamic GetDynamic(string jsonstring)
         {
-            JavaScriptSerializer ser = new JavaScriptSerializer();
+            var ser = new JavaScriptSerializer();
             return ser.Deserialize<dynamic>(jsonstring);
         }
 
         // Parse known class object and return JSON string
         private string CreateJSONstring<T>(T obj)
         {
-            MemoryStream jsonStream = new MemoryStream();
-            DataContractJsonSerializer jsonSer = new DataContractJsonSerializer(typeof(T), new DataContractJsonSerializerSettings
+            var jsonStream = new MemoryStream();
+            var jsonSer = new DataContractJsonSerializer(typeof(T), new DataContractJsonSerializerSettings
             {
                 DateTimeFormat = new DateTimeFormat("yyyy-MM-ddTHH:mm:ssZ"),
             });
             jsonSer.WriteObject(jsonStream, obj);
 
             jsonStream.Position = 0;
-            StreamReader sr = new StreamReader(jsonStream);
+            var sr = new StreamReader(jsonStream);
             return sr.ReadToEnd();
         }
 
@@ -653,8 +641,8 @@ namespace SchedulesDirect
             if (input == string.Empty)
                 return default(T);
 
-            MemoryStream jsonStream = new MemoryStream(Encoding.UTF8.GetBytes(input));
-            DataContractJsonSerializer jsonSer = new DataContractJsonSerializer(typeof(T), new DataContractJsonSerializerSettings
+            var jsonStream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+            var jsonSer = new DataContractJsonSerializer(typeof(T), new DataContractJsonSerializerSettings
             {
                 DateTimeFormat = new DateTimeFormat("yyyy-MM-ddTHH:mm:ssZ"),
             });
@@ -666,7 +654,7 @@ namespace SchedulesDirect
         // Perform post action and parse response via JSON serializer to known object type
         private V PostJSON<V, T>(string command, T obj, string token = "", WebHeaderCollection headers = null)
         {
-            string requestString = CreateJSONstring(obj);
+            var requestString = CreateJSONstring(obj);
 #if DEBUG
             DebugLog($"JSON Post [{command}] Request: {requestString}{Environment.NewLine}");
 #endif
@@ -791,7 +779,7 @@ namespace SchedulesDirect
             webRequest.ContentType = "application/json; charset=utf-8";
             webRequest.Accept = "application/json; charset=utf-8";
             webRequest.UserAgent = userAgentFull;
-            webRequest.AutomaticDecompression = (DecompressionMethods.GZip | DecompressionMethods.Deflate);
+            webRequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             if (headers != null)
                 webRequest.Headers = headers;

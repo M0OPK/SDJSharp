@@ -68,7 +68,7 @@ namespace XMLTV
             }*/
             public IEnumerable<XmlElement> programmeNodes()
             {
-                List<XmlElement> masterChannelList = new List<XmlElement>();
+                var masterChannelList = new List<XmlElement>();
 
                 foreach (var channelId in channelData.Keys)
                     masterChannelList.AddRange(programmeNodes(channelId));
@@ -102,7 +102,7 @@ namespace XMLTV
                         continue;
 
                     // Find channelnode
-                    string channelId = programmeNode.Attributes["channel"].Value;
+                    var channelId = programmeNode.Attributes["channel"].Value;
                     if (channelData.ContainsKey(channelId))
                     {
                         // Add programme

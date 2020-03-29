@@ -18,7 +18,7 @@ namespace SDGrabSharp.UI
         private SDJson sd;
         private Config config;
         private DataCache cache;
-        private Dictionary<string, Config.XmlTVTranslation> localTranslate;
+        private readonly Dictionary<string, Config.XmlTVTranslation> localTranslate;
 
         public CustomGridEntry(SDJson sdJS, Config dataconfig, DataCache datacache,
                                Dictionary<string, Config.XmlTVTranslation> dataLocalTranslate)
@@ -34,15 +34,13 @@ namespace SDGrabSharp.UI
             dgCustomEntry.Rows.Clear();
             foreach (var item in dataLocalTranslate.Select(line => line.Value).Where(line => line.FieldMode == Config.XmlTVTranslation.TranslateField.Custom))
             {
-                string channelNum = string.Empty;
-                string logicalChannelNum = string.Empty;
-                var thisData = datacache.GetLineupData(sdJS, item.LineupID).stations.
-                    Where(line => line.stationID == item.SDStationID).FirstOrDefault();
+                var channelNum = string.Empty;
+                var logicalChannelNum = string.Empty;
+                var thisData = datacache.GetLineupData(sdJS, item.LineupID).stations.FirstOrDefault(line => line.stationID == item.SDStationID);
                 if (thisData == null)
                     continue;
 
-                var thisMap = datacache.GetLineupData(sdJS, item.LineupID).map.
-                    Where(line => line.stationID == item.SDStationID).FirstOrDefault();
+                var thisMap = datacache.GetLineupData(sdJS, item.LineupID).map.FirstOrDefault(line => line.stationID == item.SDStationID);
 
                 if (thisMap != null)
                 {
@@ -50,7 +48,7 @@ namespace SDGrabSharp.UI
                     logicalChannelNum = thisMap.logicalChannelNumber;
                 }
 
-                string[] thisLine = new string[] { item.LineupID, item.SDStationID, channelNum, logicalChannelNum, thisData.name, item.CustomTranslate };
+                var thisLine = new string[] { item.LineupID, item.SDStationID, channelNum, logicalChannelNum, thisData.name, item.CustomTranslate };
                 dgCustomEntry.Rows.Add(thisLine);
             }
 
@@ -86,9 +84,9 @@ namespace SDGrabSharp.UI
         {
             foreach(DataGridViewRow row in dgCustomEntry.Rows)
             {
-                var thisLine = localTranslate.Select(line => line.Value).
-                    Where(line => line.LineupID == (string)row.Cells[0].Value && 
-                                  line.SDStationID == (string)row.Cells[1].Value).FirstOrDefault();
+                var thisLine = localTranslate.
+                    Select(line => line.Value).FirstOrDefault(line => line.LineupID == (string)row.Cells[0].Value && 
+                                                                      line.SDStationID == (string)row.Cells[1].Value);
 
                 if (thisLine != null)
                 {

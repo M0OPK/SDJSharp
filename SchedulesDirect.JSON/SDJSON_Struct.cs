@@ -59,8 +59,8 @@ namespace SchedulesDirect
         private DateTime? _cacheDate;
         public DateTime? cacheDate
         {
-            get { return _cacheDate ?? DateTime.UtcNow; }
-            set { _cacheDate = value; }
+            get => _cacheDate ?? DateTime.UtcNow;
+            set => _cacheDate = value;
         }
     }
 
@@ -586,8 +586,8 @@ namespace SchedulesDirect
         public SDScheduleRequest(string station, IEnumerable<DateTime> dates)
         {
             stationID = station;
-            List<string> dateStrings = new List<string>();
-            foreach (DateTime thisDate in dates)
+            var dateStrings = new List<string>();
+            foreach (var thisDate in dates)
                 dateStrings.Add(thisDate.ToString("yyyy-MM-dd"));
             date = dateStrings.ToArray();
         }
@@ -729,8 +729,8 @@ namespace SchedulesDirect
             stationID = station;
             //string dateStart = start.ToString("yyyy-MM-dd");
             //string dateEnd = end.ToString("yyyy-MM-dd");
-            List<string> dateStrings = new List<string>();
-            foreach (DateTime thisDate in dates)
+            var dateStrings = new List<string>();
+            foreach (var thisDate in dates)
                 dateStrings.Add(thisDate.ToString("yyyy-MM-dd"));
             date = dateStrings.ToArray();
         }

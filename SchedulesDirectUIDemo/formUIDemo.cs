@@ -13,10 +13,10 @@ namespace SchedulesDirect.UIDemo
 {
     public partial class formUIDemo : Form
     {
-        SDCountries countryList;
-        IEnumerable<SDHeadendsResponse> headEnds;
-        SDJson sd;
-        int mode;
+        private SDCountries countryList;
+        private IEnumerable<SDHeadendsResponse> headEnds;
+        private readonly SDJson sd;
+        private int mode;
 
         public formUIDemo()
         {
@@ -52,7 +52,7 @@ namespace SchedulesDirect.UIDemo
                 return;
             }
 
-            string serviceText = "Services:\r\n";
+            var serviceText = "Services:\r\n";
             foreach (var service in serviceList)
             {
                 serviceText += $"{service.type} - {service.description}: {service.uri}\r\n";
@@ -140,11 +140,11 @@ namespace SchedulesDirect.UIDemo
 
         private void btnGetSchedule_Click(object sender, EventArgs e)
         {
-            List<SDScheduleRequest> reqs = new List<SDScheduleRequest>();
-            SDScheduleRequest req = new SDScheduleRequest("45399", 
+            var reqs = new List<SDScheduleRequest>();
+            var req = new SDScheduleRequest("45399", 
                 new DateTime[] { DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30") }.AsEnumerable());
             reqs.Add(req);
-            SDScheduleRequest req2 = new SDScheduleRequest("82547", 
+            var req2 = new SDScheduleRequest("82547", 
                 new DateTime[] { DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30") }.AsEnumerable());
             reqs.Add(req2);
             var result = sd.GetSchedules(reqs.AsEnumerable());
@@ -160,8 +160,8 @@ namespace SchedulesDirect.UIDemo
 
         private void btnGetMD5_Click(object sender, EventArgs e)
         {
-            List<SDMD5Request> reqs = new List<SDMD5Request>();
-            SDMD5Request req = new SDMD5Request("16689", 
+            var reqs = new List<SDMD5Request>();
+            var req = new SDMD5Request("16689", 
                 new DateTime[] { DateTime.Parse("2016-11-29"), DateTime.Parse("2016-11-30") }.AsEnumerable() );
             reqs.Add(req);
             var result = sd.GetMD5(reqs.AsEnumerable());
@@ -177,7 +177,7 @@ namespace SchedulesDirect.UIDemo
 
         private void ShowLineups(string headendline)
         {
-            string id = headendline.Split('\t').FirstOrDefault();
+            var id = headendline.Split('\t').FirstOrDefault();
             var lineups = (from headend in headEnds
                            where headend.headend == id
                            select headend.lineups).FirstOrDefault();
@@ -207,7 +207,7 @@ namespace SchedulesDirect.UIDemo
         private void reportErrors()
         {
             var exceptions = sd.GetRawErrors();
-            string errors = string.Empty;
+            var errors = string.Empty;
             foreach (var ex in exceptions)
             {
                 errors += ex.message + "\r\n";

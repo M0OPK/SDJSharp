@@ -54,7 +54,7 @@ namespace XMLTV
         public XmlElement CreateChannelElement(string channelID, XmlLangText[] displayName, string url = null, string iconUrl = null,
                                                IEnumerable<XmlAttribute> extraattributes = null, IEnumerable<XmlNode> extranodes = null)
         {
-            XmlElement channelNode = CreateElement("channel");
+            var channelNode = CreateElement("channel");
 
             // Set ID
             channelNode.SetAttribute("id", channelID);
@@ -62,7 +62,7 @@ namespace XMLTV
             // Display name(s) if any
             foreach (var thisDisplayName in displayName)
             {
-                XmlElement displayNameNode = CreateElement("display-name");
+                var displayNameNode = CreateElement("display-name");
                 displayNameNode.SetAttribute("lang", thisDisplayName.lang);
                 displayNameNode.InnerText = thisDisplayName.text;
                 channelNode.AppendChild(displayNameNode);
@@ -71,7 +71,7 @@ namespace XMLTV
             // Icon URL if available
             if (iconUrl != null)
             {
-                XmlElement iconNode = CreateElement("icon");
+                var iconNode = CreateElement("icon");
                 iconNode.SetAttribute("src", iconUrl);
                 channelNode.AppendChild(iconNode);
             }
@@ -79,7 +79,7 @@ namespace XMLTV
             // Channel URL if available
             if (url != null)
             {
-                XmlElement urlNode = CreateElement("url");
+                var urlNode = CreateElement("url");
                 urlNode.InnerText = url;
                 channelNode.AppendChild(urlNode);
             }
@@ -87,14 +87,14 @@ namespace XMLTV
             // Any extra attributes
             if (extraattributes != null)
             {
-                foreach (XmlAttribute extra in extraattributes)
+                foreach (var extra in extraattributes)
                     channelNode.Attributes.Append((XmlAttribute)extra.Clone());
             }
 
             // Any extra nodes
             if (extranodes != null)
             {
-                foreach (XmlNode extra in extranodes)
+                foreach (var extra in extranodes)
                     channelNode.AppendChild(extra.Clone());
             }
             return channelNode;
@@ -118,14 +118,14 @@ namespace XMLTV
             XmlLangText[] categories = null, IEnumerable<XmlAttribute> extraattributes = null,
             IEnumerable<XmlElement> extranodes = null)
         {
-            XmlElement programmelNode = CreateElement("programme");
+            var programmelNode = CreateElement("programme");
             programmelNode.SetAttribute("start", start);
             programmelNode.SetAttribute("stop", stop);
             programmelNode.SetAttribute("channel", channel);
 
             if (title != null)
             {
-                XmlElement titleNode = CreateElement("title");
+                var titleNode = CreateElement("title");
                 titleNode.SetAttribute("lang", title.lang);
                 titleNode.InnerText = title.text;
                 programmelNode.AppendChild(titleNode);
@@ -133,7 +133,7 @@ namespace XMLTV
 
             if (subtitle != null)
             {
-                XmlElement subtitleNode = CreateElement("sub-title");
+                var subtitleNode = CreateElement("sub-title");
                 subtitleNode.SetAttribute("lang", subtitle.lang);
                 subtitleNode.InnerText = subtitle.text;
                 programmelNode.AppendChild(subtitleNode);
@@ -141,7 +141,7 @@ namespace XMLTV
 
             if (description != null)
             {
-                XmlElement descriptionNode = CreateElement("desc");
+                var descriptionNode = CreateElement("desc");
                 descriptionNode.SetAttribute("lang", description.lang);
                 descriptionNode.InnerText = description.text;
                 programmelNode.AppendChild(descriptionNode);
@@ -151,7 +151,7 @@ namespace XMLTV
             {
                 foreach (var category in categories)
                 {
-                    XmlElement categoryNode = CreateElement("category");
+                    var categoryNode = CreateElement("category");
                     categoryNode.SetAttribute("lang", category.lang);
                     categoryNode.InnerText = category.text;
                     programmelNode.AppendChild(categoryNode);
@@ -161,7 +161,7 @@ namespace XMLTV
             // Any extra attributes
             if (extraattributes != null)
             {
-                foreach (XmlAttribute extra in extraattributes)
+                foreach (var extra in extraattributes)
                     programmelNode.Attributes.Append(extra);
             }
 
