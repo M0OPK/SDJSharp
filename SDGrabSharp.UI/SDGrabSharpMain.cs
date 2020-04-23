@@ -16,8 +16,8 @@ namespace SDGrabSharp.UI
 {
     public partial class frmMain : Form
     {
-        DataCache cache;
-        Config config;
+        private readonly DataCache cache;
+        private readonly Config config;
         public frmMain(DataCache datacache, Config dataconfig)
         {
             InitializeComponent();
@@ -49,7 +49,7 @@ namespace SDGrabSharp.UI
 
         private void toolStripMenuItemOptions_Click(object sender, EventArgs e)
         {
-            frmOptions opts = new frmOptions(cache, config);
+            var opts = new frmOptions(cache, config);
             opts.ShowDialog(this);
         }
 
@@ -85,7 +85,7 @@ namespace SDGrabSharp.UI
                 }));
                 return;
             }
-            rtActivityLog.AppendText(string.Format("{0}\r\n", args.ActivityText));
+            rtActivityLog.AppendText($"{args.ActivityText}\r\n");
             rtActivityLog.SelectionStart = rtActivityLog.Text.Length;
             rtActivityLog.ScrollToCaret();
             Application.DoEvents();

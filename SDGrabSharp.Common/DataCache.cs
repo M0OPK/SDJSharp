@@ -30,29 +30,27 @@ namespace SDGrabSharp.Common
             Clear();
         }
 
-        private void AddCacheDateAttribute(XmlElement element, DateTime? cacheDate)
+        private static void AddCacheDateAttribute(XmlElement element, DateTime? cacheDate)
         {
-            XmlAttribute cacheAttribute = element.OwnerDocument.CreateAttribute("cachedate");
+            var cacheAttribute = element.OwnerDocument.CreateAttribute("cachedate");
 
-            cacheAttribute.InnerText = cacheDate.Value.ToString("yyyyMMddHHmmss");
+            cacheAttribute.InnerText = (cacheDate ?? DateTime.UtcNow).ToString("yyyyMMddHHmmss");
             element.Attributes.Append(cacheAttribute);
         }
 
-        private DateTime? GetCacheDate(XmlNode element)
+        private static DateTime? GetCacheDate(XmlNode element)
         {
-            if (element.Attributes != null && element.Attributes["cachedate"] != null)
-            {
-                DateTime elementDate;
-                if (DateTime.TryParseExact(element.Attributes["cachedate"].Value, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out elementDate))
-                    return elementDate;
-            }
+            if (element.Attributes?["cachedate"] == null) return DateTime.MinValue;
+            DateTime elementDate;
+            if (DateTime.TryParseExact(element.Attributes["cachedate"].Value, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out elementDate))
+                return elementDate;
 
             return DateTime.MinValue;
         }
 
         public IEnumerable<SDHeadendsResponse> GetHeadendData(SDJson sd, string country, string postcode)
         {
-            string headendKey = string.Format("{0},{1}", country, postcode);
+            var headendKey = $"{country},{postcode}";
             if (!headendData.ContainsKey(headendKey))
             {
                 var headendDataJS = sd.GetHeadends(country, postcode);
@@ -156,11 +154,11 @@ namespace SDGrabSharp.Common
 
         public void Save(string filename)
         {
-            XmlDocument cacheXml = new XmlDocument();
+            var cacheXml = new XmlDocument();
             var rootXmlNode = cacheXml.CreateXmlDeclaration("1.0", "UTF-8", null);
             cacheXml.InsertBefore(rootXmlNode, cacheXml.DocumentElement);
 
-            XmlElement rootCacheNode = cacheXml.CreateElement("SDGrabSharpCache");
+            var rootCacheNode = cacheXml.CreateElement("SDGrabSharpCache");
 
             // Set save date attribute
             rootCacheNode.SetAttribute("cache-save-date", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
@@ -171,18 +169,18 @@ namespace SDGrabSharp.Common
             // Write Countries
             if (countryData != null && countryData.continents.Count > 0)
             {
-                XmlElement countryRoot = cacheXml.CreateElement("CountryData");
+                var countryRoot = cacheXml.CreateElement("CountryData");
                 AddCacheDateAttribute(countryRoot, countryData.cacheDate);
 
                 foreach (var continent in countryData.continents)
                 {
-                    XmlElement continentNode = cacheXml.CreateElement("continent");
+                    var continentNode = cacheXml.CreateElement("continent");
                     continentNode.SetAttribute("name", continent.continentname);
                     AddCacheDateAttribute(continentNode, continent.cacheDate);
 
                     foreach (var country in continent.countries)
                     {
-                        XmlElement countryNode = cacheXml.CreateElement("country");
+                        var countryNode = cacheXml.CreateElement("country");
                         AddCacheDateAttribute(countryNode, country.cacheDate);
                         if (country.shortName != null)
                             countryNode.SetAttribute("shortname", country.shortName);
@@ -204,17 +202,17 @@ namespace SDGrabSharp.Common
             // Write headend Data
             if (headendData != null && headendData.Count > 0)
             {
-                XmlElement headEndRoot = cacheXml.CreateElement("HeadEndData");
+                var headEndRoot = cacheXml.CreateElement("HeadEndData");
                 foreach (var headendCombo in headendData)
                 {
-                    string[] splitKey = headendCombo.Key.Split(',');
-                    XmlElement headEndListNode = cacheXml.CreateElement("HeadEndList");
+                    var splitKey = headendCombo.Key.Split(',');
+                    var headEndListNode = cacheXml.CreateElement("HeadEndList");
                     headEndListNode.SetAttribute("country", splitKey[0]);
                     headEndListNode.SetAttribute("postcode", splitKey[1]);
                     var headendData = headendCombo.Value;
                     foreach (var headEnd in headendCombo.Value)
                     {
-                        XmlElement headEndNode = cacheXml.CreateElement("HeadEnd");
+                        var headEndNode = cacheXml.CreateElement("HeadEnd");
                         AddCacheDateAttribute(headEndNode, headEnd.cacheDate);
                         if (headEnd.headend != null)
                             headEndNode.SetAttribute("headend", headEnd.headend);
@@ -224,7 +222,7 @@ namespace SDGrabSharp.Common
                             headEndNode.SetAttribute("transport", headEnd.transport);
                         foreach (var lineup in headEnd.lineups)
                         {
-                            XmlElement lineUpNode = cacheXml.CreateElement("LineUp");
+                            var lineUpNode = cacheXml.CreateElement("LineUp");
                             AddCacheDateAttribute(lineUpNode, lineup.cacheDate);
                             if (lineup.lineup != null)
                                 lineUpNode.SetAttribute("lineup", lineup.lineup);
@@ -245,17 +243,17 @@ namespace SDGrabSharp.Common
             // Write Preview stations
             if (previewStationData != null && previewStationData.Count > 0)
             {
-                XmlElement lineupPreviewRoot = cacheXml.CreateElement("PreviewLineupData");
+                var lineupPreviewRoot = cacheXml.CreateElement("PreviewLineupData");
                 foreach (var lineup in previewStationData.Select(line => line))
                 {
-                    XmlElement lineupNode = cacheXml.CreateElement("PreviewLineup");
+                    var lineupNode = cacheXml.CreateElement("PreviewLineup");
                     var oldestDate = lineup.Value.Where(line => line.cacheDate != null).Select(line => line.cacheDate).Min();
 
                     AddCacheDateAttribute(lineupNode, oldestDate);
                     lineupNode.SetAttribute("lineup", lineup.Key);
                     foreach (var channel in lineup.Value)
                     {
-                        XmlElement channelNode = cacheXml.CreateElement("Channel");
+                        var channelNode = cacheXml.CreateElement("Channel");
                         channelNode.SetAttribute("channel", channel.channel);
                         channelNode.SetAttribute("callsign", channel.callsign);
                         channelNode.InnerText = channel.name;
@@ -271,17 +269,17 @@ namespace SDGrabSharp.Common
             // Write stations
             if (stationMapData != null && stationMapData.Count > 0)
             {
-                XmlElement stationMapRoot = cacheXml.CreateElement("LineUpData");
+                var stationMapRoot = cacheXml.CreateElement("LineUpData");
                 foreach (var stationMapCombo in stationMapData)
                 {
-                    XmlElement stationMapNode = cacheXml.CreateElement("LineUp");
+                    var stationMapNode = cacheXml.CreateElement("LineUp");
                     AddCacheDateAttribute(stationMapNode, stationMapCombo.Value.cacheDate);
                     stationMapNode.SetAttribute("lineup", stationMapCombo.Key);
 
                     // Maps first
                     foreach (var map in stationMapCombo.Value.map)
                     {
-                        XmlElement mapNode = cacheXml.CreateElement("Map");
+                        var mapNode = cacheXml.CreateElement("Map");
                         AddCacheDateAttribute(mapNode, map.cacheDate);
                         mapNode.SetAttribute("atscMajor", map.atscMajor.ToString());
                         mapNode.SetAttribute("atscMinor", map.atscMinor.ToString());
@@ -318,29 +316,29 @@ namespace SDGrabSharp.Common
                     // Station
                     foreach (var station in stationMapCombo.Value.stations)
                     {
-                        XmlElement stationNode = cacheXml.CreateElement("Station");
+                        var stationNode = cacheXml.CreateElement("Station");
                         AddCacheDateAttribute(stationNode, station.cacheDate);
                         stationNode.SetAttribute("affiliate", station.affiliate);
                         stationNode.SetAttribute("id", station.stationID);
                         stationNode.SetAttribute("callsign", station.callsign);
                         stationNode.SetAttribute("name", station.name);
-                        foreach (string lang in station.broadcastLanguage)
+                        foreach (var lang in station.broadcastLanguage)
                         {
-                            XmlElement languageNode = cacheXml.CreateElement("BroadcastLanguage");
+                            var languageNode = cacheXml.CreateElement("BroadcastLanguage");
                             languageNode.InnerText = lang;
                             stationNode.AppendChild(languageNode);
                         }
 
-                        foreach (string lang in station.descriptionLanguage)
+                        foreach (var lang in station.descriptionLanguage)
                         {
-                            XmlElement languageNode = cacheXml.CreateElement("DescriptionLanguage");
+                            var languageNode = cacheXml.CreateElement("DescriptionLanguage");
                             languageNode.InnerText = lang;
                             stationNode.AppendChild(languageNode);
                         }
 
                         if (station.broadcaster != null)
                         {
-                            XmlElement broadcasterNode = cacheXml.CreateElement("Broadcaster");
+                            var broadcasterNode = cacheXml.CreateElement("Broadcaster");
                             broadcasterNode.SetAttribute("city", station.broadcaster.city);
                             broadcasterNode.SetAttribute("state", station.broadcaster.state);
                             broadcasterNode.SetAttribute("postalcode", station.broadcaster.postalcode);
@@ -350,7 +348,7 @@ namespace SDGrabSharp.Common
 
                         if (station.logo != null)
                         {
-                            XmlElement logoNode = cacheXml.CreateElement("Logo");
+                            var logoNode = cacheXml.CreateElement("Logo");
                             logoNode.SetAttribute("url", station.logo.URL);
                             logoNode.SetAttribute("height", station.logo.height.ToString());
                             logoNode.SetAttribute("width", station.logo.width.ToString());
@@ -363,7 +361,7 @@ namespace SDGrabSharp.Common
                     // Metadata
                     if (stationMapCombo.Value.metadata != null)
                     {
-                        XmlElement metaNode = cacheXml.CreateElement("MetaData");
+                        var metaNode = cacheXml.CreateElement("MetaData");
                         metaNode.SetAttribute("lineup", stationMapCombo.Value.metadata.lineup);
                         metaNode.SetAttribute("modified", stationMapCombo.Value.metadata.modified.GetValueOrDefault().ToString("yyyyMMddHHmmss"));
                         metaNode.SetAttribute("transport", stationMapCombo.Value.metadata.transport);
@@ -393,7 +391,7 @@ namespace SDGrabSharp.Common
                 return false;
 
             Clear();
-            XmlDocument cacheDoc = new XmlDocument();
+            var cacheDoc = new XmlDocument();
             cacheDoc.Load(filename);
 
             var rootNode = cacheDoc.SelectSingleNode("//SDGrabSharpCache");
@@ -409,25 +407,25 @@ namespace SDGrabSharp.Common
             // Country data
             if (countryDataNode != null)
             {
-                countryData = new SDCountries();
-                countryData.cacheDate = GetCacheDate(countryDataNode);
+                countryData = new SDCountries {cacheDate = GetCacheDate(countryDataNode)};
 
                 if (validateCacheDate(countryData.cacheDate))
                 {
                     var continentNodes = countryDataNode.SelectNodes("continent");
                     foreach (XmlNode continentNode in continentNodes)
                     {
-                        var thisContinent = new SDCountries.Continent();
-                        thisContinent.cacheDate = GetCacheDate(continentNode);
-                        thisContinent.continentname = continentNode.Attributes["name"].Value;
+                        var thisContinent = new SDCountries.Continent
+                        {
+                            cacheDate = GetCacheDate(continentNode),
+                            continentname = continentNode.Attributes["name"].Value
+                        };
 
                         if (validateCacheDate(thisContinent.cacheDate))
                         {
                             var countryNodes = continentNode.SelectNodes("country");
                             foreach (XmlNode countryNode in countryNodes)
                             {
-                                var thisCountry = new SDCountries.Country();
-                                thisCountry.cacheDate = GetCacheDate(countryNode);
+                                var thisCountry = new SDCountries.Country {cacheDate = GetCacheDate(countryNode)};
                                 if (validateCacheDate(thisCountry.cacheDate))
                                 {
                                     if (countryNode.Attributes["shortname"] != null)
@@ -439,7 +437,7 @@ namespace SDGrabSharp.Common
                                         thisCountry.postalCode = countryNode.Attributes["postalCode"].Value;
                                     if (countryNode.Attributes["onePostalCode"] != null)
                                         thisCountry.onePostalCode =
-                                            (countryNode.Attributes["onePostalCode"].Value == "true");
+                                            countryNode.Attributes["onePostalCode"].Value == "true";
                                     if (countryNode.InnerText != null)
                                         thisCountry.fullName = countryNode.InnerText;
                                     thisContinent.countries.Add(thisCountry);
@@ -457,42 +455,37 @@ namespace SDGrabSharp.Common
             {
                 foreach (XmlNode headEndListNode in headendDataNode.SelectNodes("HeadEndList"))
                 {
-                    List<SDHeadendsResponse> headEnds = new List<SDHeadendsResponse>();
-                    string thisKey = string.Format("{0},{1}", headEndListNode.Attributes["country"].Value, headEndListNode.Attributes["postcode"].Value);
+                    var headEnds = new List<SDHeadendsResponse>();
+                    var thisKey =
+                        $"{headEndListNode.Attributes["country"].Value},{headEndListNode.Attributes["postcode"].Value}";
 
                     foreach (XmlNode headEndNode in headEndListNode.SelectNodes("HeadEnd"))
                     {
-                        List<SDHeadendsResponse.SDLineup> lineUpList = new List<SDHeadendsResponse.SDLineup>();
-                        SDHeadendsResponse thisHeadEnd = new SDHeadendsResponse();
-                        thisHeadEnd.cacheDate = GetCacheDate(headEndNode);
-                        if (validateCacheDate(thisHeadEnd.cacheDate))
+                        var lineUpList = new List<SDHeadendsResponse.SDLineup>();
+                        var thisHeadEnd = new SDHeadendsResponse {cacheDate = GetCacheDate(headEndNode)};
+                        if (!validateCacheDate(thisHeadEnd.cacheDate)) continue;
+                        if (headEndNode.Attributes["headend"] != null)
+                            thisHeadEnd.headend = headEndNode.Attributes["headend"].Value;
+                        if (headEndNode.Attributes["location"] != null)
+                            thisHeadEnd.location = headEndNode.Attributes["location"].Value;
+                        if (headEndNode.Attributes["transport"] != null)
+                            thisHeadEnd.transport = headEndNode.Attributes["transport"].Value;
+
+                        foreach (XmlNode lineUpNode in headEndNode.SelectNodes("LineUp"))
                         {
-                            if (headEndNode.Attributes["headend"] != null)
-                                thisHeadEnd.headend = headEndNode.Attributes["headend"].Value;
-                            if (headEndNode.Attributes["location"] != null)
-                                thisHeadEnd.location = headEndNode.Attributes["location"].Value;
-                            if (headEndNode.Attributes["transport"] != null)
-                                thisHeadEnd.transport = headEndNode.Attributes["transport"].Value;
-
-                            foreach (XmlNode lineUpNode in headEndNode.SelectNodes("LineUp"))
-                            {
-                                SDHeadendsResponse.SDLineup thisLineup = new SDHeadendsResponse.SDLineup();
-                                thisLineup.cacheDate = GetCacheDate(lineUpNode);
-                                if (validateCacheDate(thisLineup.cacheDate))
-                                {
-                                    if (lineUpNode.Attributes["lineup"] != null)
-                                        thisLineup.lineup = lineUpNode.Attributes["lineup"].Value;
-                                    if (lineUpNode.Attributes["uri"] != null)
-                                        thisLineup.uri = lineUpNode.Attributes["uri"].Value;
-                                    if (lineUpNode.InnerText != null)
-                                        thisLineup.name = lineUpNode.InnerText;
-                                    lineUpList.Add(thisLineup);
-                                }
-                            }
-
-                            thisHeadEnd.lineups = lineUpList.ToArray();
-                            headEnds.Add(thisHeadEnd);
+                            var thisLineup = new SDHeadendsResponse.SDLineup {cacheDate = GetCacheDate(lineUpNode)};
+                            if (!validateCacheDate(thisLineup.cacheDate)) continue;
+                            if (lineUpNode.Attributes["lineup"] != null)
+                                thisLineup.lineup = lineUpNode.Attributes["lineup"].Value;
+                            if (lineUpNode.Attributes["uri"] != null)
+                                thisLineup.uri = lineUpNode.Attributes["uri"].Value;
+                            if (lineUpNode.InnerText != null)
+                                thisLineup.name = lineUpNode.InnerText;
+                            lineUpList.Add(thisLineup);
                         }
+
+                        thisHeadEnd.lineups = lineUpList.ToArray();
+                        headEnds.Add(thisHeadEnd);
                     }
 
                     headendData.Add(thisKey, headEnds);
@@ -503,12 +496,11 @@ namespace SDGrabSharp.Common
             {
                 foreach (XmlNode previewLineupNode in previewDataNode.SelectNodes("PreviewLineup"))
                 {
-                    string lineup = previewLineupNode?.Attributes["lineup"]?.Value ?? String.Empty;
-                    List<SDPreviewLineupResponse> previewList = new List<SDPreviewLineupResponse>();
+                    var lineup = previewLineupNode?.Attributes["lineup"]?.Value ?? String.Empty;
+                    var previewList = new List<SDPreviewLineupResponse>();
                     foreach (XmlNode channelNode in previewLineupNode.SelectNodes("Channel"))
                     {
-                        SDPreviewLineupResponse channel = new SDPreviewLineupResponse();
-                        channel.cacheDate = GetCacheDate(previewLineupNode);
+                        var channel = new SDPreviewLineupResponse {cacheDate = GetCacheDate(previewLineupNode)};
                         if (validateCacheDate(channel.cacheDate))
                         {
                             channel.channel = channelNode?.Attributes["channel"]?.Value ?? string.Empty;
@@ -527,18 +519,16 @@ namespace SDGrabSharp.Common
                 //stationMapData = new Dictionary<string, SDGetLineupResponse>();
                 foreach (XmlNode lineUpNode in lineupDataNode.SelectNodes("LineUp"))
                 {
-                    string thisKey = lineUpNode.Attributes["lineup"].Value;
-                    SDGetLineupResponse thisStationMap = new SDGetLineupResponse();
-                    thisStationMap.cacheDate = GetCacheDate(lineUpNode);
+                    var thisKey = lineUpNode.Attributes["lineup"].Value;
+                    var thisStationMap = new SDGetLineupResponse {cacheDate = GetCacheDate(lineUpNode)};
 
                     if (validateCacheDate(thisStationMap.cacheDate))
                     {
                         // Maps
-                        List<SDGetLineupResponse.SDLineupMap> mapList = new List<SDGetLineupResponse.SDLineupMap>();
+                        var mapList = new List<SDGetLineupResponse.SDLineupMap>();
                         foreach (XmlNode mapNode in lineUpNode.SelectNodes("Map"))
                         {
-                            var thisMap = new SDGetLineupResponse.SDLineupMap();
-                            thisMap.cacheDate = GetCacheDate(mapNode);
+                            var thisMap = new SDGetLineupResponse.SDLineupMap {cacheDate = GetCacheDate(mapNode)};
                             if (validateCacheDate(thisMap.cacheDate))
                             {
                                 if (mapNode.Attributes["atscMajor"] != null)
@@ -580,12 +570,14 @@ namespace SDGrabSharp.Common
                         }
 
                         // Stations
-                        List<SDGetLineupResponse.SDLineupStation> stationList =
+                        var stationList =
                             new List<SDGetLineupResponse.SDLineupStation>();
                         foreach (XmlNode stationNode in lineUpNode.SelectNodes("Station"))
                         {
-                            var thisStation = new SDGetLineupResponse.SDLineupStation();
-                            thisStation.cacheDate = GetCacheDate(stationNode);
+                            var thisStation = new SDGetLineupResponse.SDLineupStation
+                            {
+                                cacheDate = GetCacheDate(stationNode)
+                            };
                             if (validateCacheDate(thisStation.cacheDate))
                             {
                                 if (stationNode.Attributes["affiliate"] != null)
@@ -597,36 +589,40 @@ namespace SDGrabSharp.Common
                                 if (stationNode.Attributes["name"] != null)
                                     thisStation.name = stationNode.Attributes["name"].Value;
 
-                                List<string> broadcastLanguages = new List<string>();
+                                var broadcastLanguages = new List<string>();
                                 foreach (XmlNode broadcastLanguageNode in stationNode.SelectNodes("BroadcastLanguage"))
                                     broadcastLanguages.Add(broadcastLanguageNode.InnerText);
                                 thisStation.broadcastLanguage = broadcastLanguages.ToArray();
 
-                                List<string> descriptionLanguages = new List<string>();
+                                var descriptionLanguages = new List<string>();
                                 foreach (XmlNode descriptionLanguageNode in stationNode.SelectNodes(
                                     "DescriptionLanguage"))
                                     descriptionLanguages.Add(descriptionLanguageNode.InnerText);
                                 thisStation.descriptionLanguage = descriptionLanguages.ToArray();
 
-                                XmlNode broadcasterNode = stationNode.SelectSingleNode("Broadcaster");
+                                var broadcasterNode = stationNode.SelectSingleNode("Broadcaster");
                                 if (broadcasterNode != null)
                                 {
                                     thisStation.broadcaster =
-                                        new SDGetLineupResponse.SDLineupStation.SDStationBroadcaster();
-                                    thisStation.broadcaster.city = broadcasterNode.Attributes["city"].Value;
-                                    thisStation.broadcaster.state = broadcasterNode.Attributes["state"].Value;
-                                    thisStation.broadcaster.postalcode = broadcasterNode.Attributes["postalcode"].Value;
-                                    thisStation.broadcaster.country = broadcasterNode.Attributes["country"].Value;
+                                        new SDGetLineupResponse.SDLineupStation.SDStationBroadcaster
+                                        {
+                                            city = broadcasterNode.Attributes["city"].Value,
+                                            state = broadcasterNode.Attributes["state"].Value,
+                                            postalcode = broadcasterNode.Attributes["postalcode"].Value,
+                                            country = broadcasterNode.Attributes["country"].Value
+                                        };
                                 }
 
-                                XmlNode logoNode = stationNode.SelectSingleNode("Logo");
+                                var logoNode = stationNode.SelectSingleNode("Logo");
                                 if (logoNode != null)
                                 {
-                                    thisStation.logo = new SDGetLineupResponse.SDLineupStation.SDStationLogo();
-                                    thisStation.logo.URL = logoNode.Attributes["url"].Value;
-                                    thisStation.logo.height = int.Parse(logoNode.Attributes["height"].Value);
-                                    thisStation.logo.width = int.Parse(logoNode.Attributes["width"].Value);
-                                    thisStation.logo.md5 = logoNode.Attributes["md5"].Value;
+                                    thisStation.logo = new SDGetLineupResponse.SDLineupStation.SDStationLogo
+                                    {
+                                        URL = logoNode.Attributes["url"].Value,
+                                        height = int.Parse(logoNode.Attributes["height"].Value),
+                                        width = int.Parse(logoNode.Attributes["width"].Value),
+                                        md5 = logoNode.Attributes["md5"].Value
+                                    };
                                 }
 
                                 stationList.Add(thisStation);
@@ -637,16 +633,18 @@ namespace SDGrabSharp.Common
                         thisStationMap.stations = stationList.ToArray();
 
                         // Metadata
-                        XmlNode metadataNode = lineUpNode.SelectSingleNode("MetaData");
+                        var metadataNode = lineUpNode.SelectSingleNode("MetaData");
                         if (metadataNode != null)
                         {
-                            thisStationMap.metadata = new SDGetLineupResponse.SDLineupMetadata();
-                            thisStationMap.metadata.lineup = metadataNode.Attributes["lineup"].Value;
-                            thisStationMap.metadata.modified = DateTime.ParseExact(
-                                metadataNode.Attributes["modified"].Value, "yyyyMMddHHmmss",
-                                CultureInfo.InvariantCulture);
-                            thisStationMap.metadata.transport = metadataNode.Attributes["transport"].Value;
-                            thisStationMap.metadata.modulation = metadataNode.Attributes["modulation"].Value;
+                            thisStationMap.metadata = new SDGetLineupResponse.SDLineupMetadata
+                            {
+                                lineup = metadataNode.Attributes["lineup"].Value,
+                                modified = DateTime.ParseExact(
+                                    metadataNode.Attributes["modified"].Value, "yyyyMMddHHmmss",
+                                    CultureInfo.InvariantCulture),
+                                transport = metadataNode.Attributes["transport"].Value,
+                                modulation = metadataNode.Attributes["modulation"].Value
+                            };
                         }
 
                         stationMapData.Add(thisKey, thisStationMap);

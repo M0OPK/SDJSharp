@@ -76,11 +76,11 @@ namespace SDGrabSharp.Common
 
         public void Save(string filename)
         {
-            XmlDocument configXml = new XmlDocument();
+            var configXml = new XmlDocument();
             var rootXmlNode = configXml.CreateXmlDeclaration("1.0", "UTF-8", null);
             configXml.InsertBefore(rootXmlNode, configXml.DocumentElement);
 
-            XmlElement rootConfigNode = configXml.CreateElement("SDGrabSharpConfig");
+            var rootConfigNode = configXml.CreateElement("SDGrabSharpConfig");
 
             // Set save date attribute
             rootConfigNode.SetAttribute("config-save-date", DateTimeOffset.Now.ToLocalTime().ToString("yyyyMMddHHmmss zzz").Replace(":",""));
@@ -108,14 +108,14 @@ namespace SDGrabSharp.Common
             AddSimpleXMLElement(rootConfigNode, "xmltv-filename", XmlTVFileName);
             AddSimpleXMLElement(rootConfigNode, "cache-expirehours", CacheExpiryHours.ToString());
 
-            if (TranslationMatrix != null && TranslationMatrix.Count() != 0)
+            if (TranslationMatrix != null && TranslationMatrix.Count != 0)
             {
-                XmlElement translateRootNode = configXml.CreateElement("TranslationMatrix");
-                translateRootNode.SetAttribute("items", TranslationMatrix.Count().ToString());
+                var translateRootNode = configXml.CreateElement("TranslationMatrix");
+                translateRootNode.SetAttribute("items", TranslationMatrix.Count.ToString());
 
                 foreach (var translation in TranslationMatrix.Where(item => item.Value.isDeleted == false))
                 {
-                    XmlElement translateNode = configXml.CreateElement("Translate");
+                    var translateNode = configXml.CreateElement("Translate");
                     translateNode.SetAttribute("lineup-id", translation.Value.LineupID);
                     translateNode.SetAttribute("station-id", translation.Value.SDStationID);
                     translateNode.SetAttribute("field-mode", ((int)translation.Value.FieldMode).ToString());
@@ -136,10 +136,10 @@ namespace SDGrabSharp.Common
             if (!System.IO.File.Exists(filename))
                 return false;
 
-            XmlDocument configDoc = new XmlDocument();
+            var configDoc = new XmlDocument();
             configDoc.Load(filename);
 
-            XmlNode rootConfigNode = configDoc.SelectSingleNode("SDGrabSharpConfig");
+            var rootConfigNode = configDoc.SelectSingleNode("SDGrabSharpConfig");
 
             XmlNode workNode = null;
 
@@ -153,11 +153,11 @@ namespace SDGrabSharp.Common
 
             workNode = rootConfigNode.SelectSingleNode("sd-alwaysask");
             if (workNode != null)
-                LoginAlwaysAsk = (workNode.InnerText == "true");
+                LoginAlwaysAsk = workNode.InnerText == "true";
 
             workNode = rootConfigNode.SelectSingleNode("persistent-cache");
             if (workNode != null)
-                PersistantCache = (workNode.InnerText == "true");
+                PersistantCache = workNode.InnerText == "true";
 
             workNode = rootConfigNode.SelectSingleNode("cache-filename");
             if (workNode != null)
@@ -165,31 +165,31 @@ namespace SDGrabSharp.Common
 
             workNode = rootConfigNode.SelectSingleNode("attrib-logicalnumber");
             if (workNode != null)
-                XmlTVLogicalChannelNumber = (workNode.InnerText == "true");
+                XmlTVLogicalChannelNumber = workNode.InnerText == "true";
 
             workNode = rootConfigNode.SelectSingleNode("attrib-showtype");
             if (workNode != null)
-                XmlTVShowType = (workNode.InnerText == "true");
+                XmlTVShowType = workNode.InnerText == "true";
 
             workNode = rootConfigNode.SelectSingleNode("attrib-afiliate");
             if (workNode != null)
-                XmlTVStationAfilliate = (workNode.InnerText == "true");
+                XmlTVStationAfilliate = workNode.InnerText == "true";
 
             workNode = rootConfigNode.SelectSingleNode("attrib-callsgn");
             if (workNode != null)
-                XmlTVStationCallsign = (workNode.InnerText == "true");
+                XmlTVStationCallsign = workNode.InnerText == "true";
 
             workNode = rootConfigNode.SelectSingleNode("attrib-stationid");
             if (workNode != null)
-                XmlTVStationID = (workNode.InnerText == "true");
+                XmlTVStationID = workNode.InnerText == "true";
 
             workNode = rootConfigNode.SelectSingleNode("attrib-stationname");
             if (workNode != null)
-                XmlTVStationName = (workNode.InnerText == "true");
+                XmlTVStationName = workNode.InnerText == "true";
 
             workNode = rootConfigNode.SelectSingleNode("programme-retrieveyesterday");
             if (workNode != null)
-                ProgrammeRetrieveYesterday = (workNode.InnerText == "true");
+                ProgrammeRetrieveYesterday = workNode.InnerText == "true";
 
             workNode = rootConfigNode.SelectSingleNode("programme-retrieverangedays");
             if (workNode != null)
@@ -215,13 +215,13 @@ namespace SDGrabSharp.Common
             if (workNode != null)
                 try { CacheExpiryHours = int.Parse(workNode.InnerText); } catch { }
 
-            XmlNode translateListNode = rootConfigNode.SelectSingleNode("TranslationMatrix");
+            var translateListNode = rootConfigNode.SelectSingleNode("TranslationMatrix");
             if (translateListNode != null)
             {
                 TranslationMatrix = new Dictionary<string, XmlTVTranslation>();
                 foreach (XmlNode translateNode in translateListNode.SelectNodes("Translate"))
                 {
-                    XmlTVTranslation translateItem = new XmlTVTranslation();
+                    var translateItem = new XmlTVTranslation();
                     if (translateNode.Attributes["lineup-id"] != null)
                         translateItem.LineupID = translateNode.Attributes["lineup-id"].Value;
 
@@ -244,7 +244,7 @@ namespace SDGrabSharp.Common
 
         private void AddSimpleXMLElement(XmlElement parentNode, string nodeKey, string nodeValue)
         {
-            XmlElement newNode = parentNode.OwnerDocument.CreateElement(nodeKey);
+            var newNode = parentNode.OwnerDocument.CreateElement(nodeKey);
             newNode.InnerText = nodeValue;
             parentNode.AppendChild(newNode);
         }
