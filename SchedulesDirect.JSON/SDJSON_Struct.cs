@@ -414,6 +414,10 @@ namespace SchedulesDirect
                 public int width;
                 [DataMember]
                 public string md5;
+                [DataMember]
+                public string source;
+                [DataMember]
+                public string category;
             }
         }
 

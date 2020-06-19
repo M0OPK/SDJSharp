@@ -1230,7 +1230,17 @@ namespace SDGrabSharp.Common
 
             var channelNode = xmlTV.AddChannel(channelId, displayNameItem, url, iconUrl, new XmlAttribute[] { sdChannelIDAttrib });
             if (channelNode == null)
+            {
+                // See if we can update some info
+                XmlElement thisStation;
+                if (channelByStationID.TryGetValue(stationId, out thisStation))
+                {
+                    var iconNode = (XmlElement)thisStation.SelectSingleNode("icon");
+                    if (iconNode != null)
+                        iconNode.SetAttribute("src", iconUrl);
+                }
                 return false;
+            }
 
             channelByStationID.Add(stationId, channelNode);
             return true;
